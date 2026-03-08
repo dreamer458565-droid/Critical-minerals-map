@@ -429,13 +429,13 @@ footer{background:var(--navy);padding:16px 48px;margin-top:8px;}
 .cond-header-right{display:flex;gap:8px;}
 
 .cond-body{padding:18px 20px;}
-.cond-grid{display:grid;gap:14px 16px;}
+.cond-grid{display:grid;gap:12px 14px;}
 .cond-grid-4{grid-template-columns:repeat(4,1fr);}
-.cond-grid-5{grid-template-columns:2.5fr 1.2fr 1fr 1fr auto;}
-.cond-grid-3{grid-template-columns:2fr 1fr 1fr;}
+.cond-grid-6{grid-template-columns:1.5fr 1fr 0.8fr 0.8fr 1fr auto;}
+.cond-grid-3{grid-template-columns:1.5fr 1fr 1fr;}
 
 .cond-group{}
-.cond-actions{display:flex;gap:5px;white-space:nowrap;}
+.cond-actions{display:flex;gap:5px;white-space:nowrap;align-items:end;}
 .cond-label{
   display:block;font-size:10px;font-weight:700;letter-spacing:.8px;
   text-transform:uppercase;color:var(--sub);margin-bottom:5px;
@@ -1000,23 +1000,23 @@ table.result tbody td.center{text-align:center;}
       <div class="cond-header-title">🔍 조회 조건 — 광종별</div>
     </div>
     <div class="cond-body">
-      <div class="cond-grid cond-grid-5">
-        <!-- 광종 분류 필터 -->
-        <div class="cond-group" style="grid-column:1/-1;padding-bottom:4px;border-bottom:1px solid var(--border);margin-bottom:4px;">
-          <label class="cond-label">광종 분류</label>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button class="mclass-btn active" id="mcl-all"  onclick="setMineralClass('all')">전체</button>
-            <button class="mclass-btn" id="mcl-kr33" onclick="setMineralClass('kr33')">🇰🇷 한국 33대</button>
-            <button class="mclass-btn" id="mcl-us60" onclick="setMineralClass('us60')">🇺🇸 미국 60종</button>
-            <button class="mclass-btn" id="mcl-both" onclick="setMineralClass('both')">한·미 공통</button>
-          </div>
+      <!-- 광종 분류 필터 -->
+      <div style="padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:10px;">
+        <label class="cond-label">광종 분류</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="mclass-btn active" id="mcl-all"  onclick="setMineralClass('all')">전체</button>
+          <button class="mclass-btn" id="mcl-kr33" onclick="setMineralClass('kr33')">🇰🇷 한국 33대</button>
+          <button class="mclass-btn" id="mcl-us60" onclick="setMineralClass('us60')">🇺🇸 미국 60종</button>
+          <button class="mclass-btn" id="mcl-both" onclick="setMineralClass('both')">한·미 공통</button>
         </div>
-      <!-- 광종 선택 -->
+      </div>
+      <div class="cond-grid cond-grid-6">
+        <!-- 광종 선택 -->
         <div class="cond-group">
           <label class="cond-label">광종 선택 <span>*</span></label>
           <div class="autocomplete-wrap">
             <input class="cond-input" id="mineralInput" type="text"
-              placeholder="광물명 입력 (예: 리튬, Lithium)" autocomplete="off"
+              placeholder="예: 리튬, Lithium" autocomplete="off"
               oninput="onMineralInput(this.value)" onfocus="onMineralInput(this.value)">
             <div class="autocomplete-list" id="mineralAutoList"></div>
           </div>
@@ -1041,17 +1041,7 @@ table.result tbody td.center{text-align:center;}
           <label class="cond-label">종료</label>
           <select class="cond-select" id="m_end"></select>
         </div>
-        <!-- 조회/초기화 인라인 -->
-        <div class="cond-group cond-actions" style="align-self:end;">
-          <button class="btn-query" id="m_queryBtn" onclick="queryMineral()" style="padding:8px 18px;">
-            <span id="m_queryBtnText">조회</span>
-          </button>
-          <button class="btn-reset" onclick="resetMineralForm()" style="padding:8px 10px;font-size:11px;">↺</button>
-        </div>
-      </div>
-
-      <!-- 수출입 구분 + HS단위 -->
-      <div class="cond-grid cond-grid-3" style="margin-top:14px;">
+        <!-- 수출입 구분 -->
         <div class="cond-group">
           <label class="cond-label">수출입 구분</label>
           <div class="radio-group">
@@ -1061,10 +1051,20 @@ table.result tbody td.center{text-align:center;}
             <label for="m_exp">수출</label>
           </div>
         </div>
-        <!-- HS단위 고정 6단 (숨김) -->
+        <!-- 조회/초기화 -->
+        <div class="cond-actions" style="align-self:end;">
+          <button class="btn-query" id="m_queryBtn" onclick="queryMineral()" style="padding:8px 16px;">
+            <span id="m_queryBtnText">조회</span>
+          </button>
+          <button class="btn-reset" onclick="resetMineralForm()" style="padding:8px 10px;font-size:11px;">↺</button>
+        </div>
+      </div>
+
+      <!-- 상위 국가 수 -->
+      <div style="margin-top:10px;display:flex;align-items:center;gap:16px;">
         <input type="hidden" name="m_hsunit" value="6">
-        <div class="cond-group">
-          <label class="cond-label">상위 국가 수</label>
+        <div class="cond-group" style="display:flex;align-items:center;gap:8px;">
+          <label class="cond-label" style="margin-bottom:0;white-space:nowrap;">상위 국가 수</label>
           <div class="radio-group">
             <input type="radio" name="m_topn" id="m_top5" value="5">
             <label for="m_top5">TOP5</label>
@@ -1074,7 +1074,7 @@ table.result tbody td.center{text-align:center;}
             <label for="m_top15">TOP15</label>
           </div>
         </div>
-      </div>
+      </div><!-- /상위 국가 수 -->
 
       <!-- 광종 분류체계 — 수요산업별 -->
       <div class="mineral-category-panel">
@@ -1244,17 +1244,15 @@ table.result tbody td.center{text-align:center;}
       <div class="cond-header-title">🔍 조회 조건 — HS코드별</div>
     </div>
     <div class="cond-body">
-      <div class="cond-grid cond-grid-5">
+      <div class="cond-grid cond-grid-6">
         <!-- HS 코드 입력 -->
         <div class="cond-group">
           <label class="cond-label">HS코드 입력 <span>*</span></label>
-          <div class="hs-input-wrap">
-            <div class="autocomplete-wrap" style="flex:1">
-              <input class="cond-input" id="hsInput" type="text"
-                placeholder="예: 2836, 280459, 2836910000"
-                oninput="onHsInput(this.value)" autocomplete="off">
-              <div class="autocomplete-list" id="hsAutoList"></div>
-            </div>
+          <div class="autocomplete-wrap">
+            <input class="cond-input" id="hsInput" type="text"
+              placeholder="예: 2836, 280459"
+              oninput="onHsInput(this.value)" autocomplete="off">
+            <div class="autocomplete-list" id="hsAutoList"></div>
           </div>
         </div>
         <!-- HS 단위 -->
@@ -1276,7 +1274,7 @@ table.result tbody td.center{text-align:center;}
           <label class="cond-label">조회연도</label>
           <select class="cond-select" id="h_year"></select>
         </div>
-        <!-- 수출입 구분 -->
+        <!-- 종료 (placeholder for alignment) -->
         <div class="cond-group">
           <label class="cond-label">수출입 구분</label>
           <div class="radio-group">
@@ -1286,9 +1284,11 @@ table.result tbody td.center{text-align:center;}
             <label for="h_exp">수출</label>
           </div>
         </div>
-        <!-- 조회/초기화 인라인 -->
-        <div class="cond-group cond-actions" style="align-self:end;">
-          <button class="btn-query" id="h_queryBtn" onclick="queryHs()" style="padding:8px 18px;">
+        <!-- 여백 -->
+        <div></div>
+        <!-- 조회/초기화 -->
+        <div class="cond-actions" style="align-self:end;">
+          <button class="btn-query" id="h_queryBtn" onclick="queryHs()" style="padding:8px 16px;">
             <span id="h_queryBtnText">조회</span>
           </button>
           <button class="btn-reset" onclick="resetHsForm()" style="padding:8px 10px;font-size:11px;">↺</button>
