@@ -193,8 +193,8 @@ header::after{content:'';position:absolute;top:0;right:0;bottom:0;width:40%;back
 .map-hero-title{font-family:'DM Serif Display',serif;font-size:32px;color:#fff;line-height:1.2;}
 .map-hero-title em{color:#F4C430;font-style:italic;}
 .map-hero-sub{font-size:13px;color:#F5E6B8;margin-top:8px;letter-spacing:.3px;font-weight:500;text-shadow:0 1px 3px rgba(0,0,0,.5);}
-.map-legend{display:flex;gap:10px 18px;align-items:center;padding-top:14px;flex-wrap:wrap;}
-.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#F5E6B8;white-space:nowrap;font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,.5);}
+.map-legend{display:flex;gap:10px 18px;align-items:center;padding-top:22px;margin-top:6px;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#D4C9A8;white-space:nowrap;font-weight:500;}
 .legend-dot{width:12px;height:12px;border-radius:50%;}
 
 .map-container{max-width:1320px;margin:0 auto;padding:32px 48px;}
@@ -1139,8 +1139,8 @@ table.result tbody td.center{text-align:center;}
         <div class="chart-body"><canvas id="m-trend-chart" style="max-height:230px"></canvas></div>
       </div>
     </div>
-    <!-- 공급단계별 차트 + 상세 -->
-    <div class="chart-grid" id="m-supply-area" style="grid-template-columns:1fr;margin-top:0;">
+    <!-- 공급단계별 차트 (2분할) -->
+    <div class="chart-grid" id="m-supply-area" style="margin-top:0;">
       <div class="chart-box">
         <div class="chart-box-header">
           <div class="chart-box-title">공급단계별 수입 비중</div>
@@ -1149,18 +1149,24 @@ table.result tbody td.center{text-align:center;}
             <button class="chart-tab" onclick="switchMSupply('weight',this)">중량</button>
           </div>
         </div>
-        <div class="chart-body" style="min-height:200px;"><canvas id="m-supply-chart" style="max-height:280px"></canvas></div>
+        <div class="chart-body" style="min-height:220px;"><canvas id="m-supply-chart" style="max-height:280px"></canvas></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-box-header">
+          <div class="chart-box-title">공급단계별 국가 집중도</div>
+        </div>
+        <div class="chart-body" style="min-height:220px;"><canvas id="m-supply-country-chart" style="max-height:280px"></canvas></div>
       </div>
     </div>
-    <!-- 공급단계별 상세 테이블 (HS코드명 + 주요 수입국) -->
+    <!-- 공급단계별 상세 테이블 (HS코드명 + TOP3 수입국) -->
     <div class="result-table-wrap" id="m-supply-detail" style="margin-bottom:0;">
       <div class="table-header">
-        <div class="table-title">공급단계별 상세 (HS코드 · 주요 수입국)</div>
+        <div class="table-title">공급단계별 상세 (HS코드 · TOP3 수입국)</div>
       </div>
-      <div class="table-scroll" style="max-height:300px;">
+      <div class="table-scroll" style="max-height:340px;">
         <table class="result" id="m-supply-table">
           <thead><tr>
-            <th>공급단계</th><th>HS코드</th><th>품목명</th><th>수입액 (천$)</th><th>비중</th><th>1위 수입국</th><th>집중도</th>
+            <th style="width:8%">공급단계</th><th style="width:9%">HS코드</th><th style="width:18%">품목명</th><th style="width:12%">수입액 (천$)</th><th style="width:6%">비중</th><th style="width:42%">TOP3 수입국</th><th style="width:5%">집중도</th>
           </tr></thead>
           <tbody id="m-supply-tbody"></tbody>
         </table>
@@ -1493,13 +1499,13 @@ table.result tbody td.center{text-align:center;}
           </div>
           <div class="country-card-body">
             <div class="dep-list" style="gap:9px" id="mapTop7List">
-              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇨🇳 중국</span><span class="dep-pct critical" style="font-size:12px">71.3%</span></div><div class="dep-bar-track"><div class="dep-bar-fill critical" style="width:71.3%"></div></div></div>
-              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇿🇦 남아공</span><span class="dep-pct warning" style="font-size:12px">22.4%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:22.4%"></div></div></div>
-              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇮🇩 인도네시아</span><span class="dep-pct ok" style="font-size:12px">28.4%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:28.4%"></div></div></div>
-              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇦🇺 호주</span><span class="dep-pct ok" style="font-size:12px">18.2%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:18.2%"></div></div></div>
-              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇵🇭 필리핀</span><span class="dep-pct ok" style="font-size:12px">18.4%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:18.4%"></div></div></div>
-              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇨🇱 칠레</span><span class="dep-pct ok" style="font-size:12px">16.1%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:16.1%"></div></div></div>
-              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇷🇺 러시아</span><span class="dep-pct ok" style="font-size:12px">12.5%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:12.5%"></div></div></div>
+              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇨🇳 중국</span><span class="dep-pct critical" style="font-size:12px">38.2%</span></div><div class="dep-bar-track"><div class="dep-bar-fill critical" style="width:38.2%"></div></div></div>
+              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇦🇺 호주</span><span class="dep-pct warning" style="font-size:12px">12.5%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:12.5%"></div></div></div>
+              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇨🇱 칠레</span><span class="dep-pct ok" style="font-size:12px">9.8%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:9.8%"></div></div></div>
+              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇮🇩 인도네시아</span><span class="dep-pct ok" style="font-size:12px">7.6%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:7.6%"></div></div></div>
+              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇿🇦 남아공</span><span class="dep-pct ok" style="font-size:12px">6.1%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:6.1%"></div></div></div>
+              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇯🇵 일본</span><span class="dep-pct ok" style="font-size:12px">5.3%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:5.3%"></div></div></div>
+              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇷🇺 러시아</span><span class="dep-pct ok" style="font-size:12px">4.1%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:4.1%"></div></div></div>
             </div>
           </div>
         </div>
@@ -1872,72 +1878,84 @@ let mineralClassFilter = 'all'; // 'all' | 'kr33' | 'us60' | 'both'
 
 /* HS코드 계층 구조 (2→4→6단위 드릴다운용) */
 const HS_TREE = {
+  '25':{ name:'25류 — 소금·황·토석류',
+    children:{
+      '2504':{name:'천연흑연',children:{'250410':{name:'흑연(분말)'},'250490':{name:'기타 흑연'}}},
+      '2521':{name:'석회석·형석',children:{'252110':{name:'형석(CaF₂ 97%미만)'},'252120':{name:'형석(CaF₂ 97%이상)'}}},
+      '2529':{name:'장석·형석',children:{'252910':{name:'장석'},'252921':{name:'형석(CaF₂ 97%이하)'}}},
+      '2530':{name:'기타광물',children:{'253090':{name:'기타 광물(리튬광석 등)'}}},
+    }
+  },
   '26':{ name:'26류 — 광석·슬래그·회(灰)',
     children:{
       '2601':{name:'철광석',children:{'260111':{name:'비소결철광석'},'260112':{name:'소결철광석'}}},
       '2602':{name:'망간광석',children:{'260200':{name:'망간광석 및 정광'}}},
       '2603':{name:'구리광석',children:{'260300':{name:'구리광석 및 정광'}}},
       '2604':{name:'니켈광석',children:{'260400':{name:'니켈광석 및 정광'}}},
-      '2606':{name:'알루미늄광석',children:{'260600':{name:'알루미늄광석(보크사이트)'}}},
+      '2606':{name:'알루미늄광석',children:{'260600':{name:'보크사이트'}}},
       '2607':{name:'납광석',children:{'260700':{name:'납광석 및 정광'}}},
       '2608':{name:'아연광석',children:{'260800':{name:'아연광석 및 정광'}}},
       '2609':{name:'주석광석',children:{'260900':{name:'주석광석 및 정광'}}},
       '2610':{name:'크롬광석',children:{'261000':{name:'크롬광석 및 정광'}}},
       '2611':{name:'텅스텐광석',children:{'261100':{name:'텅스텐광석 및 정광'}}},
-      '2615':{name:'바나듐광석',children:{'261500':{name:'바나듐광석·니오붐광석'}}},
+      '2612':{name:'우라늄광석',children:{'261210':{name:'우라늄광석 및 정광'}}},
+      '2613':{name:'몰리브덴광석',children:{'261390':{name:'몰리브덴광석 및 정광'}}},
+      '2615':{name:'니오브·탄탈광석',children:{'261510':{name:'지르코늄광'},'261590':{name:'니오브·탄탈·바나듐광'}}},
+      '2617':{name:'기타광석',children:{'261710':{name:'안티몬광석'}}},
     }
   },
   '28':{ name:'28류 — 무기화학품',
     children:{
       '2804':{name:'수소·희가스·비금속',children:{
         '280459':{name:'갈륨·인듐·탈륨'},
-        '280530':{name:'희토류금속'},
+        '280461':{name:'실리콘(순도99.99%이상)'},
       }},
-      '2805':{name:'알칼리금속·알칼리토류금속',children:{
+      '2805':{name:'알칼리·희토류금속',children:{
         '280520':{name:'칼슘'},
         '280530':{name:'희토류금속·스칸듐·이트륨'},
       }},
-      '2520':{name:'석고·황산칼슘',children:{
-        '252110':{name:'형석(CaF₂ 97%미만)'},
-        '252120':{name:'형석(CaF₂ 97%이상)'},
-      }},
+      '2822':{name:'산화코발트·수산화코발트',children:{'282200':{name:'산화코발트·수산화코발트'}}},
       '2825':{name:'수산화물·금속산화물',children:{
         '282520':{name:'수산화리튬'},
-        '282200':{name:'산화코발트·수산화코발트'},
         '282530':{name:'오산화바나듐'},
+        '282739':{name:'염화리튬'},
       }},
-      '2836':{name:'탄산염·과탄산염',children:{
+      '2836':{name:'탄산염',children:{
         '283691':{name:'탄산리튬'},
         '283699':{name:'기타 탄산염'},
       }},
+      '2841':{name:'금속산의 염',children:{'284390':{name:'인산철리튬 등'}}},
+      '2846':{name:'희토류화합물',children:{'284610':{name:'세륨화합물'},'284690':{name:'기타 희토류화합물'}}},
     }
   },
-  '81':{ name:'81류 — 비금속',
+  '71':{ name:'71류 — 귀금속',
     children:{
-      '8101':{name:'텅스텐',children:{
-        '810110':{name:'텅스텐 분말'},
-        '810120':{name:'텅스텐 괴·바·선'},
-      }},
-      '8102':{name:'몰리브덴',children:{
-        '810210':{name:'몰리브덴 분말'},
-      }},
-      '8105':{name:'코발트',children:{
-        '810520':{name:'코발트 매트'},
-      }},
-      '8106':{name:'비스무트',children:{}},
-      '7501':{name:'니켈 매트',children:{
-        '750110':{name:'니켈 매트'},
-      }},
-      '7502':{name:'미정련 니켈',children:{
-        '750210':{name:'니켈 괴'},
-        '750220':{name:'니켈 합금괴'},
-      }},
-      '7801':{name:'미정련 납',children:{
-        '780110':{name:'정련납 괴'},
-      }},
-      '7901':{name:'미정련 아연',children:{
-        '790110':{name:'정련아연 괴'},
-      }},
+      '7106':{name:'은',children:{'710691':{name:'은 미가공'},'710692':{name:'은 반가공'}}},
+      '7108':{name:'금',children:{'710812':{name:'금 미가공(비화폐용)'}}},
+      '7110':{name:'백금족',children:{'711011':{name:'백금 미가공'},'711021':{name:'팔라듐 미가공'},'711031':{name:'로듐 미가공'}}},
+    }
+  },
+  '75':{ name:'75류 — 니켈',
+    children:{
+      '7501':{name:'니켈 매트',children:{'750110':{name:'니켈 매트'}}},
+      '7502':{name:'미정련 니켈',children:{'750210':{name:'니켈(미합금)'},'750220':{name:'니켈 합금'}}},
+    }
+  },
+  '81':{ name:'81류 — 기타 비금속',
+    children:{
+      '8101':{name:'텅스텐',children:{'810110':{name:'텅스텐 분말'},'810120':{name:'텅스텐 괴·바'}}},
+      '8102':{name:'몰리브덴',children:{'810210':{name:'몰리브덴 분말'},'810297':{name:'몰리브덴 기타'}}},
+      '8103':{name:'탄탈',children:{'810320':{name:'탄탈 미가공'}}},
+      '8105':{name:'코발트',children:{'810510':{name:'코발트 매트'},'810520':{name:'코발트 미가공'}}},
+      '8106':{name:'비스무트',children:{'810600':{name:'비스무트 및 제품'}}},
+      '8108':{name:'티타늄',children:{'810820':{name:'티타늄 미가공'}}},
+      '8110':{name:'안티몬',children:{'811010':{name:'안티몬 미가공'}}},
+      '8112':{name:'게르마늄·기타',children:{'811221':{name:'게르마늄 미가공'},'811240':{name:'기타'}}},
+    }
+  },
+  '85':{ name:'85류 — 전기기기·축전지',
+    children:{
+      '8507':{name:'축전지(배터리)',children:{'850760':{name:'리튬이온축전지'},'850780':{name:'기타 축전지'}}},
     }
   },
 };
@@ -2989,20 +3007,34 @@ function renderMTrendChart(data) {
 }
 
 /* ── 공급단계별 차트 ── */
+let mChartSupplyCountry = null;
 function renderMSupplyChart(data) {
+  // 공급단계별 + 국가별 집계
   const byStage = {};
+  const stageCountries = {};
   data.forEach(r => {
     const hs = r.hsCd || r._hsCode || '';
     const stage = getSupplyStage(hs);
+    const cn = r.cntyNm || COUNTRY_NAMES[r.cntyCd] || r.cntyCd || '기타';
     if(!byStage[stage]) byStage[stage] = {amt:0, wt:0};
     byStage[stage].amt += parseFloat(r.impAmt||r.expAmt||0);
     byStage[stage].wt  += parseFloat(r.impWgt||r.expWgt||0);
+    if(!stageCountries[stage]) stageCountries[stage] = {};
+    stageCountries[stage][cn] = (stageCountries[stage][cn]||0) + parseFloat(r.impAmt||r.expAmt||0);
   });
-  // 정렬: 가치사슬 순서
   const ordered = SUPPLY_STAGE_ORDER.filter(s=>byStage[s]);
   const labels = ordered;
   const values = ordered.map(s=>mSupplyType==='amount' ? byStage[s].amt : byStage[s].wt);
   const colors = ordered.map(s=>SUPPLY_STAGE_COLORS[s]||'#BDC3C7');
+
+  // TOP3 국가 텍스트 (차트 바 옆에 표시용)
+  const top3ByStage = {};
+  ordered.forEach(s=>{
+    const cs = stageCountries[s]||{};
+    const sorted = Object.entries(cs).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    const stTotal = byStage[s].amt;
+    top3ByStage[s] = sorted.map(([n,a])=>({name:n, pct:stTotal>0?Math.round(a/stTotal*100):0}));
+  });
 
   if(mChartSupply) mChartSupply.destroy();
   const el = document.getElementById('m-supply-chart');
@@ -3011,6 +3043,7 @@ function renderMSupplyChart(data) {
     el.parentElement.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:13px;">공급단계 데이터 없음</div>';
     return;
   }
+  const totalVal = values.reduce((a,b)=>a+b,0);
   mChartSupply = new Chart(el.getContext('2d'), {
     type:'bar',
     data:{labels, datasets:[{
@@ -3019,21 +3052,80 @@ function renderMSupplyChart(data) {
     }]},
     options:{
       indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      layout:{padding:{right:8}},
       animation:{duration:600,easing:'easeOutQuart',delay:ctx=>ctx.dataIndex*50},
       plugins:{
         legend:{display:false},
         tooltip:{
           backgroundColor:'rgba(15,28,51,.92)',titleFont:{family:'Noto Sans KR',size:12,weight:'bold'},bodyFont:{family:'JetBrains Mono',size:11},padding:10,cornerRadius:4,
-          callbacks:{label:ctx=>{
-            const total=values.reduce((a,b)=>a+b,0);
-            const pct = total>0 ? (ctx.raw/total*100).toFixed(1) : '0';
-            return `${ctx.label}: ${Number(ctx.raw).toLocaleString()} (${pct}%)`;
-          }}
+          callbacks:{
+            label:ctx=>{
+              const pct = totalVal>0 ? (ctx.raw/totalVal*100).toFixed(1) : '0';
+              return `${ctx.label}: ${Number(ctx.raw).toLocaleString()} (${pct}%)`;
+            },
+            afterLabel:ctx=>{
+              const st = ordered[ctx.dataIndex];
+              const t3 = top3ByStage[st]||[];
+              return t3.length ? t3.map((c,i)=>`  ${i+1}. ${c.name} ${c.pct}%`).join('\n') : '';
+            }
+          }
         }
       },
       scales:{
         x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:9},callback:v=>Number(v).toLocaleString()}},
         y:{grid:{display:false},ticks:{font:{size:11,family:'Noto Sans KR',weight:600}}}
+      }
+    }
+  });
+
+  // === 우측: 공급단계별 국가 집중도 (100% stacked bar) ===
+  if(mChartSupplyCountry) mChartSupplyCountry.destroy();
+  const el2 = document.getElementById('m-supply-country-chart');
+  if(!el2) return;
+  // 전체 국가 중 각 단계에서 비중 높은 상위 3국 + 기타
+  const allCountries = new Set();
+  ordered.forEach(s=>(top3ByStage[s]||[]).forEach(c=>allCountries.add(c.name)));
+  const cnList = [...allCountries].slice(0,5);
+  const cnColors = ['#C0392B','#2980B9','#27AE60','#D4860C','#8E44AD','#7F8C8D'];
+  const datasets = cnList.map((cn,i)=>({
+    label:cn,
+    data:ordered.map(s=>{
+      const cs = stageCountries[s]||{};
+      const stTotal = byStage[s].amt;
+      return stTotal>0 ? Math.round((cs[cn]||0)/stTotal*1000)/10 : 0;
+    }),
+    backgroundColor:cnColors[i%cnColors.length],
+    borderRadius:2,
+  }));
+  // "기타" dataset
+  datasets.push({
+    label:'기타',
+    data:ordered.map((s,idx)=>{
+      const used = cnList.reduce((sum,cn)=>{
+        const cs = stageCountries[s]||{};
+        const stTotal = byStage[s].amt;
+        return sum + (stTotal>0 ? Math.round((cs[cn]||0)/stTotal*1000)/10 : 0);
+      },0);
+      return Math.max(0, Math.round((100-used)*10)/10);
+    }),
+    backgroundColor:'#DCDCDC',
+    borderRadius:2,
+  });
+  mChartSupplyCountry = new Chart(el2.getContext('2d'), {
+    type:'bar',
+    data:{labels:ordered, datasets},
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom',labels:{font:{size:9,family:'Noto Sans KR'},boxWidth:8,padding:6}},
+        tooltip:{
+          backgroundColor:'rgba(15,28,51,.92)',titleFont:{family:'Noto Sans KR',size:11},bodyFont:{size:10},padding:8,cornerRadius:4,
+          callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw}%`}
+        }
+      },
+      scales:{
+        x:{stacked:true, max:100, grid:{color:'rgba(0,0,0,.05)'}, ticks:{font:{size:9}, callback:v=>v+'%'}},
+        y:{stacked:true, grid:{display:false}, ticks:{font:{size:11,family:'Noto Sans KR',weight:600}}}
       }
     }
   });
@@ -3061,19 +3153,24 @@ function renderMSupplyDetail(data) {
   });
   document.getElementById('m-supply-tbody').innerHTML = rows.map(([hs, d]) => {
     const pct = totalAmt>0 ? (d.amt/totalAmt*100).toFixed(1) : '0';
-    // 1위 수입국
-    const topCountry = Object.entries(d.countries).sort((a,b)=>b[1]-a[1])[0];
-    const topName = topCountry ? topCountry[0] : '-';
-    const topPct = (topCountry && d.amt>0) ? (topCountry[1]/d.amt*100).toFixed(0) : '0';
+    // TOP3 수입국
+    const sortedCountries = Object.entries(d.countries).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    const top1Pct = (sortedCountries[0] && d.amt>0) ? Math.round(sortedCountries[0][1]/d.amt*100) : 0;
+    const top3Html = sortedCountries.map((c,i)=>{
+      const cpct = d.amt>0 ? Math.round(c[1]/d.amt*100) : 0;
+      const clr = i===0 ? (cpct>=70?'var(--rust)':cpct>=50?'var(--amber)':'var(--navy)') : 'var(--subtext)';
+      const fw = i===0 ? '700' : '400';
+      return `<span style="color:${clr};font-weight:${fw};font-size:11px;white-space:nowrap;">${i+1}. ${c[0]} ${cpct}%</span>`;
+    }).join('<span style="color:#ccc;margin:0 3px;">·</span>');
     const color = SUPPLY_STAGE_COLORS[d.stage] || '#BDC3C7';
     return `<tr>
       <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${color};margin-right:4px;vertical-align:middle;"></span>${d.stage}</td>
       <td><span class="hs-mono">${hs}</span></td>
-      <td style="font-size:11px;">${d.name}</td>
+      <td class="ellip" title="${(d.name||'').replace(/"/g,'&quot;')}" style="font-size:11px;">${d.name}</td>
       <td class="num">${Number(d.amt).toLocaleString()}</td>
       <td class="num">${pct}%</td>
-      <td>${topName}</td>
-      <td class="num"><span style="color:${parseInt(topPct)>=70?'var(--rust)':parseInt(topPct)>=50?'var(--amber)':'inherit'};font-weight:600;">${topPct}%</span></td>
+      <td style="white-space:normal;line-height:1.6;">${top3Html||'-'}</td>
+      <td class="num"><span style="color:${top1Pct>=70?'var(--rust)':top1Pct>=50?'var(--amber)':'inherit'};font-weight:600;">${top1Pct}%</span></td>
     </tr>`;
   }).join('');
 }
@@ -3548,25 +3645,25 @@ document.addEventListener('click',e=>{
    D3 세계지도 — 핵심광물 공급국 위험 지도
 ════════════════════════════════════════════════ */
 const MAP_COUNTRY_DATA = {
-  '156': { name:'중국',         flag:'🇨🇳', risk:'극심', pct:71.3,  minerals:[{name:'갈륨',pct:98.4},{name:'흑연',pct:95.8},{name:'희토류',pct:90},{name:'플루오라이트',pct:89.3},{name:'리튬',pct:74.2},{name:'망간',pct:61.7}]},
-  '643': { name:'러시아',       flag:'🇷🇺', risk:'중간', pct:12.5,  minerals:[{name:'팔라듐',pct:62},{name:'백금',pct:38},{name:'니켈',pct:18}]},
-  '840': { name:'미국',         flag:'🇺🇸', risk:'낮음', pct:9.1,   minerals:[{name:'희토류',pct:8},{name:'구리',pct:7},{name:'리튬',pct:6}]},
-  '124': { name:'캐나다',       flag:'🇨🇦', risk:'낮음', pct:4.2,   minerals:[{name:'코발트',pct:12},{name:'우라늄',pct:8},{name:'니켈',pct:6}]},
-  '36':  { name:'호주',         flag:'🇦🇺', risk:'중간', pct:18.2,  minerals:[{name:'니켈',pct:18.4},{name:'리튬',pct:10.5},{name:'코발트',pct:8.2},{name:'구리',pct:7}]},
-  '152': { name:'칠레',         flag:'🇨🇱', risk:'중간', pct:16.1,  minerals:[{name:'리튬',pct:15.3},{name:'구리',pct:22.1},{name:'몰리브덴',pct:18}]},
-  '76':  { name:'브라질',       flag:'🇧🇷', risk:'낮음', pct:5.2,   minerals:[{name:'니오븀',pct:28},{name:'망간',pct:12},{name:'탄탈',pct:8}]},
-  '710': { name:'남아공',       flag:'🇿🇦', risk:'중간', pct:22.4,  minerals:[{name:'망간',pct:22.4},{name:'크롬',pct:35},{name:'백금',pct:28},{name:'바나듐',pct:18}]},
-  '180': { name:'DR콩고',       flag:'🇨🇩', risk:'높음', pct:52.3,  minerals:[{name:'코발트',pct:52.3},{name:'탄탈',pct:40.2},{name:'구리',pct:8}]},
-  '360': { name:'인도네시아',   flag:'🇮🇩', risk:'중간', pct:28.4,  minerals:[{name:'니켈',pct:31.2},{name:'코발트',pct:12},{name:'주석',pct:18}]},
-  '608': { name:'필리핀',       flag:'🇵🇭', risk:'중간', pct:18.4,  minerals:[{name:'니켈',pct:31.2},{name:'크롬',pct:8}]},
-  '392': { name:'일본',         flag:'🇯🇵', risk:'낮음', pct:8.1,   minerals:[{name:'코발트(정제)',pct:18},{name:'망간',pct:12}]},
-  '398': { name:'카자흐스탄',   flag:'🇰🇿', risk:'낮음', pct:5.1,   minerals:[{name:'크롬',pct:12},{name:'우라늄',pct:8}]},
-  '604': { name:'페루',         flag:'🇵🇪', risk:'낮음', pct:6.3,   minerals:[{name:'구리',pct:14},{name:'리튬',pct:4},{name:'아연',pct:18}]},
-  '484': { name:'멕시코',       flag:'🇲🇽', risk:'낮음', pct:7.1,   minerals:[{name:'플루오라이트',pct:7.1},{name:'은',pct:8}]},
-  '246': { name:'핀란드',       flag:'🇫🇮', risk:'낮음', pct:12.3,  minerals:[{name:'코발트(정제)',pct:28.1},{name:'니켈',pct:8}]},
-  '356': { name:'인도',         flag:'🇮🇳', risk:'낮음', pct:4.5,   minerals:[{name:'크롬',pct:8},{name:'망간',pct:6}]},
-  '32':  { name:'아르헨티나',   flag:'🇦🇷', risk:'낮음', pct:3.8,   minerals:[{name:'리튬',pct:4},{name:'구리',pct:3}]},
-  '694': { name:'시에라리온',   flag:'🇸🇱', risk:'낮음', pct:2.1,   minerals:[{name:'티타늄',pct:8}]},
+  '156': { name:'중국',         flag:'🇨🇳', risk:'극심', pct:38.2,  minerals:[{name:'갈륨',pct:98.4},{name:'흑연',pct:95.8},{name:'희토류',pct:90},{name:'플루오라이트',pct:89.3},{name:'리튬',pct:74.2},{name:'망간',pct:61.7}]},
+  '36':  { name:'호주',         flag:'🇦🇺', risk:'중간', pct:12.5,  minerals:[{name:'니켈',pct:18.4},{name:'리튬',pct:10.5},{name:'코발트',pct:8.2},{name:'구리',pct:7}]},
+  '152': { name:'칠레',         flag:'🇨🇱', risk:'중간', pct:9.8,   minerals:[{name:'리튬',pct:15.3},{name:'구리',pct:22.1},{name:'몰리브덴',pct:18}]},
+  '360': { name:'인도네시아',   flag:'🇮🇩', risk:'중간', pct:7.6,   minerals:[{name:'니켈',pct:31.2},{name:'코발트',pct:12},{name:'주석',pct:18}]},
+  '710': { name:'남아공',       flag:'🇿🇦', risk:'중간', pct:6.1,   minerals:[{name:'망간',pct:22.4},{name:'크롬',pct:35},{name:'백금',pct:28},{name:'바나듐',pct:18}]},
+  '392': { name:'일본',         flag:'🇯🇵', risk:'낮음', pct:5.3,   minerals:[{name:'코발트(정제)',pct:18},{name:'망간',pct:12}]},
+  '643': { name:'러시아',       flag:'🇷🇺', risk:'중간', pct:4.1,   minerals:[{name:'팔라듐',pct:62},{name:'백금',pct:38},{name:'니켈',pct:18}]},
+  '180': { name:'DR콩고',       flag:'🇨🇩', risk:'높음', pct:3.5,   minerals:[{name:'코발트',pct:52.3},{name:'탄탈',pct:40.2},{name:'구리',pct:8}]},
+  '608': { name:'필리핀',       flag:'🇵🇭', risk:'중간', pct:2.9,   minerals:[{name:'니켈',pct:31.2},{name:'크롬',pct:8}]},
+  '246': { name:'핀란드',       flag:'🇫🇮', risk:'낮음', pct:2.1,   minerals:[{name:'코발트(정제)',pct:28.1},{name:'니켈',pct:8}]},
+  '840': { name:'미국',         flag:'🇺🇸', risk:'낮음', pct:1.8,   minerals:[{name:'희토류',pct:8},{name:'구리',pct:7},{name:'리튬',pct:6}]},
+  '76':  { name:'브라질',       flag:'🇧🇷', risk:'낮음', pct:1.4,   minerals:[{name:'니오븀',pct:28},{name:'망간',pct:12},{name:'탄탈',pct:8}]},
+  '124': { name:'캐나다',       flag:'🇨🇦', risk:'낮음', pct:1.1,   minerals:[{name:'코발트',pct:12},{name:'우라늄',pct:8},{name:'니켈',pct:6}]},
+  '604': { name:'페루',         flag:'🇵🇪', risk:'낮음', pct:0.9,   minerals:[{name:'구리',pct:14},{name:'아연',pct:18}]},
+  '484': { name:'멕시코',       flag:'🇲🇽', risk:'낮음', pct:0.7,   minerals:[{name:'플루오라이트',pct:7.1},{name:'은',pct:8}]},
+  '398': { name:'카자흐스탄',   flag:'🇰🇿', risk:'낮음', pct:0.6,   minerals:[{name:'크롬',pct:12},{name:'우라늄',pct:8}]},
+  '356': { name:'인도',         flag:'🇮🇳', risk:'낮음', pct:0.5,   minerals:[{name:'크롬',pct:8},{name:'망간',pct:6}]},
+  '32':  { name:'아르헨티나',   flag:'🇦🇷', risk:'낮음', pct:0.4,   minerals:[{name:'리튬',pct:4},{name:'구리',pct:3}]},
+  '694': { name:'시에라리온',   flag:'🇸🇱', risk:'낮음', pct:0.2,   minerals:[{name:'티타늄',pct:8}]},
   '410': { name:'대한민국',     flag:'🇰🇷', risk:'none', pct:0,     minerals:[]},
 };
 const RISK_COLOR = {'극심':'#C0392B','높음':'#D4860C','중간':'#27AE60','낮음':'#2980B9','none':'#F4C430'};
