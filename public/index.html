@@ -1017,9 +1017,9 @@ table.result tbody td.center{text-align:center;}
         <div class="cond-group">
           <label class="cond-label">기간 구분</label>
           <div class="radio-group">
-            <input type="radio" name="m_period_type" id="m_yr" value="year">
+            <input type="radio" name="m_period_type" id="m_yr" value="year" checked>
             <label for="m_yr">연도별</label>
-            <input type="radio" name="m_period_type" id="m_mo" value="month" checked>
+            <input type="radio" name="m_period_type" id="m_mo" value="month">
             <label for="m_mo">월별</label>
           </div>
         </div>
@@ -1136,7 +1136,7 @@ table.result tbody td.center{text-align:center;}
         <div class="chart-body"><canvas id="m-trend-chart" style="max-height:230px"></canvas></div>
       </div>
     </div>
-    <!-- 공급단계별 차트 -->
+    <!-- 공급단계별 차트 + 상세 -->
     <div class="chart-grid" id="m-supply-area" style="grid-template-columns:1fr;margin-top:0;">
       <div class="chart-box">
         <div class="chart-box-header">
@@ -1149,12 +1149,48 @@ table.result tbody td.center{text-align:center;}
         <div class="chart-body" style="min-height:200px;"><canvas id="m-supply-chart" style="max-height:280px"></canvas></div>
       </div>
     </div>
+    <!-- 공급단계별 상세 테이블 (HS코드명 + 주요 수입국) -->
+    <div class="result-table-wrap" id="m-supply-detail" style="margin-bottom:0;">
+      <div class="table-header">
+        <div class="table-title">공급단계별 상세 (HS코드 · 주요 수입국)</div>
+      </div>
+      <div class="table-scroll" style="max-height:300px;">
+        <table class="result" id="m-supply-table">
+          <thead><tr>
+            <th>공급단계</th><th>HS코드</th><th>품목명</th><th>수입액 (천$)</th><th>비중</th><th>1위 수입국</th><th>집중도</th>
+          </tr></thead>
+          <tbody id="m-supply-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 국가별 비중 요약 -->
+    <div class="result-table-wrap" id="m-country-summary" style="margin-bottom:0;">
+      <div class="table-header">
+        <div class="table-title">국가별 수입 비중</div>
+        <div class="table-count" id="m-country-count"></div>
+      </div>
+      <div class="table-scroll" style="max-height:260px;">
+        <table class="result" id="m-country-table">
+          <thead><tr>
+            <th>순위</th><th>국가</th><th>수입액 (천$)</th><th>비중 (%)</th><th>수입중량 (톤)</th>
+          </tr></thead>
+          <tbody id="m-country-tbody"></tbody>
+        </table>
+      </div>
+    </div>
 
     <!-- 결과 테이블 -->
     <div class="result-table-wrap" id="m-table-wrap">
       <div class="table-header">
         <div class="table-title">수출입 실적 상세</div>
-        <div class="table-count" id="m-table-count"></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="chart-tab-group">
+            <button class="chart-tab active" onclick="switchMTableView('year',this)">연도별</button>
+            <button class="chart-tab" onclick="switchMTableView('month',this)">월별</button>
+          </div>
+          <span class="table-count" id="m-table-count"></span>
+        </div>
       </div>
       <div class="table-scroll">
         <table class="result" id="m-table">
@@ -1364,20 +1400,9 @@ table.result tbody td.center{text-align:center;}
               <div class="map-subtitle">국가를 클릭하면 광물 상세 정보를 확인할 수 있습니다</div>
             </div>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-              <select class="cond-select" style="width:170px;font-size:12px" id="mapMineralSel" onchange="filterByMineral()">
+              <select class="cond-select" style="width:200px;font-size:12px" id="mapMineralSel" onchange="filterByMineral()">
                 <option value="all">전체 광물 (정적)</option>
-                <option value="갈륨">갈륨 (Ga)</option>
-                <option value="흑연">흑연 (Graphite)</option>
-                <option value="리튬">리튬 (Li)</option>
-                <option value="코발트">코발트 (Co)</option>
-                <option value="니켈">니켈 (Ni)</option>
-                <option value="망간">망간 (Mn)</option>
-                <option value="플루오라이트">플루오라이트 (CaF₂)</option>
-                <option value="희토류">희토류 (REE)</option>
-                <option value="네오디뮴">네오디뮴 (Nd)</option>
-                <option value="디스프로슘">디스프로슘 (Dy)</option>
-                <option value="텅스텐">텅스텐 (W)</option>
-                <option value="구리">구리 (Cu)</option>
+                <!-- JS로 MINERAL_DB 기반 동적 생성 -->
               </select>
               <select class="cond-select" style="width:100px;font-size:12px" id="mapYearSel"></select>
               <button class="btn-query" style="padding:6px 14px;font-size:12px;" onclick="queryMapData()">🌍 실시간 조회</button>
@@ -1789,6 +1814,50 @@ const US60 = new Set([
   '희토류(전체)', // 대표 HS 포함
 ]);
 
+// 한국↔미국 전략 비교 (엑셀 기반)
+const STRATEGY_COMPARE = {
+  '리튬':{kr:'이차전지·EV·ESS',us:'EV·배터리·에너지전환',hint:'양국 1순위; 공급망 전쟁 핵심'},
+  '니켈':{kr:'이차전지·EV',us:'EV 배터리·제강',hint:'인도네시아 의존 리스크'},
+  '코발트':{kr:'이차전지·방산',us:'EV·방산 초합금',hint:'DRC 편중 리스크'},
+  '망간':{kr:'이차전지·합금강',us:'EV 배터리·제강',hint:'LMO/LNMO 배터리 수요 증가'},
+  '흑연':{kr:'음극재·내화재',us:'음극재·산업',hint:'중국 수출규제 동시 비상'},
+  '네오디뮴':{kr:'NdFeB 자석·EV모터',us:'EV 모터·풍력',hint:'중국 독점 위험'},
+  '프라세오디뮴':{kr:'NdFeB 자석·EV모터',us:'EV 모터·풍력',hint:'Nd+Pr 혼합 공급 연동'},
+  '디스프로슘':{kr:'고온 NdFeB·방산',us:'EV 고온 모터',hint:'중국 HREE 과점'},
+  '테르븀':{kr:'고온 NdFeB·LED',us:'EV 모터·형광체',hint:'희소성 극대'},
+  '란타넘':{kr:'NiMH·촉매·광학',us:'배터리·촉매',hint:'EV 시대 수요 전환'},
+  '세륨':{kr:'CMP·촉매·안료',us:'반도체 CMP·촉매',hint:'반도체 CMP 필수'},
+  '사마륨':{kr:'SmCo 고온자석·방산',us:'방산·항공',hint:'방산 고온환경 필수'},
+  '이트륨':{kr:'LED 형광체·SOFC',us:'LED·청정에너지',hint:'백색 LED 핵심'},
+  '스칸듐':{kr:'Al-Sc합금·SOFC',us:'항공·청정에너지',hint:'Al 강도 50%↑'},
+  '갈륨':{kr:'GaN반도체·LED·5G',us:'반도체·5G·LED',hint:'중국 수출규제 동시 충격'},
+  '게르마늄':{kr:'광섬유·IR광학·반도체',us:'반도체·광통신',hint:'중국 수출규제 동시 충격'},
+  '인듐':{kr:'ITO 디스플레이·CIGS',us:'디스플레이·태양광',hint:'중국 60%+ 생산'},
+  '안티몬':{kr:'반도체·방염·축전지',us:'반도체·방산',hint:'중국 2024 수출규제'},
+  '텔루륨':{kr:'CdTe 태양광·열전',us:'태양광·열전',hint:'미국 퍼스트솔라 핵심'},
+  '텅스텐':{kr:'공구강·방산·초경',us:'공구강·방산·전자',hint:'중국 80%+ 생산'},
+  '티타늄':{kr:'항공·방산·의료',us:'항공·방산',hint:'러시아 공급차단 긴장'},
+  '바나듐':{kr:'HSLA강·ESS(VRB)',us:'HSLA강·VRB',hint:'VRB 장주기 ESS 재평가'},
+  '니오븀':{kr:'HSLA강·초전도',us:'HSLA강·초전도',hint:'브라질 CBMM 95%'},
+  '탄탈':{kr:'커패시터·반도체',us:'전자·방산',hint:'분쟁광물 이슈'},
+  '백금족':{kr:'연료전지·삼원촉매',us:'수소·촉매',hint:'수소경제 핵심'},
+  '우라늄':{kr:'원자력 발전',us:'원자력',hint:'탈탄소 원자력 르네상스'},
+  '마그네슘':{kr:'경량합금·제강',us:'EV 경량화·제강',hint:'중국 90%+ 생산'},
+  '플루오라이트':{kr:'HF·전해질·반도체',us:'반도체·배터리',hint:'불소화합물 중국 의존'},
+  '알루미늄':{kr:'경량화·패널·포장',us:'EV·항공·건설',hint:'에너지 집약 제련'},
+  '구리':{kr:'전력망·전자·건설',us:'전력인프라·EV',hint:'전기화 핵심'},
+  '몰리브덴':{kr:'합금강·촉매',us:'합금강·석유촉매',hint:'제강 첨가제'},
+  '크롬':{kr:'스테인리스강',us:'스테인리스강·도금',hint:'남아공 의존'},
+  '주석':{kr:'솔더·코팅',us:'솔더·전자',hint:'미얀마·인도네시아 편중'},
+  '팔라듐':{kr:'삼원촉매·전자',us:'촉매·수소',hint:'러시아 리스크'},
+  '하프늄':{kr:'—',us:'반도체 FinFET·원자로',hint:'한국 편입 검토 필요'},
+  '이리듐':{kr:'—',us:'PEM 수전해 anode',hint:'그린수소 중요성↑'},
+  '레늄':{kr:'—',us:'항공 초합금',hint:'미국 항공산업 중심'},
+  '비소':{kr:'—',us:'GaAs 반도체',hint:'독성 규제'},
+  '루비듐':{kr:'—',us:'원자시계·양자컴퓨팅',hint:'양자기술 부상'},
+  '바라이트':{kr:'—',us:'시추액·의료조영제',hint:'시추산업 필수'},
+};
+
 // 광종 분류 필터 상태
 let mineralClassFilter = 'all'; // 'all' | 'kr33' | 'us60' | 'both'
 
@@ -1995,20 +2064,54 @@ let sortState = {};
   const tagEl = document.getElementById('refYearTag');
   if (tagEl) tagEl.textContent = `${maxYear} 기준`;
 
-  const years = [];
-  for(let y=maxYear;y>=minYear;y--) years.push(y);
-  const months = [];
-  for(let y=maxYear;y>=minYear;y--)
-    for(let m=12;m>=1;m--)
-      months.push(`${y}${String(m).padStart(2,'0')}`);
+  // 현재 연·월 기준으로 드롭다운 범위 설정 (최신월까지 조회 가능)
+  const _now = new Date();
+  const curYear  = _now.getFullYear();
+  const curMonth = _now.getMonth() + 1;
+  const topYear  = Math.max(curYear, maxYear);
 
-  // 광종별 조회: 기본값 월별 (시작=1월, 종료=12월)
-  const fmtMonth = v => `${v.slice(0,4)}년 ${parseInt(v.slice(4),10)}월`;
-  fillSelect('m_start', months, fmtMonth, `${maxYear}01`);
-  fillSelect('m_end',   months, fmtMonth, `${maxYear}12`);
+  const years = [];
+  for(let y=topYear;y>=minYear;y--) years.push(y);
+  const months = [];
+  for(let y=topYear;y>=minYear;y--) {
+    const mEnd = (y === curYear) ? curMonth : 12;
+    for(let m=mEnd;m>=1;m--)
+      months.push(`${y}${String(m).padStart(2,'0')}`);
+  }
+
+  // 광종별 조회: 기본값 연도별 (시작=minYear, 종료=maxYear)
+  const fmtYear = v => `${v}년`;
+  fillSelect('m_start', years, fmtYear, String(minYear));
+  fillSelect('m_end',   years, fmtYear, String(maxYear));
   fillSelect('h_year',     years, y=>`${y}년`, String(maxYear));
   fillSelect('ov_year',    years, y=>`${y}년`, String(maxYear));
   fillSelect('mapYearSel', years, y=>`${y}년`, String(maxYear));
+
+  // 수입지도 광물 셀렉트: MINERAL_DB 기반 동적 생성 (그룹별)
+  (function populateMapMineralSel() {
+    const sel = document.getElementById('mapMineralSel');
+    if(!sel) return;
+    const groups = {};
+    MINERAL_DB.forEach(m => {
+      const g = m.group || '기타';
+      if(!groups[g]) groups[g] = [];
+      groups[g].push(m);
+    });
+    const groupOrder = ['배터리','희토류','전략금속','비철금속','비금속','철합금','귀금속','기타'];
+    const sortedGroups = Object.keys(groups).sort((a,b) => {
+      const ia = groupOrder.indexOf(a), ib = groupOrder.indexOf(b);
+      return (ia===-1?99:ia) - (ib===-1?99:ib);
+    });
+    let html = '<option value="all">전체 광물 (정적)</option>';
+    sortedGroups.forEach(g => {
+      html += `<optgroup label="── ${g} ──">`;
+      groups[g].sort((a,b)=>a.ko.localeCompare(b.ko,'ko')).forEach(m => {
+        html += `<option value="${m.ko}">${m.ko} (${m.sym})</option>`;
+      });
+      html += '</optgroup>';
+    });
+    sel.innerHTML = html;
+  })();
 
   // 기간 구분 변경 시 셀렉트 갱신
   document.querySelectorAll('input[name="m_period_type"]').forEach(r => {
@@ -2016,8 +2119,8 @@ let sortState = {};
       const isMonth = r.value==='month';
       const opts = isMonth ? months : years;
       const fmt  = isMonth ? v=>`${v.slice(0,4)}년 ${parseInt(v.slice(4),10)}월` : v=>`${v}년`;
-      const ds   = isMonth ? `${maxYear}01` : String(maxYear);
-      const de   = isMonth ? `${maxYear}12` : String(maxYear);
+      const ds   = isMonth ? `${curYear}01` : String(minYear);
+      const de   = isMonth ? `${curYear}${String(curMonth).padStart(2,'0')}` : String(maxYear);
       fillSelect('m_start', opts, fmt, ds);
       fillSelect('m_end',   opts, fmt, de);
     });
@@ -2075,11 +2178,14 @@ function onMineralInput(val) {
     const idx = MINERAL_DB.indexOf(m);
     const kr = KOREA33.has(m.ko) ? '<span style="font-size:9px;background:#E3F2FD;color:#1565C0;padding:1px 4px;border-radius:3px;">🇰🇷 한국</span>' : '';
     const us = US60.has(m.ko) ? '<span style="font-size:9px;background:#FFF3E0;color:#E65100;padding:1px 4px;border-radius:3px;">🇺🇸 미국</span>' : '';
+    const cmpInfo = STRATEGY_COMPARE[m.ko];
+    const indLine = cmpInfo ? `<div style="font-size:9px;color:#666;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;">${cmpInfo.kr!=='—'?'🇰🇷'+cmpInfo.kr:''}${cmpInfo.kr!=='—'&&cmpInfo.us!=='—'?' · ':''}${cmpInfo.us!=='—'?'🇺🇸'+cmpInfo.us:''}</div>` : '';
     return `
     <div class="ac-item" onmousedown="event.preventDefault();selectMineral(${idx})">
       <div>
         <div class="ac-mineral-name">${m.ko} (${m.sym}) ${kr}${us}</div>
         <div class="ac-mineral-en">${m.en} &nbsp;·&nbsp; <span style="color:#888;font-size:10px">${m.group||''}</span></div>
+        ${indLine}
       </div>
       <span class="ac-risk ${m.risk}">${m.risk}</span>
       <div class="ac-hs-chips">
@@ -2123,6 +2229,31 @@ function showMineralBanner(m) {
   document.getElementById('mb-risk').innerHTML =
     `<span style="background:${riskColor[m.risk]}22;color:${riskColor[m.risk]};
       padding:4px 12px;border-radius:3px;font-size:11px;font-weight:700;">${m.risk} 위험</span>`;
+  // 한국↔미국 전략 비교 표시
+  const cmp = STRATEGY_COMPARE[m.ko];
+  let strategyEl = document.getElementById('mb-strategy');
+  if(!strategyEl) {
+    strategyEl = document.createElement('div');
+    strategyEl.id = 'mb-strategy';
+    strategyEl.style.cssText = 'margin-top:8px;padding:8px 12px;background:rgba(27,42,74,.04);border-radius:6px;font-size:11px;line-height:1.6;';
+    document.getElementById('mb-hs-list').after(strategyEl);
+  }
+  if(cmp) {
+    const isKR = KOREA33.has(m.ko);
+    const isUS = US60.has(m.ko);
+    let badge = '';
+    if(isKR && isUS) badge = '<span style="background:#E8F5E9;color:#2E7D32;padding:2px 6px;border-radius:3px;font-weight:700;">한·미 공통</span>';
+    else if(isKR) badge = '<span style="background:#E3F2FD;color:#1565C0;padding:2px 6px;border-radius:3px;font-weight:700;">한국 단독</span>';
+    else if(isUS) badge = '<span style="background:#FFF3E0;color:#E65100;padding:2px 6px;border-radius:3px;font-weight:700;">미국 단독</span>';
+    strategyEl.innerHTML = `${badge}&nbsp;
+      ${cmp.kr!=='—' ? `<span style="color:#1565C0;">🇰🇷 ${cmp.kr}</span>` : ''}
+      ${cmp.kr!=='—' && cmp.us!=='—' ? ' · ' : ''}
+      ${cmp.us!=='—' ? `<span style="color:#E65100;">🇺🇸 ${cmp.us}</span>` : ''}
+      <span style="color:var(--muted);margin-left:6px;">${cmp.hint}</span>`;
+    strategyEl.style.display = '';
+  } else {
+    strategyEl.style.display = 'none';
+  }
   banner.classList.add('visible');
 }
 
@@ -2677,7 +2808,42 @@ function renderMineralResult(data) {
   renderMDonutChart(data);
   renderMTrendChart(data);
   renderMSupplyChart(data);
+  renderMSupplyDetail(data);
+  renderMCountrySummary(data);
   renderMTable(data);
+}
+
+let mTableView = 'year'; // 'year' | 'month'
+
+/* ── 국가별 비중 요약 테이블 ── */
+function renderMCountrySummary(data) {
+  const byCountry = {};
+  data.forEach(r => {
+    const c = r.cntyNm || COUNTRY_NAMES[r.cntyCd] || r.cntyCd || '기타';
+    if(!byCountry[c]) byCountry[c] = {amt:0, wt:0};
+    byCountry[c].amt += parseFloat(r.impAmt||r.expAmt||0);
+    byCountry[c].wt  += parseFloat(r.impWgt||r.expWgt||0);
+  });
+  const sorted = Object.entries(byCountry).sort((a,b)=>b[1].amt-a[1].amt);
+  const total = sorted.reduce((s,e)=>s+e[1].amt,0);
+  document.getElementById('m-country-count').textContent = `${sorted.length}개국`;
+  document.getElementById('m-country-tbody').innerHTML = sorted.map((e,i) => {
+    const pct = total>0 ? (e[1].amt/total*100).toFixed(1) : '0';
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${e[0]}</td>
+      <td class="num">${Number(e[1].amt).toLocaleString()}</td>
+      <td class="num"><span style="color:${parseFloat(pct)>=10?'var(--rust)':'inherit'};font-weight:${parseFloat(pct)>=10?'600':'normal'}">${pct}%</span></td>
+      <td class="num">${Number(e[1].wt).toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── 테이블 뷰 전환 (연도별 집계 / 월별 상세) ── */
+function switchMTableView(view, el) {
+  mTableView = view;
+  if(el) { el.closest('.chart-tab-group').querySelectorAll('.chart-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); }
+  if(mResultData.length) renderMTable(mResultData);
 }
 
 /* ── 도넛 차트: 국가별/대륙별 비중 ── */
@@ -2864,24 +3030,92 @@ function renderMSupplyChart(data) {
   });
 }
 
-/* ── 결과 테이블 ── */
-function renderMTable(data) {
-  document.getElementById('m-table-count').textContent = `${data.length}건`;
-  document.getElementById('m-tbody').innerHTML = data.map(r => {
-    const amt = parseFloat(r.impAmt||r.expAmt||0);
-    const wt  = parseFloat(r.impWgt||r.expWgt||0);
-    const uprice = wt>0 ? Number((amt*1000/wt).toFixed(1)).toLocaleString() : '-';
-    const cntyLabel = r.cntyNm || COUNTRY_NAMES[r.cntyCd] || r.cntyCd || '';
+/* ── 공급단계 상세 테이블 (HS코드명 + 주요 수입국) ── */
+function renderMSupplyDetail(data) {
+  // HS코드별 집계: 공급단계, 금액, 중량, 국가별 금액
+  const byHs = {};
+  data.forEach(r => {
+    const hs = r.hsCd || r._hsCode || '';
+    const stage = getSupplyStage(hs);
+    const cn = r.cntyNm || COUNTRY_NAMES[r.cntyCd] || r.cntyCd || '기타';
+    if(!byHs[hs]) byHs[hs] = {stage, name:r.hsNm||'', amt:0, wt:0, countries:{}};
+    byHs[hs].amt += parseFloat(r.impAmt||r.expAmt||0);
+    byHs[hs].wt  += parseFloat(r.impWgt||r.expWgt||0);
+    byHs[hs].countries[cn] = (byHs[hs].countries[cn]||0) + parseFloat(r.impAmt||r.expAmt||0);
+  });
+  const totalAmt = Object.values(byHs).reduce((s,e)=>s+e.amt,0);
+  // 공급단계 순서로 정렬 후 금액순
+  const rows = Object.entries(byHs).sort((a,b)=>{
+    const ia = SUPPLY_STAGE_ORDER.indexOf(a[1].stage), ib = SUPPLY_STAGE_ORDER.indexOf(b[1].stage);
+    if(ia!==ib) return ia-ib;
+    return b[1].amt - a[1].amt;
+  });
+  document.getElementById('m-supply-tbody').innerHTML = rows.map(([hs, d]) => {
+    const pct = totalAmt>0 ? (d.amt/totalAmt*100).toFixed(1) : '0';
+    // 1위 수입국
+    const topCountry = Object.entries(d.countries).sort((a,b)=>b[1]-a[1])[0];
+    const topName = topCountry ? topCountry[0] : '-';
+    const topPct = (topCountry && d.amt>0) ? (topCountry[1]/d.amt*100).toFixed(0) : '0';
+    const color = SUPPLY_STAGE_COLORS[d.stage] || '#BDC3C7';
     return `<tr>
-      <td>${r.period||'—'}</td>
-      <td><span class="hs-mono">${r.hsCd||r._hsCode||''}</span></td>
-      <td>${r.hsNm||r._mineral||''}</td>
-      <td>${cntyLabel}</td>
-      <td class="num">${Number(amt).toLocaleString()}</td>
-      <td class="num">${Number(wt).toLocaleString()}</td>
-      <td class="num">${uprice}</td>
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${color};margin-right:4px;vertical-align:middle;"></span>${d.stage}</td>
+      <td><span class="hs-mono">${hs}</span></td>
+      <td style="font-size:11px;">${d.name}</td>
+      <td class="num">${Number(d.amt).toLocaleString()}</td>
+      <td class="num">${pct}%</td>
+      <td>${topName}</td>
+      <td class="num"><span style="color:${parseInt(topPct)>=70?'var(--rust)':parseInt(topPct)>=50?'var(--amber)':'inherit'};font-weight:600;">${topPct}%</span></td>
     </tr>`;
   }).join('');
+}
+
+/* ── 결과 테이블 ── */
+function renderMTable(data) {
+  if(mTableView==='year') {
+    // 연도별 집계: 연도+HS코드+국가별로 합산
+    const agg = {};
+    data.forEach(r => {
+      const yr = (r.period||'').slice(0,4) || '—';
+      const hs = r.hsCd||r._hsCode||'';
+      const cn = r.cntyNm || COUNTRY_NAMES[r.cntyCd] || r.cntyCd || '기타';
+      const key = `${yr}|${hs}|${cn}`;
+      if(!agg[key]) agg[key] = {yr,hs,name:r.hsNm||r._mineral||'',cn,amt:0,wt:0};
+      agg[key].amt += parseFloat(r.impAmt||r.expAmt||0);
+      agg[key].wt  += parseFloat(r.impWgt||r.expWgt||0);
+    });
+    const rows = Object.values(agg).sort((a,b)=>b.yr.localeCompare(a.yr)||b.amt-a.amt);
+    document.getElementById('m-table-count').textContent = `${rows.length}건 (연도별)`;
+    document.getElementById('m-tbody').innerHTML = rows.map(r => {
+      const uprice = r.wt>0 ? Number((r.amt*1000/r.wt).toFixed(1)).toLocaleString() : '-';
+      return `<tr>
+        <td>${r.yr}</td>
+        <td><span class="hs-mono">${r.hs}</span></td>
+        <td>${r.name}</td>
+        <td>${r.cn}</td>
+        <td class="num">${Number(r.amt).toLocaleString()}</td>
+        <td class="num">${Number(r.wt).toLocaleString()}</td>
+        <td class="num">${uprice}</td>
+      </tr>`;
+    }).join('');
+  } else {
+    // 월별 상세
+    document.getElementById('m-table-count').textContent = `${data.length}건 (월별)`;
+    document.getElementById('m-tbody').innerHTML = data.map(r => {
+      const amt = parseFloat(r.impAmt||r.expAmt||0);
+      const wt  = parseFloat(r.impWgt||r.expWgt||0);
+      const uprice = wt>0 ? Number((amt*1000/wt).toFixed(1)).toLocaleString() : '-';
+      const cntyLabel = r.cntyNm || COUNTRY_NAMES[r.cntyCd] || r.cntyCd || '';
+      return `<tr>
+        <td>${r.period||'—'}</td>
+        <td><span class="hs-mono">${r.hsCd||r._hsCode||''}</span></td>
+        <td>${r.hsNm||r._mineral||''}</td>
+        <td>${cntyLabel}</td>
+        <td class="num">${Number(amt).toLocaleString()}</td>
+        <td class="num">${Number(wt).toLocaleString()}</td>
+        <td class="num">${uprice}</td>
+      </tr>`;
+    }).join('');
+  }
 }
 
 /* 차트 타입 전환 */
