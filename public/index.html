@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="한국 핵심광물 수입 현황 대시보드 — 관세청 무역통계 기반 실시간 광종별·HS코드별 수출입 조회 및 수입지도">
 <meta name="theme-color" content="#1B2A4A">
-<title>KOMIR 핵심광물 수입 현황</title>
+<title>핵심광물 수입 현황 조회·분석</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
@@ -859,7 +859,7 @@ table.result tbody td.center{text-align:center;}
 <header>
   <div class="header-inner">
     <div class="header-left">
-      <div class="header-badge">KOMIR · 한국광물자원공사</div>
+      <div class="header-badge">Theo-moon</div>
       <div class="header-title">핵심광물 <em>수입 현황</em><br>조회·분석</div>
       <div class="header-sub">Critical Minerals Import Dependency Analysis</div>
     </div>
@@ -1518,8 +1518,8 @@ table.result tbody td.center{text-align:center;}
 
 <footer>
   <div class="footer-inner">
-    <div class="footer-left"><strong>KOMIR</strong> &nbsp;·&nbsp; 핵심광물 수입 현황 조회·분석 v3 &nbsp;·&nbsp; 데이터 기준: <span id="refYearFt">2024</span>년 관세청 무역통계</div>
-    <div class="footer-right">본 자료는 내부 분석용이며 공식 발표자료가 아닙니다</div>
+    <div class="footer-left">&copy; <strong>Theo-moon</strong> &nbsp;·&nbsp; 핵심광물 수입 현황 조회·분석 v3 &nbsp;·&nbsp; 데이터 기준: <span id="refYearFt">2024</span>년 관세청 무역통계</div>
+    <div class="footer-right">&copy; Theo-moon. All rights reserved.</div>
   </div>
 </footer>
 
@@ -1790,7 +1790,7 @@ const MINERAL_DB = [
 ];
 
 /* ── 광종 분류 집합: 한국 33대 / 미국 60종 ─────────────────────── */
-// KOMIR 33대 핵심광물 (2024 지정 기준)
+// 33대 핵심광물 (2024 지정 기준)
 const KOREA33 = new Set([
   '리튬','니켈','코발트','망간','흑연',
   '네오디뮴','프라세오디뮴','란타넘','디스프로슘','테르븀','이트륨',
@@ -3518,7 +3518,7 @@ function downloadCSV(mode){
   const a=document.createElement('a');
   const url=URL.createObjectURL(blob);
   a.href=url;
-  a.download=`KOMIR_${mode}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.download=`CriticalMinerals_${mode}_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
   setTimeout(()=>URL.revokeObjectURL(url), 1000);
 }
