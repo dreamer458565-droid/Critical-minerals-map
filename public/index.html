@@ -1300,7 +1300,10 @@ table.result tbody td.center{text-align:center;}
   <!-- HS 드릴다운 트리 -->
   <div class="hs-tree-box" id="hsTreeBox" style="display:none">
     <div class="hs-tree-header">
-      <div class="hs-tree-title">HS코드 계층 탐색</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button id="hsTreeBack" onclick="hsTreeGoUp()" style="display:none;padding:3px 8px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:var(--cream);cursor:pointer;white-space:nowrap;">◀ 상위</button>
+        <div class="hs-tree-title">HS코드 계층 탐색</div>
+      </div>
       <div class="hs-breadcrumb" id="hsBreadcrumb"></div>
     </div>
     <div class="hs-tree-body">
@@ -3736,48 +3739,98 @@ function resetHsForm(){
    11. HS 드릴다운 트리
 ════════════════════════════════════════════════ */
 let hsBreadcrumbPath = [];
+let hsCurrentLevel = ''; // '' = root (all chapters), '26' = 2-digit, '2603' = 4-digit, '260300' = 6-digit
 
 function buildHsTree(code) {
   const box=document.getElementById('hsTreeBox');
   const nodesEl=document.getElementById('hsTreeNodes');
   const breadEl=document.getElementById('hsBreadcrumb');
+  const backBtn=document.getElementById('hsTreeBack');
   box.style.display='block';
 
-  const c=code.replace(/\./g,'');
+  const c=(code||'').replace(/\./g,'');
+  hsCurrentLevel=c;
+
+  // ── 루트: 전체 류(2단위) 목록 ──
+  if(!c || c.length<2) {
+    hsBreadcrumbPath=[{code:'',name:'전체'}];
+    breadEl.innerHTML='<span class="active">전체 류</span>';
+    backBtn.style.display='none';
+    nodesEl.innerHTML = Object.entries(HS_TREE).map(([ch,node])=>
+      `<div class="hs-node" onclick="drillHsTree('${ch}')">
+        <span class="hs-node-code">${ch}</span>
+        <span class="hs-node-name">${node.name}</span>
+        <span class="hs-drill-indicator">▶</span>
+      </div>`
+    ).join('');
+    return;
+  }
+
   const top2=c.slice(0,2);
   const root=HS_TREE[top2];
-  if(!root){ box.style.display='none'; return; }
+  if(!root){ nodesEl.innerHTML='<div style="padding:12px;color:var(--subtext);">해당 류에 등록된 트리 없음</div>'; return; }
 
-  // 브레드크럼
-  hsBreadcrumbPath=[{code:top2,name:root.name}];
-  if(c.length>=4){
-    const sub=root.children[c.slice(0,4)];
-    if(sub) hsBreadcrumbPath.push({code:c.slice(0,4),name:sub.name});
+  // ── 브레드크럼 구성 ──
+  hsBreadcrumbPath=[{code:'',name:'전체'}];
+  hsBreadcrumbPath.push({code:top2,name:root.name});
+  let currentChildren = root.children;
+  let currentNode = root;
+  if(c.length>=4 && root.children[c.slice(0,4)]){
+    const sub4 = root.children[c.slice(0,4)];
+    hsBreadcrumbPath.push({code:c.slice(0,4),name:sub4.name});
+    currentNode = sub4;
+    currentChildren = sub4.children || {};
+    if(c.length>=6 && sub4.children && sub4.children[c.slice(0,6)]){
+      const sub6 = sub4.children[c.slice(0,6)];
+      hsBreadcrumbPath.push({code:c.slice(0,6),name:sub6.name});
+      currentNode = sub6;
+      currentChildren = sub6.children || {};
+    }
   }
-  breadEl.innerHTML=hsBreadcrumbPath.map((p,i)=>
-    `<span class="${i===hsBreadcrumbPath.length-1?'active':''}"
-      onclick="drillHsTree('${p.code}')">${p.code} ${p.name.slice(0,12)}${p.name.length>12?'…':''}</span>
-    ${i<hsBreadcrumbPath.length-1?'<span class="sep">›</span>':''}`
-  ).join('');
 
-  // 현재 레벨의 자식 노드
-  const currentNode = c.length>=4 ? root.children[c.slice(0,4)] : root;
-  const children = currentNode?.children || root.children;
+  // 백 버튼 표시
+  backBtn.style.display='inline-block';
 
-  nodesEl.innerHTML = Object.entries(children).map(([code2,node])=>{
+  // 브레드크럼 렌더
+  breadEl.innerHTML=hsBreadcrumbPath.map((p,i)=>{
+    const isLast = i===hsBreadcrumbPath.length-1;
+    const label = p.code ? `${p.code} ${p.name.slice(0,12)}${p.name.length>12?'…':''}` : '전체';
+    return `<span class="${isLast?'active':''}" style="${isLast?'':'cursor:pointer;text-decoration:underline;'}"
+      onclick="drillHsTree('${p.code}')">${label}</span>
+    ${!isLast?'<span class="sep">›</span>':''}`;
+  }).join('');
+
+  // ── 자식 노드 렌더 ──
+  if(!currentChildren || Object.keys(currentChildren).length===0){
+    // 리프 노드: 조회 안내
+    nodesEl.innerHTML=`<div style="padding:12px;color:var(--subtext);font-size:12px;">
+      <strong>${c}</strong> — ${currentNode.name}<br>
+      하위 코드가 없습니다. 이 코드로 조회하시려면 위 입력창에 입력 후 조회 버튼을 누르세요.
+    </div>`;
+    return;
+  }
+
+  nodesEl.innerHTML = Object.entries(currentChildren).map(([code2,node])=>{
     const hasChildren = node.children && Object.keys(node.children).length>0;
-    const isActive = c.startsWith(code2);
-    return `<div class="hs-node ${isActive?'active':''}" onclick="drillHsTree('${code2}')">
+    return `<div class="hs-node" onclick="drillHsTree('${code2}')">
       <span class="hs-node-code">${code2}</span>
       <span class="hs-node-name">${node.name}</span>
-      ${hasChildren?`<span class="hs-drill-indicator">▶</span>`:''}
+      ${hasChildren?'<span class="hs-drill-indicator">▶</span>':'<span class="hs-drill-indicator" style="color:var(--muted);">─</span>'}
     </div>`;
   }).join('');
 }
 
 function drillHsTree(code) {
-  document.getElementById('hsInput').value=code;
+  document.getElementById('hsInput').value=code||'';
   buildHsTree(code);
+}
+
+function hsTreeGoUp() {
+  // 현재 레벨에서 한 단계 상위로
+  if(hsBreadcrumbPath.length>=2){
+    const parent = hsBreadcrumbPath[hsBreadcrumbPath.length-2];
+    drillHsTree(parent.code);
+  }
 }
 
 /* ════════════════════════════════════════════════
