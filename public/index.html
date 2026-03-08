@@ -2532,6 +2532,8 @@ const HS_QUICK_MAP = {
 };
 
 function onHsInput(val) {
+  const clean = (val||'').replace(/\./g,'');
+  if(clean.length>=2) autoSyncHsUnit(clean);
   const list = document.getElementById('hsAutoList');
   if(!val||val.length<2) { list.classList.remove('open'); return; }
   const q = val.replace(/\./g,'');
@@ -3603,6 +3605,21 @@ function resetMineralForm() {
   document.getElementById('m-state-box').style.display='flex';
 }
 
+/* 입력 자릿수 → HS 단위 라디오 자동 동기화 */
+function autoSyncHsUnit(code) {
+  const len = (code||'').length;
+  let best = '2';
+  if(len >= 10) best = '10';
+  else if(len >= 6) best = '6';
+  else if(len >= 4) best = '4';
+  else best = '2';
+  const radio = document.getElementById({2:'h_hs2',4:'h_hs4',6:'h_hs6',10:'h_hs10'}[best]);
+  if(radio && !radio.checked) {
+    radio.checked = true;
+    buildHsQuickChips();
+  }
+}
+
 /* ════════════════════════════════════════════════
    10. HS코드별 조회 실행
 ════════════════════════════════════════════════ */
@@ -3611,6 +3628,8 @@ async function queryHs() {
   if(!hsRaw) { alert('HS코드를 입력해주세요.'); return; }
   const year    = document.getElementById('h_year').value;
   const impYn   = document.querySelector('input[name="h_imp"]:checked').value;
+  // 입력 자릿수에 맞춰 HS 단위 자동 동기화
+  autoSyncHsUnit(hsRaw);
   const hsUnit  = document.querySelector('input[name="h_unit"]:checked').value;
   const truncHs = hsRaw.slice(0, parseInt(hsUnit));
 
