@@ -653,6 +653,8 @@ table.result thead th.sort-desc::after{content:' ▼';font-size:8px;}
 table.result thead th:first-child{text-align:left;}
 table.result tbody tr:nth-child(even){background:#F5F8FC;}
 table.result tbody tr:hover{background:#EEF4FF;}
+.supply-group-header:hover{filter:brightness(.97);}
+.supply-group-header td{border-bottom:2px solid rgba(0,0,0,.08)!important;}
 table.result tbody td{
   padding:8px 14px;border-bottom:1px solid #E8EEF4;font-size:12px;color:var(--text);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
@@ -3234,34 +3236,68 @@ function renderMSupplyDetail(data) {
     byHs[hs].countries[cn] = (byHs[hs].countries[cn]||0) + parseFloat(r.impAmt||r.expAmt||0);
   });
   const totalAmt = Object.values(byHs).reduce((s,e)=>s+e.amt,0);
-  // 공급단계 순서로 정렬 후 금액순
-  const rows = Object.entries(byHs).sort((a,b)=>{
-    const ia = SUPPLY_STAGE_ORDER.indexOf(a[1].stage), ib = SUPPLY_STAGE_ORDER.indexOf(b[1].stage);
-    if(ia!==ib) return ia-ib;
-    return b[1].amt - a[1].amt;
+  // 공급단계별 그룹화
+  const groups = {};
+  Object.entries(byHs).forEach(([hs, d]) => {
+    if(!groups[d.stage]) groups[d.stage] = {items:[], totalAmt:0};
+    groups[d.stage].items.push([hs, d]);
+    groups[d.stage].totalAmt += d.amt;
   });
-  document.getElementById('m-supply-tbody').innerHTML = rows.map(([hs, d]) => {
-    const pct = totalAmt>0 ? (d.amt/totalAmt*100).toFixed(1) : '0';
-    // TOP3 수입국
-    const sortedCountries = Object.entries(d.countries).sort((a,b)=>b[1]-a[1]).slice(0,3);
-    const top1Pct = (sortedCountries[0] && d.amt>0) ? Math.round(sortedCountries[0][1]/d.amt*100) : 0;
-    const top3Html = sortedCountries.map((c,i)=>{
-      const cpct = d.amt>0 ? Math.round(c[1]/d.amt*100) : 0;
-      const clr = i===0 ? (cpct>=70?'var(--rust)':cpct>=50?'var(--amber)':'var(--navy)') : 'var(--subtext)';
-      const fw = i===0 ? '700' : '400';
-      return `<span style="color:${clr};font-weight:${fw};font-size:11px;white-space:nowrap;">${i+1}. ${c[0]} ${cpct}%</span>`;
-    }).join('<span style="color:#ccc;margin:0 3px;">·</span>');
-    const color = SUPPLY_STAGE_COLORS[d.stage] || '#BDC3C7';
-    return `<tr>
-      <td><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${color};margin-right:4px;vertical-align:middle;"></span>${d.stage}</td>
-      <td><span class="hs-mono">${hs}</span></td>
-      <td class="ellip" title="${(d.name||'').replace(/"/g,'&quot;')}" style="font-size:11px;">${d.name}</td>
-      <td class="num">${Number(d.amt).toLocaleString()}</td>
-      <td class="num">${pct}%</td>
-      <td style="white-space:normal;line-height:1.6;">${top3Html||'-'}</td>
-      <td class="num"><span style="color:${top1Pct>=70?'var(--rust)':top1Pct>=50?'var(--amber)':'inherit'};font-weight:600;">${top1Pct}%</span></td>
+  // 공급단계 순서 정렬
+  const stageOrder = SUPPLY_STAGE_ORDER.filter(s=>groups[s]);
+  let html = '';
+  stageOrder.forEach(stage => {
+    const g = groups[stage];
+    const color = SUPPLY_STAGE_COLORS[stage] || '#BDC3C7';
+    const stagePct = totalAmt>0 ? (g.totalAmt/totalAmt*100).toFixed(1) : '0';
+    const items = g.items.sort((a,b)=>b[1].amt-a[1].amt);
+    // 그룹 헤더 행 (클릭 시 접기/펼치기)
+    html += `<tr class="supply-group-header" onclick="toggleSupplyGroup(this)" style="background:${color}11;cursor:pointer;border-left:3px solid ${color};">
+      <td colspan="3" style="font-weight:700;padding:8px 10px;">
+        <span class="supply-toggle" style="display:inline-block;width:16px;font-size:12px;transition:transform .2s;">▼</span>
+        <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${color};margin:0 6px;vertical-align:middle;"></span>
+        ${stage} <span style="color:var(--subtext);font-weight:400;font-size:11px;margin-left:6px;">${items.length}개 품목</span>
+      </td>
+      <td class="num" style="font-weight:700;">${Number(g.totalAmt).toLocaleString()}</td>
+      <td class="num" style="font-weight:700;">${stagePct}%</td>
+      <td colspan="2"></td>
     </tr>`;
-  }).join('');
+    // 데이터 행
+    items.forEach(([hs, d]) => {
+      const pct = totalAmt>0 ? (d.amt/totalAmt*100).toFixed(1) : '0';
+      const sortedCountries = Object.entries(d.countries).sort((a,b)=>b[1]-a[1]).slice(0,3);
+      const top1Pct = (sortedCountries[0] && d.amt>0) ? Math.round(sortedCountries[0][1]/d.amt*100) : 0;
+      const top3Html = sortedCountries.map((c,i)=>{
+        const cpct = d.amt>0 ? Math.round(c[1]/d.amt*100) : 0;
+        const clr = i===0 ? (cpct>=70?'var(--rust)':cpct>=50?'var(--amber)':'var(--navy)') : 'var(--subtext)';
+        const fw = i===0 ? '700' : '400';
+        return `<span style="color:${clr};font-weight:${fw};font-size:11px;white-space:nowrap;">${i+1}. ${c[0]} ${cpct}%</span>`;
+      }).join('<span style="color:#ccc;margin:0 3px;">·</span>');
+      html += `<tr class="supply-group-row">
+        <td style="padding-left:28px;font-size:11px;color:var(--subtext);">${stage}</td>
+        <td><span class="hs-mono">${hs}</span></td>
+        <td class="ellip" title="${(d.name||'').replace(/"/g,'&quot;')}" style="font-size:11px;">${d.name}</td>
+        <td class="num">${Number(d.amt).toLocaleString()}</td>
+        <td class="num">${pct}%</td>
+        <td style="white-space:normal;line-height:1.6;">${top3Html||'-'}</td>
+        <td class="num"><span style="color:${top1Pct>=70?'var(--rust)':top1Pct>=50?'var(--amber)':'inherit'};font-weight:600;">${top1Pct}%</span></td>
+      </tr>`;
+    });
+  });
+  document.getElementById('m-supply-tbody').innerHTML = html;
+}
+
+/* 공급단계 그룹 접기/펼치기 */
+function toggleSupplyGroup(headerRow) {
+  const toggle = headerRow.querySelector('.supply-toggle');
+  const isOpen = toggle.textContent.trim() === '▼';
+  toggle.textContent = isOpen ? '▶' : '▼';
+  toggle.style.transform = isOpen ? '' : '';
+  let row = headerRow.nextElementSibling;
+  while(row && row.classList.contains('supply-group-row')) {
+    row.style.display = isOpen ? 'none' : '';
+    row = row.nextElementSibling;
+  }
 }
 
 /* ── 결과 테이블 ── */
