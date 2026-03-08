@@ -18,7 +18,8 @@
   --green:#27AE60; --green-l:#E6F4EA;
   --blue:#2980B9; --blue-l:#EBF5FB;
   --cream:#F8F5EF; --parchment:#EFE8D8; --panel:#EFE8D8;
-  --text:#2C2416; --subtext:#7A6E5A; --sub:#7A6E5A; --border:#DDD4C0; --white:#fff;
+  --text:#2C2416; --subtext:#7A6E5A; --sub:#7A6E5A; --muted:#9E9E9E; --rust:#A0522D;
+  --border:#DDD4C0; --white:#fff;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Noto Sans KR',sans-serif;font-size:14px;line-height:1.6;background:var(--cream);color:var(--text);min-height:100vh;}
@@ -2050,11 +2051,14 @@ let sortState = {};
    3. 초기화
 ════════════════════════════════════════════════ */
 (function init() {
-  // ── 연도 동적화 (n-1년 기준, 최근 10년) ──────────────────────
-  const curYear = new Date().getFullYear();
-  const maxYear = curYear - 1;           // n-1년 (2025 실행 시 2024)
-  const minYear = maxYear - 9;           // 최근 10년
-  window._maxYear = maxYear;             // reset 함수에서 재사용
+  // ── 연도 동적화 (n-1년 기준, 최근 10년, 현재월까지 조회 가능) ──
+  const _now = new Date();
+  const curYear  = _now.getFullYear();
+  const curMonth = _now.getMonth() + 1;
+  const maxYear  = curYear - 1;            // n-1년 (2026 실행 시 2025)
+  const minYear  = maxYear - 9;            // 최근 10년
+  const topYear  = Math.max(curYear, maxYear);
+  window._maxYear = maxYear;               // reset 함수에서 재사용
 
   // 헤더·태그·푸터 연도 스팬 갱신
   ['refYear','refYearFt'].forEach(id => {
@@ -2063,12 +2067,6 @@ let sortState = {};
   });
   const tagEl = document.getElementById('refYearTag');
   if (tagEl) tagEl.textContent = `${maxYear} 기준`;
-
-  // 현재 연·월 기준으로 드롭다운 범위 설정 (최신월까지 조회 가능)
-  const _now = new Date();
-  const curYear  = _now.getFullYear();
-  const curMonth = _now.getMonth() + 1;
-  const topYear  = Math.max(curYear, maxYear);
 
   const years = [];
   for(let y=topYear;y>=minYear;y--) years.push(y);
@@ -2097,7 +2095,7 @@ let sortState = {};
       if(!groups[g]) groups[g] = [];
       groups[g].push(m);
     });
-    const groupOrder = ['배터리','희토류','전략금속','비철금속','비금속','철합금','귀금속','기타'];
+    const groupOrder = ['이차전지','반도체·전자','희토류·자석','산업금속','화학·기타'];
     const sortedGroups = Object.keys(groups).sort((a,b) => {
       const ia = groupOrder.indexOf(a), ib = groupOrder.indexOf(b);
       return (ia===-1?99:ia) - (ib===-1?99:ib);
