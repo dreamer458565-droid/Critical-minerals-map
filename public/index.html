@@ -509,17 +509,18 @@ footer{background:var(--navy);padding:16px 48px;margin-top:8px;}
 /* 조회/초기화 버튼 */
 .cond-footer{display:flex;justify-content:center;gap:10px;padding:14px 20px;background:var(--parchment);border-top:1px solid var(--border);}
 .btn-query{
-  padding:8px 28px;background:var(--navy);color:#fff;border:none;
+  flex:1;max-width:200px;padding:10px 28px;background:var(--navy);color:#fff;border:none;
   font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;
   border-radius:4px;cursor:pointer;transition:background .2s;
-  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;
 }
 .btn-query:hover{background:var(--navy-mid);}
 .btn-query.loading{opacity:.7;pointer-events:none;}
 .btn-reset{
-  padding:10px 24px;background:transparent;color:var(--sub);
+  flex:1;max-width:200px;padding:10px 24px;background:transparent;color:var(--sub);
   border:1.5px solid var(--border);font-family:'Noto Sans KR',sans-serif;
   font-size:13px;font-weight:600;border-radius:4px;cursor:pointer;transition:all .2s;
+  display:inline-flex;align-items:center;justify-content:center;gap:4px;
 }
 .btn-reset:hover{background:var(--parchment);}
 
@@ -4219,23 +4220,28 @@ async function queryMapData() {
     return;
   }
 
-  // MINERAL_DB에서 HS 코드 탐색
+  // MINERAL_DB에서 HS 코드 탐색 (복수 HS 코드 지원)
   const mEntry = MINERAL_DB.find(m => m.ko === mineral);
-  const hsCd = mEntry?.hs?.[0] || mEntry?.hs;
-  if (!hsCd) { if (statusEl) statusEl.textContent = 'HS코드 없음'; return; }
+  const hsList = mEntry?.hs || [];
+  if (!hsList.length) { if (statusEl) statusEl.textContent = 'HS코드 없음'; return; }
 
-  if (statusEl) statusEl.textContent = `⏳ ${year}년 ${mineral} 조회 중...`;
+  if (statusEl) statusEl.textContent = `⏳ ${year}년 ${mineral} 조회 중... (HS ${hsList.length}건)`;
 
   try {
-    const items = await callTradeApi({ hsCd, strtYr: year, endYr: year, impExpDivCd: 'IMP' });
+    // 모든 HS 코드를 병렬 조회 후 합산
+    const allResults = await Promise.all(
+      hsList.map(hs => callTradeApi({ hsCd: hs, strtYr: year, endYr: year, impExpDivCd: 'IMP' }).catch(()=>[]))
+    );
     const ctry  = {};
     let total   = 0;
-    for (const it of items) {
-      const code = it.cntyCd || it.statCd || '';
-      const amt  = parseFloat(it.impAmt || it.impDlr || '0');
-      if (!code || amt <= 0) continue;
-      ctry[code] = (ctry[code]||0) + amt;
-      total += amt;
+    for (const items of allResults) {
+      for (const it of items) {
+        const code = it.cntyCd || it.statCd || '';
+        const amt  = parseFloat(it.impAmt || it.impDlr || '0');
+        if (!code || amt <= 0) continue;
+        ctry[code] = (ctry[code]||0) + amt;
+        total += amt;
+      }
     }
     if (total === 0) { if (statusEl) statusEl.textContent = '⚠️ 데이터 없음'; return; }
 
