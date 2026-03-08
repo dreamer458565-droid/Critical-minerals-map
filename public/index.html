@@ -431,7 +431,7 @@ footer{background:var(--navy);padding:16px 48px;margin-top:8px;}
 .cond-body{padding:18px 20px;}
 .cond-grid{display:grid;gap:14px 20px;}
 .cond-grid-4{grid-template-columns:repeat(4,1fr);}
-.cond-grid-5{grid-template-columns:2fr 1fr 1fr 1fr 1fr;}
+.cond-grid-5{grid-template-columns:2fr 1fr 1fr 1fr auto;}
 .cond-grid-3{grid-template-columns:2fr 1fr 1fr;}
 
 .cond-group{}
@@ -1040,6 +1040,15 @@ table.result tbody td.center{text-align:center;}
           <label class="cond-label">종료</label>
           <select class="cond-select" id="m_end"></select>
         </div>
+        <!-- 조회/초기화 인라인 -->
+        <div class="cond-group" style="align-self:end;">
+          <div style="display:flex;gap:6px;">
+            <button class="btn-query" id="m_queryBtn" onclick="queryMineral()" style="padding:8px 20px;flex:none;">
+              <span id="m_queryBtnText">🔍 조회</span>
+            </button>
+            <button class="btn-reset" onclick="resetMineralForm()" style="padding:8px 12px;flex:none;font-size:12px;">↺ 초기화</button>
+          </div>
+        </div>
       </div>
 
       <!-- 수출입 구분 + HS단위 -->
@@ -1082,12 +1091,6 @@ table.result tbody td.center{text-align:center;}
           <div class="mcat-chips" id="mcat-4"></div>
         </div>
       </div>
-    </div>
-    <div class="cond-footer">
-      <button class="btn-query" id="m_queryBtn" onclick="queryMineral()">
-        <span id="m_queryBtnText">🔍 조회</span>
-      </button>
-      <button class="btn-reset" onclick="resetMineralForm()">↺ 초기화</button>
     </div>
   </div>
 
@@ -1242,7 +1245,7 @@ table.result tbody td.center{text-align:center;}
       <div class="cond-header-title">🔍 조회 조건 — HS코드별</div>
     </div>
     <div class="cond-body">
-      <div class="cond-grid cond-grid-3">
+      <div class="cond-grid cond-grid-5">
         <!-- HS 코드 입력 -->
         <div class="cond-group">
           <label class="cond-label">HS코드 입력 <span>*</span></label>
@@ -1253,7 +1256,6 @@ table.result tbody td.center{text-align:center;}
                 oninput="onHsInput(this.value)" autocomplete="off">
               <div class="autocomplete-list" id="hsAutoList"></div>
             </div>
-            <button class="btn-hs-search" onclick="queryHs()">조회</button>
           </div>
         </div>
         <!-- HS 단위 -->
@@ -1275,27 +1277,29 @@ table.result tbody td.center{text-align:center;}
           <label class="cond-label">조회연도</label>
           <select class="cond-select" id="h_year"></select>
         </div>
-      </div>
-
-      <!-- 수출입 구분 -->
-      <div style="margin-top:14px;">
-        <label class="cond-label">수출입 구분</label>
-        <div class="radio-group" style="width:200px">
-          <input type="radio" name="h_imp" id="h_imp" value="1" checked>
-          <label for="h_imp">수입</label>
-          <input type="radio" name="h_imp" id="h_exp" value="0">
-          <label for="h_exp">수출</label>
+        <!-- 수출입 구분 -->
+        <div class="cond-group">
+          <label class="cond-label">수출입 구분</label>
+          <div class="radio-group">
+            <input type="radio" name="h_imp" id="h_imp" value="1" checked>
+            <label for="h_imp">수입</label>
+            <input type="radio" name="h_imp" id="h_exp" value="0">
+            <label for="h_exp">수출</label>
+          </div>
+        </div>
+        <!-- 조회/초기화 인라인 -->
+        <div class="cond-group" style="align-self:end;">
+          <div style="display:flex;gap:6px;">
+            <button class="btn-query" id="h_queryBtn" onclick="queryHs()" style="padding:8px 20px;flex:none;">
+              <span id="h_queryBtnText">🔍 조회</span>
+            </button>
+            <button class="btn-reset" onclick="resetHsForm()" style="padding:8px 12px;flex:none;font-size:12px;">↺ 초기화</button>
+          </div>
         </div>
       </div>
 
       <!-- 빠른 HS 선택 (HS단위에 따라 동적 생성) -->
       <div class="quick-chips" id="hsQuickChips"></div>
-    </div>
-    <div class="cond-footer">
-      <button class="btn-query" id="h_queryBtn" onclick="queryHs()">
-        <span id="h_queryBtnText">🔍 조회</span>
-      </button>
-      <button class="btn-reset" onclick="resetHsForm()">↺ 초기화</button>
     </div>
   </div>
 
