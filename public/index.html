@@ -3115,16 +3115,18 @@ function renderMSupplyChart(data) {
       plugins:{
         legend:{display:false},
         tooltip:{
-          backgroundColor:'rgba(15,28,51,.92)',titleFont:{family:'Noto Sans KR',size:12,weight:'bold'},bodyFont:{family:'JetBrains Mono',size:11},padding:10,cornerRadius:4,
+          backgroundColor:'rgba(15,28,51,.92)',titleFont:{family:'Noto Sans KR',size:12,weight:'bold'},bodyFont:{family:'Noto Sans KR',size:11},padding:10,cornerRadius:4,boxPadding:3,
           callbacks:{
+            title:ctx=>ctx[0]?.label ? `📦 ${ctx[0].label}` : '',
             label:ctx=>{
               const pct = totalVal>0 ? (ctx.raw/totalVal*100).toFixed(1) : '0';
-              return `${ctx.label}: ${Number(ctx.raw).toLocaleString()} (${pct}%)`;
+              return `수입액: ${Number(ctx.raw).toLocaleString()}천$ (${pct}%)`;
             },
             afterLabel:ctx=>{
               const st = ordered[ctx.dataIndex];
               const t3 = top3ByStage[st]||[];
-              return t3.length ? t3.map((c,i)=>`  ${i+1}. ${c.name} ${c.pct}%`).join('\n') : '';
+              if(!t3.length) return '';
+              return ['── 주요 수입국 ──', ...t3.map((c,i)=>`  ${i+1}. ${c.name} ${c.pct}%`)].join('\n');
             }
           }
         },
@@ -3187,8 +3189,16 @@ function renderMSupplyChart(data) {
       plugins:{
         legend:{position:'bottom',labels:{font:{size:9,family:'Noto Sans KR'},boxWidth:8,padding:6}},
         tooltip:{
-          backgroundColor:'rgba(15,28,51,.92)',titleFont:{family:'Noto Sans KR',size:11},bodyFont:{size:10},padding:8,cornerRadius:4,
-          callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw}%`}
+          mode:'index', intersect:false,
+          backgroundColor:'rgba(15,28,51,.92)',titleFont:{family:'Noto Sans KR',size:12,weight:'bold'},bodyFont:{family:'Noto Sans KR',size:11},padding:10,cornerRadius:4,boxPadding:3,
+          callbacks:{
+            title:ctx=>ctx[0]?.label ? `📦 ${ctx[0].label}` : '',
+            label:ctx=>{
+              if(ctx.raw<=0) return null;
+              return `  ${ctx.dataset.label}: ${ctx.raw}%`;
+            },
+          },
+          filter:ctx=>ctx.raw>0,
         },
         datalabels:{
           display:ctx=> ctx.dataset.data[ctx.dataIndex] >= 12,
