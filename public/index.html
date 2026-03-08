@@ -431,11 +431,25 @@ footer{background:var(--navy);padding:16px 48px;margin-top:8px;}
 .cond-body{padding:18px 20px;}
 .cond-grid{display:grid;gap:12px 14px;}
 .cond-grid-4{grid-template-columns:repeat(4,1fr);}
-.cond-grid-6{grid-template-columns:1.5fr 1fr 0.8fr 0.8fr 1fr auto;}
-.cond-grid-3{grid-template-columns:1.5fr 1fr 1fr;}
+.cond-grid-5{grid-template-columns:1.8fr 1fr 0.8fr 0.8fr 1fr;}
+.cond-grid-hs{grid-template-columns:2fr 1.2fr 0.8fr 1fr;}
 
 .cond-group{}
-.cond-actions{display:flex;gap:5px;white-space:nowrap;align-items:end;}
+.search-wrap{display:flex;gap:6px;}
+.search-wrap .autocomplete-wrap{flex:1;}
+.btn-search{
+  padding:8px 14px;background:var(--navy-mid);color:#fff;border:none;
+  font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:700;
+  border-radius:4px;cursor:pointer;white-space:nowrap;transition:background .2s;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.btn-search:hover{background:var(--navy);}
+.btn-search.loading{opacity:.7;pointer-events:none;}
+.btn-reset-sm{
+  padding:8px 9px;background:var(--cream);color:var(--sub);
+  border:1.5px solid var(--border);font-size:13px;font-weight:700;
+  border-radius:4px;cursor:pointer;transition:all .2s;
+}
 .cond-label{
   display:block;font-size:10px;font-weight:700;letter-spacing:.8px;
   text-transform:uppercase;color:var(--sub);margin-bottom:5px;
@@ -473,15 +487,7 @@ footer{background:var(--navy);padding:16px 48px;margin-top:8px;}
 .ac-risk.중간{background:var(--green-l);color:var(--green);}
 .ac-risk.낮음{background:var(--blue-l);color:var(--blue);}
 
-/* HS 코드 입력 */
-.hs-input-wrap{display:flex;gap:8px;}
-.hs-input-wrap .cond-input{flex:1;}
-.btn-hs-search{
-  padding:8px 16px;background:var(--navy-mid);color:#fff;border:none;
-  font-size:12px;font-weight:700;border-radius:4px;cursor:pointer;white-space:nowrap;
-  transition:background .2s;
-}
-.btn-hs-search:hover{background:var(--navy);}
+/* (search-wrap handles input+button layout) */
 
 /* 라디오 토글 */
 .radio-group{display:flex;gap:0;border:1.5px solid var(--border);border-radius:4px;overflow:hidden;}
@@ -805,8 +811,7 @@ table.result tbody td.center{text-align:center;}
   .map-hero{padding:24px 24px 20px;}
   .map-container{padding:20px 24px;}
   .country-detail-grid{grid-template-columns:repeat(2,1fr);}
-  .cond-grid-4,.cond-grid-5{grid-template-columns:repeat(2,1fr);}
-  .cond-grid-3{grid-template-columns:1fr 1fr 1fr;}
+  .cond-grid-4,.cond-grid-5,.cond-grid-hs{grid-template-columns:repeat(2,1fr);}
   .chart-grid{grid-template-columns:1fr;}
   .risk-matrix{grid-template-columns:repeat(2,1fr);}
   .treemap-grid{height:auto;grid-template-columns:1fr 1fr;grid-template-rows:auto;}
@@ -829,7 +834,7 @@ table.result tbody td.center{text-align:center;}
   .gauge-row{grid-template-columns:repeat(2,1fr);}
   .risk-matrix{grid-template-columns:1fr;}
   .treemap-grid{grid-template-columns:1fr;height:auto;}
-  .cond-grid-3,.cond-grid-4,.cond-grid-5{grid-template-columns:1fr;}
+  .cond-grid-4,.cond-grid-5,.cond-grid-hs{grid-template-columns:1fr;}
   .chart-grid{grid-template-columns:1fr;}
   .map-hero{padding:16px;}
   .map-hero-title{font-size:22px;}
@@ -1010,15 +1015,21 @@ table.result tbody td.center{text-align:center;}
           <button class="mclass-btn" id="mcl-both" onclick="setMineralClass('both')">한·미 공통</button>
         </div>
       </div>
-      <div class="cond-grid cond-grid-6">
-        <!-- 광종 선택 -->
+      <div class="cond-grid cond-grid-5">
+        <!-- 광종 선택 + 조회/초기화 -->
         <div class="cond-group">
           <label class="cond-label">광종 선택 <span>*</span></label>
-          <div class="autocomplete-wrap">
-            <input class="cond-input" id="mineralInput" type="text"
-              placeholder="예: 리튬, Lithium" autocomplete="off"
-              oninput="onMineralInput(this.value)" onfocus="onMineralInput(this.value)">
-            <div class="autocomplete-list" id="mineralAutoList"></div>
+          <div class="search-wrap">
+            <div class="autocomplete-wrap">
+              <input class="cond-input" id="mineralInput" type="text"
+                placeholder="예: 리튬, Lithium" autocomplete="off"
+                oninput="onMineralInput(this.value)" onfocus="onMineralInput(this.value)">
+              <div class="autocomplete-list" id="mineralAutoList"></div>
+            </div>
+            <button class="btn-search" id="m_queryBtn" onclick="queryMineral()">
+              <span id="m_queryBtnText">🔍 조회</span>
+            </button>
+            <button class="btn-reset-sm" onclick="resetMineralForm()" title="초기화">↺</button>
           </div>
         </div>
         <!-- 기간 구분 -->
@@ -1050,13 +1061,6 @@ table.result tbody td.center{text-align:center;}
             <input type="radio" name="m_imp" id="m_exp" value="0">
             <label for="m_exp">수출</label>
           </div>
-        </div>
-        <!-- 조회/초기화 -->
-        <div class="cond-actions" style="align-self:end;">
-          <button class="btn-query" id="m_queryBtn" onclick="queryMineral()" style="padding:8px 16px;">
-            <span id="m_queryBtnText">조회</span>
-          </button>
-          <button class="btn-reset" onclick="resetMineralForm()" style="padding:8px 10px;font-size:11px;">↺</button>
         </div>
       </div>
 
@@ -1244,15 +1248,21 @@ table.result tbody td.center{text-align:center;}
       <div class="cond-header-title">🔍 조회 조건 — HS코드별</div>
     </div>
     <div class="cond-body">
-      <div class="cond-grid cond-grid-6">
-        <!-- HS 코드 입력 -->
+      <div class="cond-grid cond-grid-hs">
+        <!-- HS 코드 입력 + 조회/초기화 -->
         <div class="cond-group">
           <label class="cond-label">HS코드 입력 <span>*</span></label>
-          <div class="autocomplete-wrap">
-            <input class="cond-input" id="hsInput" type="text"
-              placeholder="예: 2836, 280459"
-              oninput="onHsInput(this.value)" autocomplete="off">
-            <div class="autocomplete-list" id="hsAutoList"></div>
+          <div class="search-wrap">
+            <div class="autocomplete-wrap">
+              <input class="cond-input" id="hsInput" type="text"
+                placeholder="예: 2836, 280459"
+                oninput="onHsInput(this.value)" autocomplete="off">
+              <div class="autocomplete-list" id="hsAutoList"></div>
+            </div>
+            <button class="btn-search" id="h_queryBtn" onclick="queryHs()">
+              <span id="h_queryBtnText">🔍 조회</span>
+            </button>
+            <button class="btn-reset-sm" onclick="resetHsForm()" title="초기화">↺</button>
           </div>
         </div>
         <!-- HS 단위 -->
@@ -1274,7 +1284,7 @@ table.result tbody td.center{text-align:center;}
           <label class="cond-label">조회연도</label>
           <select class="cond-select" id="h_year"></select>
         </div>
-        <!-- 종료 (placeholder for alignment) -->
+        <!-- 수출입 구분 -->
         <div class="cond-group">
           <label class="cond-label">수출입 구분</label>
           <div class="radio-group">
@@ -1283,15 +1293,6 @@ table.result tbody td.center{text-align:center;}
             <input type="radio" name="h_imp" id="h_exp" value="0">
             <label for="h_exp">수출</label>
           </div>
-        </div>
-        <!-- 여백 -->
-        <div></div>
-        <!-- 조회/초기화 -->
-        <div class="cond-actions" style="align-self:end;">
-          <button class="btn-query" id="h_queryBtn" onclick="queryHs()" style="padding:8px 16px;">
-            <span id="h_queryBtnText">조회</span>
-          </button>
-          <button class="btn-reset" onclick="resetHsForm()" style="padding:8px 10px;font-size:11px;">↺</button>
         </div>
       </div>
 
