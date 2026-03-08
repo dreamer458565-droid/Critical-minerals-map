@@ -429,12 +429,13 @@ footer{background:var(--navy);padding:16px 48px;margin-top:8px;}
 .cond-header-right{display:flex;gap:8px;}
 
 .cond-body{padding:18px 20px;}
-.cond-grid{display:grid;gap:14px 20px;}
+.cond-grid{display:grid;gap:14px 16px;}
 .cond-grid-4{grid-template-columns:repeat(4,1fr);}
-.cond-grid-5{grid-template-columns:2fr 1fr 1fr 1fr auto;}
+.cond-grid-5{grid-template-columns:2.5fr 1.2fr 1fr 1fr auto;}
 .cond-grid-3{grid-template-columns:2fr 1fr 1fr;}
 
 .cond-group{}
+.cond-actions{display:flex;gap:5px;white-space:nowrap;}
 .cond-label{
   display:block;font-size:10px;font-weight:700;letter-spacing:.8px;
   text-transform:uppercase;color:var(--sub);margin-bottom:5px;
@@ -1041,13 +1042,11 @@ table.result tbody td.center{text-align:center;}
           <select class="cond-select" id="m_end"></select>
         </div>
         <!-- 조회/초기화 인라인 -->
-        <div class="cond-group" style="align-self:end;">
-          <div style="display:flex;gap:6px;">
-            <button class="btn-query" id="m_queryBtn" onclick="queryMineral()" style="padding:8px 20px;flex:none;">
-              <span id="m_queryBtnText">🔍 조회</span>
-            </button>
-            <button class="btn-reset" onclick="resetMineralForm()" style="padding:8px 12px;flex:none;font-size:12px;">↺ 초기화</button>
-          </div>
+        <div class="cond-group cond-actions" style="align-self:end;">
+          <button class="btn-query" id="m_queryBtn" onclick="queryMineral()" style="padding:8px 18px;">
+            <span id="m_queryBtnText">조회</span>
+          </button>
+          <button class="btn-reset" onclick="resetMineralForm()" style="padding:8px 10px;font-size:11px;">↺</button>
         </div>
       </div>
 
@@ -1288,13 +1287,11 @@ table.result tbody td.center{text-align:center;}
           </div>
         </div>
         <!-- 조회/초기화 인라인 -->
-        <div class="cond-group" style="align-self:end;">
-          <div style="display:flex;gap:6px;">
-            <button class="btn-query" id="h_queryBtn" onclick="queryHs()" style="padding:8px 20px;flex:none;">
-              <span id="h_queryBtnText">🔍 조회</span>
-            </button>
-            <button class="btn-reset" onclick="resetHsForm()" style="padding:8px 12px;flex:none;font-size:12px;">↺ 초기화</button>
-          </div>
+        <div class="cond-group cond-actions" style="align-self:end;">
+          <button class="btn-query" id="h_queryBtn" onclick="queryHs()" style="padding:8px 18px;">
+            <span id="h_queryBtnText">조회</span>
+          </button>
+          <button class="btn-reset" onclick="resetHsForm()" style="padding:8px 10px;font-size:11px;">↺</button>
         </div>
       </div>
 
