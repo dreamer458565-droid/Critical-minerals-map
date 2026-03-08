@@ -1166,6 +1166,7 @@ table.result tbody td.center{text-align:center;}
       <div class="table-header">
         <div class="table-title">공급단계별 상세 (HS코드 · TOP3 수입국)</div>
       </div>
+      <div class="chart-tab-group" id="m-supply-stage-filter" style="margin:0 0 6px 0;"></div>
       <div class="table-scroll" style="max-height:340px;">
         <table class="result" id="m-supply-table">
           <thead><tr>
@@ -1904,93 +1905,271 @@ const STRATEGY_COMPARE = {
 // 광종 분류 필터 상태
 let mineralClassFilter = 'all'; // 'all' | 'kr33' | 'us60' | 'both'
 
-/* HS코드 계층 구조 (2→4→6단위 드릴다운용) */
+/* HS코드 계층 구조 (2→4→6→10단위 드릴다운용) */
 const HS_TREE = {
   '25':{ name:'25류 — 소금·황·토석류',
     children:{
-      '2504':{name:'천연흑연',children:{'250410':{name:'흑연(분말)'},'250490':{name:'기타 흑연'}}},
-      '2521':{name:'석회석·형석',children:{'252110':{name:'형석(CaF₂ 97%미만)'},'252120':{name:'형석(CaF₂ 97%이상)'}}},
-      '2529':{name:'장석·형석',children:{'252910':{name:'장석'},'252921':{name:'형석(CaF₂ 97%이하)'}}},
-      '2530':{name:'기타광물',children:{'253090':{name:'기타 광물(리튬광석 등)'}}},
+      '2504':{name:'천연흑연',children:{
+        '250410':{name:'흑연(분말)',children:{
+          '2504100000':{name:'인상·인편상 천연흑연(분말)'},
+        }},
+        '250490':{name:'기타 흑연',children:{
+          '2504901000':{name:'토상(土狀) 천연흑연'},
+          '2504909000':{name:'기타 천연흑연'},
+        }},
+      }},
+      '2521':{name:'석회석·형석',children:{
+        '252110':{name:'형석(CaF₂ 97%미만)',children:{'2521100000':{name:'석회석 플럭스·석회석'}}},
+        '252120':{name:'형석(CaF₂ 97%이상)',children:{'2521200000':{name:'생석회'}}},
+      }},
+      '2529':{name:'장석·형석',children:{
+        '252910':{name:'장석',children:{'2529100000':{name:'장석'}}},
+        '252921':{name:'형석(CaF₂ 97%이하)',children:{'2529210000':{name:'형석(CaF₂ 97%이하)'}}},
+      }},
+      '2530':{name:'기타광물',children:{
+        '253090':{name:'기타 광물(리튬광석 등)',children:{
+          '2530901000':{name:'천연비소화합물'},
+          '2530902000':{name:'경석(輕石)'},
+          '2530909010':{name:'리튬광석(스포듀민 등)'},
+          '2530909090':{name:'기타 광물'},
+        }},
+      }},
     }
   },
   '26':{ name:'26류 — 광석·슬래그·회(灰)',
     children:{
-      '2601':{name:'철광석',children:{'260111':{name:'비소결철광석'},'260112':{name:'소결철광석'}}},
-      '2602':{name:'망간광석',children:{'260200':{name:'망간광석 및 정광'}}},
-      '2603':{name:'구리광석',children:{'260300':{name:'구리광석 및 정광'}}},
-      '2604':{name:'니켈광석',children:{'260400':{name:'니켈광석 및 정광'}}},
-      '2606':{name:'알루미늄광석',children:{'260600':{name:'보크사이트'}}},
-      '2607':{name:'납광석',children:{'260700':{name:'납광석 및 정광'}}},
-      '2608':{name:'아연광석',children:{'260800':{name:'아연광석 및 정광'}}},
-      '2609':{name:'주석광석',children:{'260900':{name:'주석광석 및 정광'}}},
-      '2610':{name:'크롬광석',children:{'261000':{name:'크롬광석 및 정광'}}},
-      '2611':{name:'텅스텐광석',children:{'261100':{name:'텅스텐광석 및 정광'}}},
-      '2612':{name:'우라늄광석',children:{'261210':{name:'우라늄광석 및 정광'}}},
-      '2613':{name:'몰리브덴광석',children:{'261390':{name:'몰리브덴광석 및 정광'}}},
-      '2615':{name:'니오브·탄탈광석',children:{'261510':{name:'지르코늄광'},'261590':{name:'니오브·탄탈·바나듐광'}}},
-      '2617':{name:'기타광석',children:{'261710':{name:'안티몬광석'}}},
+      '2601':{name:'철광석',children:{
+        '260111':{name:'비소결철광석',children:{
+          '2601111000':{name:'적철광 비소결'},
+          '2601112000':{name:'자철광 비소결'},
+          '2601119000':{name:'기타 비소결철광석'},
+        }},
+        '260112':{name:'소결철광석',children:{
+          '2601121000':{name:'소결용 철광석'},
+          '2601122000':{name:'펠릿'},
+        }},
+      }},
+      '2602':{name:'망간광석',children:{'260200':{name:'망간광석 및 정광',children:{
+        '2602000000':{name:'망간광석·정광(철망간광 포함)'},
+      }}}},
+      '2603':{name:'구리광석',children:{'260300':{name:'구리광석 및 정광',children:{
+        '2603000000':{name:'구리광석 및 정광'},
+      }}}},
+      '2604':{name:'니켈광석',children:{'260400':{name:'니켈광석 및 정광',children:{
+        '2604000000':{name:'니켈광석 및 정광'},
+      }}}},
+      '2606':{name:'알루미늄광석',children:{'260600':{name:'보크사이트',children:{
+        '2606001000':{name:'보크사이트(소결하지 않은것)'},
+        '2606009000':{name:'기타 알루미늄광석'},
+      }}}},
+      '2607':{name:'납광석',children:{'260700':{name:'납광석 및 정광',children:{
+        '2607000000':{name:'납광석 및 정광'},
+      }}}},
+      '2608':{name:'아연광석',children:{'260800':{name:'아연광석 및 정광',children:{
+        '2608000000':{name:'아연광석 및 정광'},
+      }}}},
+      '2609':{name:'주석광석',children:{'260900':{name:'주석광석 및 정광',children:{
+        '2609000000':{name:'주석광석 및 정광'},
+      }}}},
+      '2610':{name:'크롬광석',children:{'261000':{name:'크롬광석 및 정광',children:{
+        '2610001000':{name:'크롬철광석'},
+        '2610009000':{name:'기타 크롬광석·정광'},
+      }}}},
+      '2611':{name:'텅스텐광석',children:{'261100':{name:'텅스텐광석 및 정광',children:{
+        '2611000000':{name:'텅스텐광석 및 정광'},
+      }}}},
+      '2612':{name:'우라늄광석',children:{'261210':{name:'우라늄광석 및 정광',children:{
+        '2612101000':{name:'우라늄광석'},
+        '2612109000':{name:'우라늄 정광'},
+      }}}},
+      '2613':{name:'몰리브덴광석',children:{'261390':{name:'몰리브덴광석 및 정광',children:{
+        '2613900000':{name:'기타 몰리브덴광석·정광'},
+      }}}},
+      '2615':{name:'니오브·탄탈광석',children:{
+        '261510':{name:'지르코늄광',children:{
+          '2615100000':{name:'지르코늄광석 및 정광'},
+        }},
+        '261590':{name:'니오브·탄탈·바나듐광',children:{
+          '2615901000':{name:'니오브·탄탈광석 및 정광'},
+          '2615902000':{name:'바나듐광석 및 정광'},
+        }},
+      }},
+      '2617':{name:'기타광석',children:{'261710':{name:'안티몬광석',children:{
+        '2617100000':{name:'안티몬광석 및 정광'},
+      }}}},
     }
   },
   '28':{ name:'28류 — 무기화학품',
     children:{
       '2804':{name:'수소·희가스·비금속',children:{
-        '280459':{name:'갈륨·인듐·탈륨'},
-        '280461':{name:'실리콘(순도99.99%이상)'},
+        '280459':{name:'갈륨·인듐·탈륨',children:{
+          '2804591000':{name:'갈륨'},
+          '2804592000':{name:'인듐'},
+          '2804593000':{name:'탈륨'},
+          '2804599000':{name:'기타 비금속원소'},
+        }},
+        '280461':{name:'실리콘(순도99.99%이상)',children:{
+          '2804611000':{name:'다결정 실리콘(순도99.99%이상)'},
+          '2804619000':{name:'기타 실리콘(순도99.99%이상)'},
+        }},
       }},
       '2805':{name:'알칼리·희토류금속',children:{
-        '280520':{name:'칼슘'},
-        '280530':{name:'희토류금속·스칸듐·이트륨'},
+        '280520':{name:'칼슘',children:{'2805200000':{name:'칼슘'}}},
+        '280530':{name:'희토류금속·스칸듐·이트륨',children:{
+          '2805301010':{name:'세륨(Ce)'},
+          '2805301020':{name:'란타넘(La)'},
+          '2805301030':{name:'프라세오디뮴(Pr)'},
+          '2805301040':{name:'네오디뮴(Nd)'},
+          '2805301090':{name:'기타 희토류금속(혼합물 포함)'},
+          '2805302000':{name:'스칸듐'},
+          '2805303000':{name:'이트륨'},
+        }},
       }},
-      '2822':{name:'산화코발트·수산화코발트',children:{'282200':{name:'산화코발트·수산화코발트'}}},
+      '2822':{name:'산화코발트·수산화코발트',children:{'282200':{name:'산화코발트·수산화코발트',children:{
+        '2822001000':{name:'산화코발트'},
+        '2822002000':{name:'수산화코발트'},
+      }}}},
       '2825':{name:'수산화물·금속산화물',children:{
-        '282520':{name:'수산화리튬'},
-        '282530':{name:'오산화바나듐'},
-        '282739':{name:'염화리튬'},
+        '282520':{name:'수산화리튬',children:{
+          '2825201000':{name:'수산화리튬(산화리튬 포함)'},
+          '2825209000':{name:'기타 리튬의 산화물·수산화물'},
+        }},
+        '282530':{name:'오산화바나듐',children:{'2825300000':{name:'오산화바나듐'}}},
+        '282739':{name:'염화리튬',children:{'2827391000':{name:'염화리튬'}}},
       }},
       '2836':{name:'탄산염',children:{
-        '283691':{name:'탄산리튬'},
-        '283699':{name:'기타 탄산염'},
+        '283691':{name:'탄산리튬',children:{'2836910000':{name:'탄산리튬'}}},
+        '283699':{name:'기타 탄산염',children:{
+          '2836991000':{name:'탄산바륨'},
+          '2836999000':{name:'기타 탄산염'},
+        }},
       }},
-      '2841':{name:'금속산의 염',children:{'284390':{name:'인산철리튬 등'}}},
-      '2846':{name:'희토류화합물',children:{'284610':{name:'세륨화합물'},'284690':{name:'기타 희토류화합물'}}},
+      '2841':{name:'금속산의 염',children:{'284390':{name:'인산철리튬 등',children:{
+        '2843900000':{name:'기타 금속산의 염'},
+      }}}},
+      '2846':{name:'희토류화합물',children:{
+        '284610':{name:'세륨화합물',children:{
+          '2846101000':{name:'산화세륨'},
+          '2846109000':{name:'기타 세륨화합물'},
+        }},
+        '284690':{name:'기타 희토류화합물',children:{
+          '2846901000':{name:'산화이트륨'},
+          '2846902000':{name:'산화란타넘'},
+          '2846903000':{name:'산화네오디뮴'},
+          '2846909000':{name:'기타 희토류 화합물'},
+        }},
+      }},
     }
   },
   '71':{ name:'71류 — 귀금속',
     children:{
-      '7106':{name:'은',children:{'710691':{name:'은 미가공'},'710692':{name:'은 반가공'}}},
-      '7108':{name:'금',children:{'710812':{name:'금 미가공(비화폐용)'}}},
-      '7110':{name:'백금족',children:{'711011':{name:'백금 미가공'},'711021':{name:'팔라듐 미가공'},'711031':{name:'로듐 미가공'}}},
+      '7106':{name:'은',children:{
+        '710691':{name:'은 미가공',children:{
+          '7106911000':{name:'은 괴(塊)'},
+          '7106919000':{name:'기타 미가공 은'},
+        }},
+        '710692':{name:'은 반가공',children:{
+          '7106921000':{name:'은 판·시트·스트립'},
+          '7106929000':{name:'기타 반가공 은'},
+        }},
+      }},
+      '7108':{name:'금',children:{'710812':{name:'금 미가공(비화폐용)',children:{
+        '7108121000':{name:'금 괴(塊)(비화폐용)'},
+        '7108129000':{name:'기타 미가공 금(비화폐용)'},
+      }}}},
+      '7110':{name:'백금족',children:{
+        '711011':{name:'백금 미가공',children:{'7110110000':{name:'백금 미가공'}}},
+        '711021':{name:'팔라듐 미가공',children:{'7110210000':{name:'팔라듐 미가공'}}},
+        '711031':{name:'로듐 미가공',children:{'7110310000':{name:'로듐 미가공'}}},
+      }},
     }
   },
   '75':{ name:'75류 — 니켈',
     children:{
-      '7501':{name:'니켈 매트',children:{'750110':{name:'니켈 매트'}}},
-      '7502':{name:'미정련 니켈',children:{'750210':{name:'니켈(미합금)'},'750220':{name:'니켈 합금'}}},
+      '7501':{name:'니켈 매트',children:{'750110':{name:'니켈 매트',children:{
+        '7501100000':{name:'니켈 매트'},
+      }}}},
+      '7502':{name:'미정련 니켈',children:{
+        '750210':{name:'니켈(미합금)',children:{
+          '7502101000':{name:'전해니켈(캐소드)'},
+          '7502109000':{name:'기타 미합금 니켈'},
+        }},
+        '750220':{name:'니켈 합금',children:{'7502200000':{name:'니켈 합금'}}},
+      }},
     }
   },
   '80':{ name:'80류 — 주석',
     children:{
-      '8001':{name:'주석 미가공',children:{'800110':{name:'주석(합금아닌것)'},'800120':{name:'주석합금'}}},
-      '8002':{name:'주석 웨이스트',children:{'800200':{name:'주석 웨이스트·스크랩'}}},
-      '8003':{name:'주석 봉·형재',children:{'800300':{name:'주석 봉·형재·선'}}},
+      '8001':{name:'주석 미가공',children:{
+        '800110':{name:'주석(합금아닌것)',children:{'8001100000':{name:'주석(합금아닌것) 미가공'}}},
+        '800120':{name:'주석합금',children:{'8001200000':{name:'주석합금 미가공'}}},
+      }},
+      '8002':{name:'주석 웨이스트',children:{'800200':{name:'주석 웨이스트·스크랩',children:{
+        '8002000000':{name:'주석 웨이스트 및 스크랩'},
+      }}}},
+      '8003':{name:'주석 봉·형재',children:{'800300':{name:'주석 봉·형재·선',children:{
+        '8003000000':{name:'주석 봉·형재·선'},
+      }}}},
     }
   },
   '81':{ name:'81류 — 기타 비금속',
     children:{
-      '8101':{name:'텅스텐',children:{'810110':{name:'텅스텐 분말'},'810120':{name:'텅스텐 괴·바'}}},
-      '8102':{name:'몰리브덴',children:{'810210':{name:'몰리브덴 분말'},'810297':{name:'몰리브덴 기타'}}},
-      '8103':{name:'탄탈',children:{'810320':{name:'탄탈 미가공'}}},
-      '8105':{name:'코발트',children:{'810510':{name:'코발트 매트'},'810520':{name:'코발트 미가공'}}},
-      '8106':{name:'비스무트',children:{'810600':{name:'비스무트 및 제품'}}},
-      '8108':{name:'티타늄',children:{'810820':{name:'티타늄 미가공'}}},
-      '8110':{name:'안티몬',children:{'811010':{name:'안티몬 미가공'}}},
-      '8112':{name:'게르마늄·기타',children:{'811221':{name:'게르마늄 미가공'},'811240':{name:'기타'}}},
+      '8101':{name:'텅스텐',children:{
+        '810110':{name:'텅스텐 분말',children:{'8101100000':{name:'텅스텐 분말'}}},
+        '810120':{name:'텅스텐 괴·바',children:{'8101200000':{name:'텅스텐(합금 아닌것) 괴·바'}}},
+      }},
+      '8102':{name:'몰리브덴',children:{
+        '810210':{name:'몰리브덴 분말',children:{'8102100000':{name:'몰리브덴 분말'}}},
+        '810297':{name:'몰리브덴 기타',children:{'8102970000':{name:'몰리브덴 기타 제품'}}},
+      }},
+      '8103':{name:'탄탈',children:{'810320':{name:'탄탈 미가공',children:{
+        '8103201000':{name:'탄탈 분말'},
+        '8103209000':{name:'탄탈 미가공(기타)'},
+      }}}},
+      '8105':{name:'코발트',children:{
+        '810510':{name:'코발트 매트',children:{'8105100000':{name:'코발트 매트·중간생산물'}}},
+        '810520':{name:'코발트 미가공',children:{
+          '8105201000':{name:'코발트 미합금 괴'},
+          '8105209000':{name:'코발트 미가공(기타)'},
+        }},
+      }},
+      '8106':{name:'비스무트',children:{'810600':{name:'비스무트 및 제품',children:{
+        '8106001000':{name:'비스무트 미가공·분말·웨이스트'},
+        '8106009000':{name:'비스무트 제품'},
+      }}}},
+      '8108':{name:'티타늄',children:{'810820':{name:'티타늄 미가공',children:{
+        '8108201000':{name:'티타늄 괴(塊)'},
+        '8108202000':{name:'티타늄 스펀지'},
+        '8108209000':{name:'기타 티타늄 미가공'},
+      }}}},
+      '8110':{name:'안티몬',children:{'811010':{name:'안티몬 미가공',children:{
+        '8110101000':{name:'안티몬 괴(塊)'},
+        '8110102000':{name:'안티몬 분말'},
+        '8110109000':{name:'기타 안티몬 미가공'},
+      }}}},
+      '8112':{name:'게르마늄·기타',children:{
+        '811221':{name:'게르마늄 미가공',children:{
+          '8112211000':{name:'게르마늄 괴·분말'},
+          '8112219000':{name:'기타 게르마늄 미가공'},
+        }},
+        '811240':{name:'기타',children:{'8112400000':{name:'기타 비금속 미가공'}}},
+      }},
     }
   },
   '85':{ name:'85류 — 전기기기·축전지',
     children:{
-      '8507':{name:'축전지(배터리)',children:{'850760':{name:'리튬이온축전지'},'850780':{name:'기타 축전지'}}},
+      '8507':{name:'축전지(배터리)',children:{
+        '850760':{name:'리튬이온축전지',children:{
+          '8507601000':{name:'리튬이온축전지(단전지)'},
+          '8507602000':{name:'리튬이온축전지(모듈)'},
+          '8507603000':{name:'리튬이온축전지(배터리팩)'},
+          '8507609000':{name:'기타 리튬이온축전지'},
+        }},
+        '850780':{name:'기타 축전지',children:{
+          '8507801000':{name:'리튬일차전지'},
+          '8507809000':{name:'기타 축전지'},
+        }},
+      }},
     }
   },
 };
@@ -2103,6 +2282,8 @@ let mDonutType = 'doughnut';
 let mDonutScope = 'country'; // 'country' | 'continent'
 let mTrendType = 'bar';
 let mSupplyType = 'amount';  // 'amount' | 'weight'
+let mSupplyStageFilter = 'all'; // 'all' | specific stage name
+let _lastSupplyDetailData = null; // cache for re-render on filter change
 let hCountryType = 'doughnut';
 let hDonutScope = 'country'; // 'country' | 'continent'
 let hSubType = 'bar';
@@ -3227,6 +3408,7 @@ function renderMSupplyChart(data) {
 
 /* ── 공급단계 상세 테이블 (HS코드명 + 주요 수입국) ── */
 function renderMSupplyDetail(data) {
+  _lastSupplyDetailData = data;
   // HS코드별 집계: 공급단계, 금액, 중량, 국가별 금액
   const byHs = {};
   data.forEach(r => {
@@ -3238,7 +3420,6 @@ function renderMSupplyDetail(data) {
     byHs[hs].wt  += parseFloat(r.impWgt||r.expWgt||0);
     byHs[hs].countries[cn] = (byHs[hs].countries[cn]||0) + parseFloat(r.impAmt||r.expAmt||0);
   });
-  const totalAmt = Object.values(byHs).reduce((s,e)=>s+e.amt,0);
   // 공급단계별 그룹화
   const groups = {};
   Object.entries(byHs).forEach(([hs, d]) => {
@@ -3246,13 +3427,31 @@ function renderMSupplyDetail(data) {
     groups[d.stage].items.push([hs, d]);
     groups[d.stage].totalAmt += d.amt;
   });
-  // 공급단계 순서 정렬
   const stageOrder = SUPPLY_STAGE_ORDER.filter(s=>groups[s]);
+
+  // ── 필터 버튼 렌더 ──
+  const filterEl = document.getElementById('m-supply-stage-filter');
+  if(filterEl) {
+    let btns = `<button class="chart-tab${mSupplyStageFilter==='all'?' active':''}" onclick="switchSupplyStageFilter('all',this)">전체</button>`;
+    stageOrder.forEach(s => {
+      const clr = SUPPLY_STAGE_COLORS[s]||'#BDC3C7';
+      btns += `<button class="chart-tab${mSupplyStageFilter===s?' active':''}" onclick="switchSupplyStageFilter('${s}',this)" style="border-bottom-color:${mSupplyStageFilter===s?clr:'transparent'};">${s}</button>`;
+    });
+    filterEl.innerHTML = btns;
+  }
+
+  // ── 비중 기준 금액 결정 ──
+  const grandTotal = Object.values(byHs).reduce((s,e)=>s+e.amt,0);
+  const baseTotal = (mSupplyStageFilter!=='all' && groups[mSupplyStageFilter])
+    ? groups[mSupplyStageFilter].totalAmt : grandTotal;
+
+  // ── 테이블 렌더 ──
+  const visibleStages = mSupplyStageFilter==='all' ? stageOrder : stageOrder.filter(s=>s===mSupplyStageFilter);
   let html = '';
-  stageOrder.forEach(stage => {
+  visibleStages.forEach(stage => {
     const g = groups[stage];
     const color = SUPPLY_STAGE_COLORS[stage] || '#BDC3C7';
-    const stagePct = totalAmt>0 ? (g.totalAmt/totalAmt*100).toFixed(1) : '0';
+    const stagePct = baseTotal>0 ? (g.totalAmt/baseTotal*100).toFixed(1) : '0';
     const items = g.items.sort((a,b)=>b[1].amt-a[1].amt);
     // 그룹 헤더 행 (클릭 시 접기/펼치기)
     html += `<tr class="supply-group-header" onclick="toggleSupplyGroup(this)" style="background:${color}11;cursor:pointer;border-left:3px solid ${color};">
@@ -3267,7 +3466,7 @@ function renderMSupplyDetail(data) {
     </tr>`;
     // 데이터 행
     items.forEach(([hs, d]) => {
-      const pct = totalAmt>0 ? (d.amt/totalAmt*100).toFixed(1) : '0';
+      const pct = baseTotal>0 ? (d.amt/baseTotal*100).toFixed(1) : '0';
       const sortedCountries = Object.entries(d.countries).sort((a,b)=>b[1]-a[1]).slice(0,3);
       const top1Pct = (sortedCountries[0] && d.amt>0) ? Math.round(sortedCountries[0][1]/d.amt*100) : 0;
       const top3Html = sortedCountries.map((c,i)=>{
@@ -3288,6 +3487,16 @@ function renderMSupplyDetail(data) {
     });
   });
   document.getElementById('m-supply-tbody').innerHTML = html;
+}
+
+/* 공급단계 필터 전환 */
+function switchSupplyStageFilter(stage, el) {
+  mSupplyStageFilter = stage;
+  if(el) {
+    el.parentElement.querySelectorAll('.chart-tab').forEach(b=>b.classList.remove('active'));
+    el.classList.add('active');
+  }
+  if(_lastSupplyDetailData) renderMSupplyDetail(_lastSupplyDetailData);
 }
 
 /* 공급단계 그룹 접기/펼치기 */
@@ -3739,7 +3948,10 @@ function resetHsForm(){
    11. HS 드릴다운 트리
 ════════════════════════════════════════════════ */
 let hsBreadcrumbPath = [];
-let hsCurrentLevel = ''; // '' = root (all chapters), '26' = 2-digit, '2603' = 4-digit, '260300' = 6-digit
+let hsCurrentLevel = '';
+
+/* HS 코드 계층 단위: 2 → 4 → 6 → 8 → 10 */
+const HS_LEVELS = [2, 4, 6, 8, 10];
 
 function buildHsTree(code) {
   const box=document.getElementById('hsTreeBox');
@@ -3770,25 +3982,22 @@ function buildHsTree(code) {
   const root=HS_TREE[top2];
   if(!root){ nodesEl.innerHTML='<div style="padding:12px;color:var(--subtext);">해당 류에 등록된 트리 없음</div>'; return; }
 
-  // ── 브레드크럼 구성 ──
+  // ── 브레드크럼 구성 (계층 깊이 무관하게 탐색) ──
   hsBreadcrumbPath=[{code:'',name:'전체'}];
   hsBreadcrumbPath.push({code:top2,name:root.name});
-  let currentChildren = root.children;
   let currentNode = root;
-  if(c.length>=4 && root.children[c.slice(0,4)]){
-    const sub4 = root.children[c.slice(0,4)];
-    hsBreadcrumbPath.push({code:c.slice(0,4),name:sub4.name});
-    currentNode = sub4;
-    currentChildren = sub4.children || {};
-    if(c.length>=6 && sub4.children && sub4.children[c.slice(0,6)]){
-      const sub6 = sub4.children[c.slice(0,6)];
-      hsBreadcrumbPath.push({code:c.slice(0,6),name:sub6.name});
-      currentNode = sub6;
-      currentChildren = sub6.children || {};
-    }
+  let currentChildren = root.children || {};
+  for(const lvl of HS_LEVELS.slice(1)) { // 4,6,8,10
+    if(c.length < lvl) break;
+    const prefix = c.slice(0, lvl);
+    if(currentChildren[prefix]) {
+      const sub = currentChildren[prefix];
+      hsBreadcrumbPath.push({code:prefix, name:sub.name});
+      currentNode = sub;
+      currentChildren = sub.children || {};
+    } else break;
   }
 
-  // 백 버튼 표시
   backBtn.style.display='inline-block';
 
   // 브레드크럼 렌더
@@ -3802,9 +4011,9 @@ function buildHsTree(code) {
 
   // ── 자식 노드 렌더 ──
   if(!currentChildren || Object.keys(currentChildren).length===0){
-    // 리프 노드: 조회 안내
+    const digitLabel = c.length>=10 ? '10자리(HSK)' : `${c.length}자리`;
     nodesEl.innerHTML=`<div style="padding:12px;color:var(--subtext);font-size:12px;">
-      <strong>${c}</strong> — ${currentNode.name}<br>
+      <strong>${c}</strong> — ${currentNode.name} <span style="font-size:10px;color:var(--muted);">[${digitLabel}]</span><br>
       하위 코드가 없습니다. 이 코드로 조회하시려면 위 입력창에 입력 후 조회 버튼을 누르세요.
     </div>`;
     return;
@@ -3812,9 +4021,11 @@ function buildHsTree(code) {
 
   nodesEl.innerHTML = Object.entries(currentChildren).map(([code2,node])=>{
     const hasChildren = node.children && Object.keys(node.children).length>0;
+    const digitLen = code2.length;
+    const digitTag = digitLen>=10 ? 'HSK' : `${digitLen}자리`;
     return `<div class="hs-node" onclick="drillHsTree('${code2}')">
       <span class="hs-node-code">${code2}</span>
-      <span class="hs-node-name">${node.name}</span>
+      <span class="hs-node-name">${node.name} <span style="font-size:9px;color:var(--muted);">[${digitTag}]</span></span>
       ${hasChildren?'<span class="hs-drill-indicator">▶</span>':'<span class="hs-drill-indicator" style="color:var(--muted);">─</span>'}
     </div>`;
   }).join('');
