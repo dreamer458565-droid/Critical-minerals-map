@@ -432,7 +432,6 @@ footer{background:var(--navy);padding:16px 48px;margin-top:8px;}
 .cond-grid{display:grid;gap:12px 14px;}
 .cond-grid-4{grid-template-columns:repeat(4,1fr);}
 .cond-grid-5{grid-template-columns:1.8fr 1fr 0.8fr 0.8fr 1fr;}
-.cond-grid-hs{grid-template-columns:2fr 1.2fr 0.8fr 1fr;}
 
 .cond-group{}
 .search-wrap{display:flex;gap:6px;}
@@ -811,7 +810,7 @@ table.result tbody td.center{text-align:center;}
   .map-hero{padding:24px 24px 20px;}
   .map-container{padding:20px 24px;}
   .country-detail-grid{grid-template-columns:repeat(2,1fr);}
-  .cond-grid-4,.cond-grid-5,.cond-grid-hs{grid-template-columns:repeat(2,1fr);}
+  .cond-grid-4,.cond-grid-5{grid-template-columns:repeat(2,1fr);}
   .chart-grid{grid-template-columns:1fr;}
   .risk-matrix{grid-template-columns:repeat(2,1fr);}
   .treemap-grid{height:auto;grid-template-columns:1fr 1fr;grid-template-rows:auto;}
@@ -834,7 +833,7 @@ table.result tbody td.center{text-align:center;}
   .gauge-row{grid-template-columns:repeat(2,1fr);}
   .risk-matrix{grid-template-columns:1fr;}
   .treemap-grid{grid-template-columns:1fr;height:auto;}
-  .cond-grid-4,.cond-grid-5,.cond-grid-hs{grid-template-columns:1fr;}
+  .cond-grid-4,.cond-grid-5{grid-template-columns:1fr;}
   .chart-grid{grid-template-columns:1fr;}
   .map-hero{padding:16px;}
   .map-hero-title{font-size:22px;}
@@ -1248,7 +1247,7 @@ table.result tbody td.center{text-align:center;}
       <div class="cond-header-title">🔍 조회 조건 — HS코드별</div>
     </div>
     <div class="cond-body">
-      <div class="cond-grid cond-grid-hs">
+      <div class="cond-grid cond-grid-5" style="grid-template-columns:1.8fr 1.2fr 0.8fr 0.8fr 1fr;">
         <!-- HS 코드 입력 + 조회/초기화 -->
         <div class="cond-group">
           <label class="cond-label">HS코드 입력 <span>*</span></label>
@@ -1279,10 +1278,15 @@ table.result tbody td.center{text-align:center;}
             <label for="h_hs10">10단</label>
           </div>
         </div>
-        <!-- 기간 -->
+        <!-- 시작 연도 -->
         <div class="cond-group">
-          <label class="cond-label">조회연도</label>
-          <select class="cond-select" id="h_year"></select>
+          <label class="cond-label">시작</label>
+          <select class="cond-select" id="h_start"></select>
+        </div>
+        <!-- 종료 연도 -->
+        <div class="cond-group">
+          <label class="cond-label">종료</label>
+          <select class="cond-select" id="h_end"></select>
         </div>
         <!-- 수출입 구분 -->
         <div class="cond-group">
@@ -2327,7 +2331,8 @@ let sortState = {};
   const fmtYear = v => `${v}년`;
   fillSelect('m_start', years, fmtYear, String(maxYear));
   fillSelect('m_end',   years, fmtYear, String(maxYear));
-  fillSelect('h_year',     years, y=>`${y}년`, String(maxYear));
+  fillSelect('h_start',    years, y=>`${y}년`, String(maxYear));
+  fillSelect('h_end',      years, y=>`${y}년`, String(maxYear));
   fillSelect('ov_year',    years, y=>`${y}년`, String(maxYear));
   fillSelect('mapYearSel', years, y=>`${y}년`, String(maxYear));
 
@@ -2989,23 +2994,51 @@ async function queryMineral() {
   try {
     // 중복 HS코드 제거 (hsUnit 단위로 truncate 후)
     const seenHs = new Set();
-    const allData = [];
+    const hsList = [];
     for(const hs of selectedMineral.hs) {
       const truncHs = hs.slice(0, parseInt(hsUnit));
       if(seenHs.has(truncHs)) continue;
       seenHs.add(truncHs);
-      const params = { hsCd: truncHs, impExpDivCd: impYn==='1' ? 'IMP' : 'EXP' };
+      hsList.push({truncHs, origHs:hs});
+    }
+
+    // ── 다년도 분할 호출: 관세청 API가 1년 단위만 지원하므로 연도별로 쪼개서 병렬 호출 ──
+    const impExp = impYn==='1' ? 'IMP' : 'EXP';
+    const queries = [];
+    for(const {truncHs, origHs} of hsList) {
       if(periodType==='month') {
-        params.strtYymm = String(start);  // YYYYMM
-        params.endYymm  = String(end);    // YYYYMM
+        // 월별: 연도가 다르면 연도별로 분할
+        const sy = parseInt(String(start).slice(0,4)), ey = parseInt(String(end).slice(0,4));
+        if(sy === ey) {
+          queries.push({p:{hsCd:truncHs, strtYymm:String(start), endYymm:String(end), impExpDivCd:impExp}, origHs});
+        } else {
+          for(let y=sy; y<=ey; y++) {
+            const sm = (y===sy) ? String(start) : `${y}01`;
+            const em = (y===ey) ? String(end)   : `${y}12`;
+            queries.push({p:{hsCd:truncHs, strtYymm:sm, endYymm:em, impExpDivCd:impExp}, origHs});
+          }
+        }
       } else {
-        params.strtYr = String(start);    // YYYY
-        params.endYr  = String(end);      // YYYY
+        // 연도별: 1년씩 분할
+        const sy = parseInt(start), ey = parseInt(end);
+        for(let y=sy; y<=ey; y++) {
+          queries.push({p:{hsCd:truncHs, strtYr:String(y), endYr:String(y), impExpDivCd:impExp}, origHs});
+        }
       }
-      // detail=true: 개별 행(기간·국가별) 데이터
-      const rows = await callTradeApi(params, {detail:true});
+    }
+
+    // 배치 병렬 호출 (5개씩)
+    const allData = [];
+    const BATCH = 5;
+    for(let i=0; i<queries.length; i+=BATCH) {
       if(_signal.aborted) return;
-      if(rows) rows.forEach(r=>allData.push({...r, _hsCode:hs, _mineral:selectedMineral.ko}));
+      const batch = queries.slice(i, i+BATCH);
+      const results = await Promise.all(
+        batch.map(q => callTradeApi(q.p, {detail:true}).catch(()=>[]))
+      );
+      results.forEach((rows, idx) => {
+        if(rows) rows.forEach(r => allData.push({...r, _hsCode:batch[idx].origHs, _mineral:selectedMineral.ko}));
+      });
     }
     // ── 필터: 해당 광종의 HS 코드에 해당하는 행만 유지 ──
     const mineralHsCodes = selectedMineral.hs;
@@ -3629,25 +3662,37 @@ function autoSyncHsUnit(code) {
 async function queryHs() {
   const hsRaw = document.getElementById('hsInput').value.trim().replace(/\./g,'');
   if(!hsRaw) { alert('HS코드를 입력해주세요.'); return; }
-  const year    = document.getElementById('h_year').value;
+  const startYr = document.getElementById('h_start').value;
+  const endYr   = document.getElementById('h_end').value;
   const impYn   = document.querySelector('input[name="h_imp"]:checked').value;
   // 입력 자릿수에 맞춰 HS 단위 자동 동기화
   autoSyncHsUnit(hsRaw);
   const hsUnit  = document.querySelector('input[name="h_unit"]:checked').value;
   const truncHs = hsRaw.slice(0, parseInt(hsUnit));
+  const impExp  = impYn==='1' ? 'IMP' : 'EXP';
 
   setHsLoading(true);
   buildHsTree(hsRaw);
 
   try {
-    const params = {
-      hsCd: truncHs,
-      strtYr: year,
-      endYr:  year,
-      impExpDivCd: impYn==='1' ? 'IMP' : 'EXP',
-    };
-    const data = await callTradeApi(params, {detail:true});
-    hResultData = data||[];
+    // ── 다년도 분할 호출: 1년씩 병렬 호출 후 병합 ──
+    const sy = parseInt(startYr), ey = parseInt(endYr);
+    const queries = [];
+    for(let y=sy; y<=ey; y++) {
+      queries.push({ hsCd:truncHs, strtYr:String(y), endYr:String(y), impExpDivCd:impExp });
+    }
+    const BATCH = 5;
+    let allData = [];
+    for(let i=0; i<queries.length; i+=BATCH) {
+      const batch = queries.slice(i, i+BATCH);
+      const results = await Promise.all(
+        batch.map(p => callTradeApi(p, {detail:true}).catch(()=>[]))
+      );
+      for(const rows of results) {
+        if(rows) allData = allData.concat(rows);
+      }
+    }
+    hResultData = allData;
     renderHsResult(hResultData, truncHs);
   } catch(e) {
     document.getElementById('h-state-box').innerHTML=`<div class="state-icon">⚠️</div>
@@ -3676,7 +3721,9 @@ function renderHsResult(data, hsCd) {
   document.getElementById('h-state-box').style.display='none';
   document.getElementById('hsResult').classList.add('visible');
   document.getElementById('h-result-count').textContent = data.length;
-  document.getElementById('h-result-desc').textContent  = `HS ${hsCd} · ${document.getElementById('h_year').value}년`;
+  const hs = document.getElementById('h_start').value;
+  const he = document.getElementById('h_end').value;
+  document.getElementById('h-result-desc').textContent  = `HS ${hsCd} · ${hs}${hs!==he?'~'+he:''}년`;
 
   renderHCountryChart(data);
   renderHSubChart(data, hsCd);
