@@ -492,7 +492,7 @@ footer{background:var(--navy);padding:16px 48px;margin-top:8px;}
 .radio-group label:hover{background:var(--parchment);}
 
 /* 빠른 선택 칩 */
-.quick-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:12px;border-top:1px solid var(--border);}
+.quick-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;padding-top:12px;border-top:1px solid var(--border);align-items:center;line-height:2.2;}
 .quick-label{font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--sub);text-transform:uppercase;align-self:center;margin-right:4px;}
 .qchip{
   padding:4px 11px;font-size:11px;font-weight:600;cursor:pointer;border-radius:3px;
@@ -503,6 +503,7 @@ footer{background:var(--navy);padding:16px 48px;margin-top:8px;}
 .qchip.mineral{background:var(--danger-l);color:var(--danger);border-color:#F5A89A;}
 .qchip.mineral:hover{background:var(--danger);color:#fff;}
 .qchip.active{background:var(--navy)!important;color:#fff!important;border-color:var(--navy)!important;}
+.qchip-group{font-size:10px;font-weight:700;color:var(--sub);align-self:center;margin-right:2px;white-space:nowrap;}
 
 /* 조회/초기화 버튼 */
 .cond-footer{display:flex;justify-content:center;gap:10px;padding:14px 20px;background:var(--parchment);border-top:1px solid var(--border);}
@@ -653,8 +654,9 @@ table.result tbody tr:nth-child(even){background:#F5F8FC;}
 table.result tbody tr:hover{background:#EEF4FF;}
 table.result tbody td{
   padding:8px 14px;border-bottom:1px solid #E8EEF4;font-size:12px;color:var(--text);
-  white-space:nowrap;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
+table.result tbody td.ellip{max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 table.result tbody td.num{text-align:right;font-family:'JetBrains Mono',monospace;font-size:11.5px;}
 table.result tbody td.center{text-align:center;}
 .risk-pill{
@@ -1485,19 +1487,19 @@ table.result tbody td.center{text-align:center;}
         <div class="country-card">
           <div class="country-card-header" style="background:var(--parchment);border-bottom:1px solid var(--border)">
             <div>
-              <div class="country-info-title">공급 집중 위험 TOP 7</div>
-              <div class="country-info-sub">단일국 의존도 기준</div>
+              <div class="country-info-title">핵심광물 수입 국가 TOP 7</div>
+              <div class="country-info-sub">전체 수입액 비중 기준 (정적)</div>
             </div>
           </div>
           <div class="country-card-body">
-            <div class="dep-list" style="gap:9px">
-              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">갈륨 → 중국</span><span class="dep-pct critical" style="font-size:12px">98.4%</span></div><div class="dep-bar-track"><div class="dep-bar-fill critical" style="width:98.4%"></div></div></div>
-              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">흑연 → 중국</span><span class="dep-pct critical" style="font-size:12px">95.8%</span></div><div class="dep-bar-track"><div class="dep-bar-fill critical" style="width:95.8%"></div></div></div>
-              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">플루오라이트 → 중국</span><span class="dep-pct critical" style="font-size:12px">89.3%</span></div><div class="dep-bar-track"><div class="dep-bar-fill critical" style="width:89.3%"></div></div></div>
-              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">디스프로슘 → 중국</span><span class="dep-pct critical" style="font-size:12px">86.1%</span></div><div class="dep-bar-track"><div class="dep-bar-fill critical" style="width:86.1%"></div></div></div>
-              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">리튬 → 중국</span><span class="dep-pct warning" style="font-size:12px">74.2%</span></div><div class="dep-bar-track"><div class="dep-bar-fill warning" style="width:74.2%"></div></div></div>
-              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">Co → DR콩고</span><span class="dep-pct warning" style="font-size:12px">52.3%</span></div><div class="dep-bar-track"><div class="dep-bar-fill warning" style="width:52.3%"></div></div></div>
-              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">니켈 → 필리핀</span><span class="dep-pct ok" style="font-size:12px">31.2%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:31.2%"></div></div></div>
+            <div class="dep-list" style="gap:9px" id="mapTop7List">
+              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇨🇳 중국</span><span class="dep-pct critical" style="font-size:12px">71.3%</span></div><div class="dep-bar-track"><div class="dep-bar-fill critical" style="width:71.3%"></div></div></div>
+              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇿🇦 남아공</span><span class="dep-pct warning" style="font-size:12px">22.4%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:22.4%"></div></div></div>
+              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇮🇩 인도네시아</span><span class="dep-pct ok" style="font-size:12px">28.4%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:28.4%"></div></div></div>
+              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇦🇺 호주</span><span class="dep-pct ok" style="font-size:12px">18.2%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:18.2%"></div></div></div>
+              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇵🇭 필리핀</span><span class="dep-pct ok" style="font-size:12px">18.4%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:18.4%"></div></div></div>
+              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇨🇱 칠레</span><span class="dep-pct ok" style="font-size:12px">16.1%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:16.1%"></div></div></div>
+              <div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">🇷🇺 러시아</span><span class="dep-pct ok" style="font-size:12px">12.5%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ok" style="width:12.5%"></div></div></div>
             </div>
           </div>
         </div>
@@ -1565,16 +1567,22 @@ function buildMcatChips() {
   else if (mineralClassFilter === 'us60') filterLabel = ' 🇺🇸미국 60종';
   else if (mineralClassFilter === 'both') filterLabel = ' 한·미 공통';
 
-  // 탭 버튼 재생성
-  tabsEl.innerHTML = activeGroups.map((g,i)=>
-    `<button class="mcat-tab${i===0?' active':''}" onclick="switchMcatDynamic(${i},this)">${activeIcons[i]}&ensp;${g}</button>`
-  ).join('');
+  // 탭 버튼 재생성 (광종 수 표시)
+  tabsEl.innerHTML = activeGroups.map((g,i)=>{
+    const cnt = filteredDB.filter(m => m.group === g).length;
+    return `<button class="mcat-tab${i===0?' active':''}" onclick="switchMcatDynamic(${i},this)">${activeIcons[i]}&ensp;${g} <span style="font-size:9px;opacity:.6;">(${cnt})</span></button>`;
+  }).join('');
 
   // 칩 패널 재생성 (wrap 내용 교체)
   wrapEl.innerHTML = activeGroups.map((g,i)=>{
     const minerals = filteredDB.filter(m => m.group === g);
     return `<div class="mcat-chips${i===0?' active':''}" id="mcatDyn-${i}">
-      ${minerals.map(m=>`<span class="mcat-chip" onclick="quickMineral('${m.ko}')">${m.ko} <em>${m.sym}</em></span>`).join('')}
+      ${minerals.map(m=>{
+        const cmp = STRATEGY_COMPARE[m.ko];
+        const ind = cmp ? (mineralClassFilter==='us60' ? (cmp.us!=='—'?cmp.us:'') : (cmp.kr!=='—'?cmp.kr:'')) : '';
+        const indTip = ind ? ` title="${ind}"` : '';
+        return `<span class="mcat-chip" onclick="quickMineral('${m.ko}')"${indTip}>${m.ko} <em>${m.sym}</em></span>`;
+      }).join('')}
     </div>`;
   }).join('');
 
@@ -1597,8 +1605,8 @@ document.addEventListener('DOMContentLoaded', () => { buildMcatChips(); buildHsQ
 const MINERAL_DB = [
   // ══ 이차전지 ══
   {ko:'리튬',       en:'Lithium',       sym:'Li',   group:'이차전지', risk:'높음',
-   hs:['260300','282520','283691','283692','284150','284190','285000','850760','850780'],
-   hsName:['리튬광석','수산화리튬','탄산리튬','염화리튬','인산리튬','리튬화합물(기타)','기타리튬화합물','리튬이온축전지','리튬배터리팩']},
+   hs:['253090','282520','283691','282739','284390','850760','850780'],
+   hsName:['리튬광석(기타광물)','수산화리튬','탄산리튬','염화리튬','인산철리튬 등','리튬이온축전지','리튬배터리팩']},
   {ko:'코발트',     en:'Cobalt',        sym:'Co',   group:'이차전지', risk:'높음',
    hs:['260500','282200','282300','810520','810510','810530','282210','282290'],
    hsName:['코발트광','산화코발트','수산화코발트','코발트분말','코발트괴·스크랩','코발트합금','염화코발트','코발트화합물']},
@@ -2079,7 +2087,7 @@ let sortState = {};
 
   // 광종별 조회: 기본값 연도별 (시작=minYear, 종료=maxYear)
   const fmtYear = v => `${v}년`;
-  fillSelect('m_start', years, fmtYear, String(minYear));
+  fillSelect('m_start', years, fmtYear, String(maxYear));
   fillSelect('m_end',   years, fmtYear, String(maxYear));
   fillSelect('h_year',     years, y=>`${y}년`, String(maxYear));
   fillSelect('ov_year',    years, y=>`${y}년`, String(maxYear));
@@ -2117,7 +2125,7 @@ let sortState = {};
       const isMonth = r.value==='month';
       const opts = isMonth ? months : years;
       const fmt  = isMonth ? v=>`${v.slice(0,4)}년 ${parseInt(v.slice(4),10)}월` : v=>`${v}년`;
-      const ds   = isMonth ? `${curYear}01` : String(minYear);
+      const ds   = isMonth ? `${curYear}01` : String(maxYear);
       const de   = isMonth ? `${curYear}${String(curMonth).padStart(2,'0')}` : String(maxYear);
       fillSelect('m_start', opts, fmt, ds);
       fillSelect('m_end',   opts, fmt, de);
@@ -2334,45 +2342,33 @@ function quickHs(code) {
   buildHsTree(code);
 }
 
-/* ── HS단위별 빠른 선택 칩 동적 생성 ── */
-const HS_CHIPS_DATA = {
-  '2': [
-    {code:'26', label:'26류 — 광석·슬래그', type:'hs'},
-    {code:'28', label:'28류 — 무기화학', type:'hs'},
-    {code:'75', label:'75류 — 니켈', type:'hs'},
-    {code:'81', label:'81류 — 비금속', type:'hs'},
-    {code:'71', label:'71류 — 귀금속', type:'hs'},
+/* ── HS단위별 빠른 선택 칩 (산업별 분류) ── */
+const HS_CHIPS_BY_INDUSTRY = {
+  '이차전지': [
+    {hs6:'283691', hs4:'2836', hs10:'2836910000', label:'탄산리튬'},
+    {hs6:'282520', hs4:'2825', hs10:'2825200000', label:'수산화리튬'},
+    {hs6:'810510', hs4:'8105', hs10:'8105201000', label:'코발트'},
+    {hs6:'750210', hs4:'7502', hs10:'7502100000', label:'니켈(미가공)'},
+    {hs6:'260200', hs4:'2602', hs10:'2602000000', label:'망간광'},
+    {hs6:'250410', hs4:'2504', hs10:'2504101000', label:'흑연(분말)'},
   ],
-  '4': [
-    {code:'2504', label:'흑연 2504', type:'mineral'},
-    {code:'2602', label:'망간광 2602', type:'mineral'},
-    {code:'2603', label:'구리광 2603', type:'mineral'},
-    {code:'2804', label:'수소·희가스 2804', type:'mineral'},
-    {code:'2805', label:'알칼리토류 2805', type:'mineral'},
-    {code:'2825', label:'수산화물 2825', type:'mineral'},
-    {code:'2836', label:'탄산염 2836', type:'mineral'},
-    {code:'7502', label:'니켈 7502', type:'mineral'},
-    {code:'8105', label:'코발트 8105', type:'mineral'},
-    {code:'8101', label:'텅스텐 8101', type:'mineral'},
+  '반도체·전자': [
+    {hs6:'280459', hs4:'2804', hs10:'2804590000', label:'갈륨'},
+    {hs6:'280461', hs4:'2804', hs10:'2804611000', label:'실리콘'},
+    {hs6:'811221', hs4:'8112', hs10:'8112210000', label:'게르마늄'},
+    {hs6:'261590', hs4:'2615', hs10:'2615900000', label:'니오브·탄탈광'},
   ],
-  '6': [
-    {code:'280459', label:'갈륨 2804.59', type:'mineral'},
-    {code:'280530', label:'희토류 2805.30', type:'mineral'},
-    {code:'283691', label:'탄산리튬 2836.91', type:'mineral'},
-    {code:'260200', label:'망간광 2602.00', type:'mineral'},
-    {code:'250410', label:'흑연(분말) 2504.10', type:'mineral'},
-    {code:'750210', label:'니켈(미가공) 7502.10', type:'mineral'},
-    {code:'810510', label:'코발트 매트 8105.10', type:'mineral'},
-    {code:'810110', label:'텅스텐 분말 8101.10', type:'mineral'},
-    {code:'282520', label:'수산화리튬 2825.20', type:'mineral'},
-    {code:'261590', label:'니오브·탄탈광 2615.90', type:'mineral'},
+  '희토류·자석': [
+    {hs6:'280530', hs4:'2805', hs10:'2805301000', label:'희토류금속'},
+    {hs6:'284610', hs4:'2846', hs10:'2846101000', label:'세륨화합물'},
+    {hs6:'261210', hs4:'2612', hs10:'2612100000', label:'우라늄광'},
   ],
-  '10': [
-    {code:'2804590000', label:'갈륨 2804590000', type:'mineral'},
-    {code:'2805301000', label:'희토류금속 2805301000', type:'mineral'},
-    {code:'2836910000', label:'탄산리튬 2836910000', type:'mineral'},
-    {code:'2825200000', label:'수산화리튬 2825200000', type:'mineral'},
-    {code:'2504101000', label:'천연흑연 분말 2504101000', type:'mineral'},
+  '산업금속': [
+    {hs6:'810110', hs4:'8101', hs10:'8101100000', label:'텅스텐'},
+    {hs6:'261000', hs4:'2610', hs10:'2610000000', label:'크롬광'},
+    {hs6:'260300', hs4:'2603', hs10:'2603000000', label:'구리광'},
+    {hs6:'261390', hs4:'2613', hs10:'2613900000', label:'몰리브덴광'},
+    {hs6:'720241', hs4:'7202', hs10:'7202410000', label:'페로크롬'},
   ],
 };
 
@@ -2380,10 +2376,25 @@ function buildHsQuickChips() {
   const unit = document.querySelector('input[name="h_unit"]:checked')?.value || '2';
   const el = document.getElementById('hsQuickChips');
   if (!el) return;
-  const chips = HS_CHIPS_DATA[unit] || HS_CHIPS_DATA['2'];
-  el.innerHTML = chips.map(c =>
-    `<span class="qchip ${c.type}" onclick="quickHs('${c.code}')">${c.label}</span>`
-  ).join('');
+  if (unit === '2') {
+    el.innerHTML = [
+      {code:'26',label:'26류 — 광석·슬래그'},{code:'28',label:'28류 — 무기화학'},
+      {code:'75',label:'75류 — 니켈'},{code:'81',label:'81류 — 비금속'},
+      {code:'71',label:'71류 — 귀금속'},{code:'85',label:'85류 — 축전지'},
+    ].map(c=>`<span class="qchip hs" onclick="quickHs('${c.code}')">${c.label}</span>`).join('');
+    return;
+  }
+  const hsKey = unit==='4'?'hs4':unit==='10'?'hs10':'hs6';
+  let html = '';
+  Object.entries(HS_CHIPS_BY_INDUSTRY).forEach(([group, items])=>{
+    html += `<span class="qchip-group">${group}:</span> `;
+    items.forEach(c=>{
+      const code = c[hsKey] || c.hs6;
+      html += `<span class="qchip mineral" onclick="quickHs('${code}')">${c.label} ${code}</span>`;
+    });
+    html += '<br>';
+  });
+  el.innerHTML = html;
 }
 
 /* ════════════════════════════════════════════════
@@ -3088,7 +3099,7 @@ function renderMTable(data) {
       return `<tr>
         <td>${r.yr}</td>
         <td><span class="hs-mono">${r.hs}</span></td>
-        <td>${r.name}</td>
+        <td class="ellip" title="${(r.name||'').replace(/"/g,'&quot;')}">${r.name}</td>
         <td>${r.cn}</td>
         <td class="num">${Number(r.amt).toLocaleString()}</td>
         <td class="num">${Number(r.wt).toLocaleString()}</td>
@@ -3106,7 +3117,7 @@ function renderMTable(data) {
       return `<tr>
         <td>${r.period||'—'}</td>
         <td><span class="hs-mono">${r.hsCd||r._hsCode||''}</span></td>
-        <td>${r.hsNm||r._mineral||''}</td>
+        <td class="ellip" title="${(r.hsNm||r._mineral||'').replace(/"/g,'&quot;')}">${r.hsNm||r._mineral||''}</td>
         <td>${cntyLabel}</td>
         <td class="num">${Number(amt).toLocaleString()}</td>
         <td class="num">${Number(wt).toLocaleString()}</td>
@@ -3601,6 +3612,21 @@ async function queryMapData() {
     Object.values(MAP_COUNTRY_DATA).forEach(v => delete v._hidden);
     updateMapColors();
     if (statusEl) statusEl.textContent = '정적 데이터 표시 중';
+    // TOP7 정적 복원 (국가별 수입액 비중)
+    const staticTop = Object.entries(MAP_COUNTRY_DATA_STATIC)
+      .filter(([k])=>k!=='410')
+      .sort((a,b)=>(b[1].pct||0)-(a[1].pct||0)).slice(0,7);
+    const topList = document.getElementById('mapTop7List');
+    if (topList) {
+      topList.innerHTML = staticTop.map(([,c])=>{
+        const cls = c.pct>=50?'critical':c.pct>=20?'warning':'ok';
+        return `<div class="dep-item"><div class="dep-header"><span class="dep-mineral" style="font-size:12px">${c.flag} ${c.name}</span><span class="dep-pct ${cls}" style="font-size:12px">${c.pct}%</span></div><div class="dep-bar-track"><div class="dep-bar-fill ${cls}" style="width:${Math.min(c.pct,100)}%"></div></div></div>`;
+      }).join('');
+    }
+    const hdr = document.querySelector('.country-card .country-info-title');
+    if (hdr) hdr.textContent = '핵심광물 수입 국가 TOP 7';
+    const sub = document.querySelector('.country-card .country-info-sub');
+    if (sub) sub.textContent = '전체 수입액 비중 기준 (정적)';
     return;
   }
 
@@ -3651,27 +3677,29 @@ async function queryMapData() {
 
     updateMapColors();
 
-    // 지도 우측 패널 TOP 7 업데이트
+    // 지도 우측 패널 TOP 7 업데이트 (국가별 수입액 비중)
     const top7 = Object.entries(ctry)
       .sort((a,b)=>b[1]-a[1]).slice(0,7)
       .map(([a3, amt]) => ({
         name: COUNTRY_NAMES[a3]||a3,
+        flag: COUNTRY_FLAGS[a3]||'🌐',
+        amt,
         pct: Math.round(amt/total*1000)/10
       }));
-    const topList = document.querySelector('.country-card .dep-list');
+    const topList = document.getElementById('mapTop7List');
     if (topList) {
       topList.innerHTML = top7.map(c => {
-        const cls = c.pct>=80?'critical':c.pct>=50?'warning':'ok';
+        const cls = c.pct>=50?'critical':c.pct>=20?'warning':'ok';
         return `<div class="dep-item">
           <div class="dep-header">
-            <span class="dep-mineral" style="font-size:12px">${mineral} → ${c.name}</span>
+            <span class="dep-mineral" style="font-size:12px">${c.flag} ${c.name}</span>
             <span class="dep-pct ${cls}" style="font-size:12px">${c.pct}%</span>
           </div>
           <div class="dep-bar-track"><div class="dep-bar-fill ${cls}" style="width:${Math.min(c.pct,100)}%"></div></div>
         </div>`;
       }).join('');
       const hdr = document.querySelector('.country-card .country-info-title');
-      if (hdr) hdr.textContent = `${mineral} 수입 집중 TOP 7`;
+      if (hdr) hdr.textContent = `${mineral} 수입 국가 TOP 7`;
       const sub = document.querySelector('.country-card .country-info-sub');
       if (sub) sub.textContent = `${year}년 수입액 비중 기준`;
     }
