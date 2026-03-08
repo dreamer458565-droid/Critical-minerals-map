@@ -8,6 +8,7 @@
 <title>핵심광물 수입 현황 조회·분석</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <style>
@@ -1349,11 +1350,33 @@ table.result tbody td.center{text-align:center;}
       </div>
     </div>
 
+    <!-- 국가별 비중 요약 -->
+    <div class="result-table-wrap" id="h-country-summary" style="margin-bottom:0;">
+      <div class="table-header">
+        <div class="table-title">국가별 수입 비중</div>
+        <div class="table-count" id="h-country-count"></div>
+      </div>
+      <div class="table-scroll" style="max-height:260px;">
+        <table class="result" id="h-country-table">
+          <thead><tr>
+            <th>순위</th><th>국가</th><th>수입액 (천$)</th><th>비중 (%)</th><th>수입중량 (톤)</th>
+          </tr></thead>
+          <tbody id="h-country-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- 결과 테이블 -->
     <div class="result-table-wrap" id="h-table-wrap">
       <div class="table-header">
         <div class="table-title">수출입 실적 상세</div>
-        <div class="table-count" id="h-table-count"></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="chart-tab-group" style="margin:0;">
+            <button class="chart-tab active" onclick="switchHTableView('year',this)">연도별</button>
+            <button class="chart-tab" onclick="switchHTableView('month',this)">월별</button>
+          </div>
+          <div class="table-count" id="h-table-count"></div>
+        </div>
       </div>
       <div class="table-scroll">
         <table class="result" id="h-table">
@@ -1941,6 +1964,13 @@ const HS_TREE = {
       '7502':{name:'미정련 니켈',children:{'750210':{name:'니켈(미합금)'},'750220':{name:'니켈 합금'}}},
     }
   },
+  '80':{ name:'80류 — 주석',
+    children:{
+      '8001':{name:'주석 미가공',children:{'800110':{name:'주석(합금아닌것)'},'800120':{name:'주석합금'}}},
+      '8002':{name:'주석 웨이스트',children:{'800200':{name:'주석 웨이스트·스크랩'}}},
+      '8003':{name:'주석 봉·형재',children:{'800300':{name:'주석 봉·형재·선'}}},
+    }
+  },
   '81':{ name:'81류 — 기타 비금속',
     children:{
       '8101':{name:'텅스텐',children:{'810110':{name:'텅스텐 분말'},'810120':{name:'텅스텐 괴·바'}}},
@@ -2071,6 +2101,7 @@ let mSupplyType = 'amount';  // 'amount' | 'weight'
 let hCountryType = 'doughnut';
 let hDonutScope = 'country'; // 'country' | 'continent'
 let hSubType = 'bar';
+let hTableView = 'year'; // 'year' | 'month'
 let sortState = {};
 
 /* ════════════════════════════════════════════════
@@ -2396,9 +2427,10 @@ function buildHsQuickChips() {
   if (!el) return;
   if (unit === '2') {
     el.innerHTML = [
-      {code:'26',label:'26류 — 광석·슬래그'},{code:'28',label:'28류 — 무기화학'},
-      {code:'75',label:'75류 — 니켈'},{code:'81',label:'81류 — 비금속'},
-      {code:'71',label:'71류 — 귀금속'},{code:'85',label:'85류 — 축전지'},
+      {code:'25',label:'25류 — 토석류'},{code:'26',label:'26류 — 광석·슬래그'},
+      {code:'28',label:'28류 — 무기화학'},{code:'71',label:'71류 — 귀금속'},
+      {code:'75',label:'75류 — 니켈'},{code:'80',label:'80류 — 주석'},
+      {code:'81',label:'81류 — 비금속'},{code:'85',label:'85류 — 축전지'},
     ].map(c=>`<span class="qchip hs" onclick="quickHs('${c.code}')">${c.label}</span>`).join('');
     return;
   }
@@ -2851,11 +2883,20 @@ function renderMCountrySummary(data) {
     byCountry[c].amt += parseFloat(r.impAmt||r.expAmt||0);
     byCountry[c].wt  += parseFloat(r.impWgt||r.expWgt||0);
   });
-  const sorted = Object.entries(byCountry).sort((a,b)=>b[1].amt-a[1].amt);
-  const total = sorted.reduce((s,e)=>s+e[1].amt,0);
+  // 수입액 > 0 인 국가만 표시
+  const sorted = Object.entries(byCountry).filter(e=>e[1].amt>0).sort((a,b)=>b[1].amt-a[1].amt);
+  const totalAmt = sorted.reduce((s,e)=>s+e[1].amt,0);
+  const totalWt  = sorted.reduce((s,e)=>s+e[1].wt,0);
   document.getElementById('m-country-count').textContent = `${sorted.length}개국`;
-  document.getElementById('m-country-tbody').innerHTML = sorted.map((e,i) => {
-    const pct = total>0 ? (e[1].amt/total*100).toFixed(1) : '0';
+  // 합계 행 + 국가 행
+  const totalRow = `<tr style="background:var(--navy);color:#fff;font-weight:700;">
+    <td>—</td><td>합계</td>
+    <td class="num">${Number(totalAmt).toLocaleString()}</td>
+    <td class="num">100%</td>
+    <td class="num">${Number(totalWt).toLocaleString()}</td>
+  </tr>`;
+  const countryRows = sorted.map((e,i) => {
+    const pct = totalAmt>0 ? (e[1].amt/totalAmt*100).toFixed(1) : '0';
     return `<tr>
       <td>${i+1}</td>
       <td>${e[0]}</td>
@@ -2864,6 +2905,7 @@ function renderMCountrySummary(data) {
       <td class="num">${Number(e[1].wt).toLocaleString()}</td>
     </tr>`;
   }).join('');
+  document.getElementById('m-country-tbody').innerHTML = totalRow + countryRows;
 }
 
 /* ── 테이블 뷰 전환 (연도별 집계 / 월별 상세) ── */
@@ -2929,25 +2971,41 @@ function renderMDonutChart(data) {
       ctx.restore();
     }
   };
+  const totalDonut = values.reduce((a,b)=>a+b,0);
   mChartDonut = new Chart(mDonutEl.getContext('2d'), {
     type: mDonutType==='pie' ? 'pie' : 'doughnut',
     data:{ labels, datasets:[{data:values, backgroundColor:colors, borderColor:'#fff', borderWidth:2}] },
     options:{
       responsive:true, maintainAspectRatio:true,
       animation:{duration:600,easing:'easeOutQuart'},
+      layout:{padding:{top:4,bottom:4,left:4,right:4}},
       plugins:{
         legend:{position:window.innerWidth<640?'bottom':'right',labels:{font:{size:10,family:'Noto Sans KR'},boxWidth:10,padding:8}},
         tooltip:{
           backgroundColor:'rgba(15,28,51,.92)',titleFont:{family:'Noto Sans KR',size:12,weight:'bold'},bodyFont:{family:'Noto Sans KR',size:11},padding:10,cornerRadius:4,boxPadding:4,
           callbacks:{label:ctx=>{
-            const total=values.reduce((a,b)=>a+b,0);
-            const pct=(ctx.raw/total*100).toFixed(1);
+            const pct=(ctx.raw/totalDonut*100).toFixed(1);
             return `${ctx.label}: ${Number(ctx.raw).toLocaleString()}천$ (${pct}%)`;
           }}
+        },
+        datalabels:{
+          display:ctx=>{
+            const pct = ctx.dataset.data[ctx.dataIndex]/totalDonut*100;
+            return pct >= 8;
+          },
+          color:'#fff',
+          font:{size:10,weight:'bold',family:'Noto Sans KR'},
+          textShadowBlur:3,textShadowColor:'rgba(0,0,0,.5)',
+          formatter:(val,ctx)=>{
+            const pct = (val/totalDonut*100).toFixed(1);
+            const lbl = ctx.chart.data.labels[ctx.dataIndex];
+            return `${lbl}\n${pct}%`;
+          },
+          textAlign:'center',
         }
       }
     },
-    plugins:[centerTextPlugin]
+    plugins:[centerTextPlugin, ChartDataLabels]
   });
 }
 
@@ -3052,7 +3110,7 @@ function renderMSupplyChart(data) {
     }]},
     options:{
       indexAxis:'y', responsive:true, maintainAspectRatio:false,
-      layout:{padding:{right:8}},
+      layout:{padding:{right:60}},
       animation:{duration:600,easing:'easeOutQuart',delay:ctx=>ctx.dataIndex*50},
       plugins:{
         legend:{display:false},
@@ -3069,13 +3127,23 @@ function renderMSupplyChart(data) {
               return t3.length ? t3.map((c,i)=>`  ${i+1}. ${c.name} ${c.pct}%`).join('\n') : '';
             }
           }
+        },
+        datalabels:{
+          anchor:'end', align:'right', clamp:true,
+          color:'#2C2416',
+          font:{size:10,weight:600,family:'JetBrains Mono'},
+          formatter:(val)=>{
+            const pct = totalVal>0 ? (val/totalVal*100).toFixed(1) : '0';
+            return `${pct}%`;
+          },
         }
       },
       scales:{
         x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:9},callback:v=>Number(v).toLocaleString()}},
         y:{grid:{display:false},ticks:{font:{size:11,family:'Noto Sans KR',weight:600}}}
       }
-    }
+    },
+    plugins:[ChartDataLabels]
   });
 
   // === 우측: 공급단계별 국가 집중도 (100% stacked bar) ===
@@ -3121,13 +3189,24 @@ function renderMSupplyChart(data) {
         tooltip:{
           backgroundColor:'rgba(15,28,51,.92)',titleFont:{family:'Noto Sans KR',size:11},bodyFont:{size:10},padding:8,cornerRadius:4,
           callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw}%`}
+        },
+        datalabels:{
+          display:ctx=> ctx.dataset.data[ctx.dataIndex] >= 12,
+          color:'#fff',
+          font:{size:9,weight:'bold',family:'Noto Sans KR'},
+          textShadowBlur:2,textShadowColor:'rgba(0,0,0,.4)',
+          formatter:(val,ctx)=>{
+            if(val<18) return Math.round(val)+'%';
+            return `${ctx.dataset.label} ${Math.round(val)}%`;
+          },
         }
       },
       scales:{
         x:{stacked:true, max:100, grid:{color:'rgba(0,0,0,.05)'}, ticks:{font:{size:9}, callback:v=>v+'%'}},
         y:{stacked:true, grid:{display:false}, ticks:{font:{size:11,family:'Noto Sans KR',weight:600}}}
       }
-    }
+    },
+    plugins:[ChartDataLabels]
   });
 }
 
@@ -3321,6 +3400,7 @@ function renderHsResult(data, hsCd) {
 
   renderHCountryChart(data);
   renderHSubChart(data, hsCd);
+  renderHCountrySummary(data);
   renderHTable(data);
 }
 
@@ -3378,6 +3458,7 @@ function renderHCountryChart(data) {
       ctx.restore();
     }
   };
+  const hTotalDonut = values.reduce((a,b)=>a+b,0);
   hChartCountry = new Chart(hCountryEl.getContext('2d'), {
     type: hCountryType==='bar' ? 'bar' : hCountryType==='pie' ? 'pie' : 'doughnut',
     data:{labels,datasets:[{data:values,backgroundColor:colors,borderColor:'#fff',borderWidth:2}]},
@@ -3385,14 +3466,29 @@ function renderHCountryChart(data) {
       indexAxis: hCountryType==='bar' ? 'y' : undefined,
       responsive:true, maintainAspectRatio:true,
       animation:{duration:600,easing:'easeOutQuart'},
+      layout:{padding:{top:4,bottom:4,left:4,right:4}},
       plugins:{
         legend:{position:hCountryType==='bar'?'top':(window.innerWidth<640?'bottom':'right'),labels:{font:{size:10,family:'Noto Sans KR'},boxWidth:10,padding:8}},
         tooltip:{
           backgroundColor:'rgba(15,28,51,.92)',titleFont:{family:'Noto Sans KR',size:12,weight:'bold'},bodyFont:{family:'Noto Sans KR',size:11},padding:10,cornerRadius:4,boxPadding:4,
           callbacks:{label:ctx=>{
-            const total=values.reduce((a,b)=>a+b,0);
-            return `${ctx.label}: ${Number(ctx.raw).toLocaleString()}천$ (${(ctx.raw/total*100).toFixed(1)}%)`;
+            return `${ctx.label}: ${Number(ctx.raw).toLocaleString()}천$ (${(ctx.raw/hTotalDonut*100).toFixed(1)}%)`;
           }}
+        },
+        datalabels: hCountryType==='bar' ? {display:false} : {
+          display:ctx=>{
+            const pct = ctx.dataset.data[ctx.dataIndex]/hTotalDonut*100;
+            return pct >= 8;
+          },
+          color:'#fff',
+          font:{size:10,weight:'bold',family:'Noto Sans KR'},
+          textShadowBlur:3,textShadowColor:'rgba(0,0,0,.5)',
+          formatter:(val,ctx)=>{
+            const pct = (val/hTotalDonut*100).toFixed(1);
+            const lbl = ctx.chart.data.labels[ctx.dataIndex];
+            return `${lbl}\n${pct}%`;
+          },
+          textAlign:'center',
         }
       },
       scales: hCountryType==='bar' ? {
@@ -3400,7 +3496,7 @@ function renderHCountryChart(data) {
         y:{grid:{display:false},ticks:{font:{size:10,family:'Noto Sans KR'}}}
       } : undefined,
     },
-    plugins:[hCenterPlugin]
+    plugins:[hCenterPlugin, ChartDataLabels]
   });
 }
 
@@ -3452,26 +3548,93 @@ function renderHSubChart(data, hsCd) {
   });
 }
 
-/* ── HS 결과 테이블 ── */
-function renderHTable(data) {
-  document.getElementById('h-table-count').textContent=`${data.length}건`;
-  document.getElementById('h-tbody').innerHTML = data.map(r=>{
-    const amt=parseFloat(r.impAmt||r.expAmt||0);
-    const wt =parseFloat(r.impWgt||r.expWgt||0);
-    const uprice=wt>0?Number((amt*1000/wt).toFixed(1)).toLocaleString():'-';
-    const hs=r.hsCd||'';
-    // HS코드 접두사 매칭으로 연관 광종 찾기 (2/4/6/10단위)
-    const relMinerals = findRelatedMinerals(hs);
+/* ── HS 국가별 비중 요약 테이블 ── */
+function renderHCountrySummary(data) {
+  const byCountry = {};
+  data.forEach(r => {
+    const c = r.cntyNm || COUNTRY_NAMES[r.cntyCd] || r.cntyCd || '기타';
+    if(!byCountry[c]) byCountry[c] = {amt:0, wt:0};
+    byCountry[c].amt += parseFloat(r.impAmt||r.expAmt||0);
+    byCountry[c].wt  += parseFloat(r.impWgt||r.expWgt||0);
+  });
+  const sorted = Object.entries(byCountry).filter(e=>e[1].amt>0).sort((a,b)=>b[1].amt-a[1].amt);
+  const totalAmt = sorted.reduce((s,e)=>s+e[1].amt,0);
+  const totalWt  = sorted.reduce((s,e)=>s+e[1].wt,0);
+  document.getElementById('h-country-count').textContent = `${sorted.length}개국`;
+  const totalRow = `<tr style="background:var(--navy);color:#fff;font-weight:700;">
+    <td>—</td><td>합계</td>
+    <td class="num">${Number(totalAmt).toLocaleString()}</td>
+    <td class="num">100%</td>
+    <td class="num">${Number(totalWt).toLocaleString()}</td>
+  </tr>`;
+  const countryRows = sorted.map((e,i) => {
+    const pct = totalAmt>0 ? (e[1].amt/totalAmt*100).toFixed(1) : '0';
     return `<tr>
-      <td><span class="hs-mono">${hs}</span></td>
-      <td>${r.hsNm||'—'}</td>
-      <td style="font-size:11px;color:var(--amber)">${relMinerals||'—'}</td>
-      <td>${r.period||'—'}</td>
-      <td class="num">${Number(amt).toLocaleString()}</td>
-      <td class="num">${Number(wt).toLocaleString()}</td>
-      <td class="num">${uprice}</td>
+      <td>${i+1}</td>
+      <td>${e[0]}</td>
+      <td class="num">${Number(e[1].amt).toLocaleString()}</td>
+      <td class="num"><span style="color:${parseFloat(pct)>=10?'var(--rust)':'inherit'};font-weight:${parseFloat(pct)>=10?'600':'normal'}">${pct}%</span></td>
+      <td class="num">${Number(e[1].wt).toLocaleString()}</td>
     </tr>`;
   }).join('');
+  document.getElementById('h-country-tbody').innerHTML = totalRow + countryRows;
+}
+
+/* ── HS 결과 테이블 (연도별/월별) ── */
+function renderHTable(data) {
+  if(hTableView==='year') {
+    // 연도별 집계: 연도+HS코드별 합산
+    const agg = {};
+    data.forEach(r => {
+      const yr = (r.period||'').slice(0,4) || '—';
+      const hs = r.hsCd||'';
+      const key = `${yr}|${hs}`;
+      if(!agg[key]) agg[key] = {yr,hs,name:r.hsNm||'',amt:0,wt:0};
+      agg[key].amt += parseFloat(r.impAmt||r.expAmt||0);
+      agg[key].wt  += parseFloat(r.impWgt||r.expWgt||0);
+    });
+    const rows = Object.values(agg).sort((a,b)=>b.yr.localeCompare(a.yr)||b.amt-a.amt);
+    document.getElementById('h-table-count').textContent = `${rows.length}건 (연도별)`;
+    document.getElementById('h-tbody').innerHTML = rows.map(r => {
+      const uprice = r.wt>0 ? Number((r.amt*1000/r.wt).toFixed(1)).toLocaleString() : '-';
+      const relMinerals = findRelatedMinerals(r.hs);
+      return `<tr>
+        <td><span class="hs-mono">${r.hs}</span></td>
+        <td class="ellip" title="${(r.name||'').replace(/"/g,'&quot;')}">${r.name}</td>
+        <td style="font-size:11px;color:var(--amber)">${relMinerals||'—'}</td>
+        <td>${r.yr}</td>
+        <td class="num">${Number(r.amt).toLocaleString()}</td>
+        <td class="num">${Number(r.wt).toLocaleString()}</td>
+        <td class="num">${uprice}</td>
+      </tr>`;
+    }).join('');
+  } else {
+    // 월별 상세
+    document.getElementById('h-table-count').textContent=`${data.length}건 (월별)`;
+    document.getElementById('h-tbody').innerHTML = data.map(r=>{
+      const amt=parseFloat(r.impAmt||r.expAmt||0);
+      const wt =parseFloat(r.impWgt||r.expWgt||0);
+      const uprice=wt>0?Number((amt*1000/wt).toFixed(1)).toLocaleString():'-';
+      const hs=r.hsCd||'';
+      const relMinerals = findRelatedMinerals(hs);
+      return `<tr>
+        <td><span class="hs-mono">${hs}</span></td>
+        <td class="ellip" title="${(r.hsNm||'').replace(/"/g,'&quot;')}">${r.hsNm||'—'}</td>
+        <td style="font-size:11px;color:var(--amber)">${relMinerals||'—'}</td>
+        <td>${r.period||'—'}</td>
+        <td class="num">${Number(amt).toLocaleString()}</td>
+        <td class="num">${Number(wt).toLocaleString()}</td>
+        <td class="num">${uprice}</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+/* ── HS 테이블 뷰 전환 ── */
+function switchHTableView(view, el) {
+  hTableView = view;
+  if(el) { el.closest('.chart-tab-group').querySelectorAll('.chart-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); }
+  if(hResultData.length) renderHTable(hResultData);
 }
 
 /* ── HS코드 → 연관 광종 찾기 (접두사 매칭) ── */
