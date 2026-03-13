@@ -5433,8 +5433,8 @@ const INDUSTRY_CHAINS = {
         { ko: null, label: '배터리 팩', icon: '⚡', desc: 'BMS 포함 EV·ESS용 팩', hs: ['850760'], expMode: true },
       ]},
       { label: '완성차', color: '#6A1B9A', nodes: [
-        { ko: null, label: '전기차 (EV)', icon: '🚗', desc: 'Hyundai Ioniq·Kia EV 시리즈', hs: ['870370','870360'], expMode: true },
-        { ko: null, label: 'PHEV·HEV', icon: '🔌', desc: '플러그인·하이브리드 차량', hs: ['870340','870350'], expMode: true },
+        { ko: null, label: '전기차 (EV)', icon: '🚗', desc: 'Hyundai Ioniq·Kia EV 시리즈', hs: ['870370','870360'], hsLegacy: ['870390'], expMode: true },
+        { ko: null, label: 'PHEV·HEV', icon: '🔌', desc: '플러그인·하이브리드 차량', hs: ['870340','870350'], hsLegacy: ['870390'], expMode: true },
       ]},
     ],
     finalProduct: { label: '글로벌 EV 시장', icon: '🌍', desc: '미국·유럽·동남아 수출 / IRA 요건 충족' },
@@ -5467,7 +5467,7 @@ const INDUSTRY_CHAINS = {
         { ko: null, label: '시스템 반도체', icon: '⚙️', desc: 'AP·GPU·파운드리', hs: ['854231','854239'], expMode: true },
       ]},
       { label: '최종 기기', color: '#1565C0', nodes: [
-        { ko: null, label: '스마트폰', icon: '📱', desc: '갤럭시 시리즈 / 삼성·LG 전자', hs: ['851712'], expMode: true },
+        { ko: null, label: '스마트폰', icon: '📱', desc: '갤럭시 시리즈 / 삼성·LG 전자', hs: ['851713','851714'], hsLegacy: ['851712'], expMode: true },
         { ko: null, label: '서버·데이터센터', icon: '🖥️', desc: 'AI 서버·HPC 솔루션', hs: ['847180'], expMode: true },
       ]},
     ],
@@ -5591,6 +5591,14 @@ function vcSelectIndustry(id) {
   renderVcFlow(id);
 }
 
+// HS 코드 버전 관리: WCO 5년 주기 개정 대응
+// hs = 현재(HS 2022) 코드, hsLegacy = 2022년 이전 코드(HS 2017)
+function resolveHs(node, year) {
+  const y = parseInt(year);
+  if (y < 2022 && node.hsLegacy?.length) return node.hsLegacy;
+  return node.hs || [];
+}
+
 function renderVcFlow(id) {
   const chain = INDUSTRY_CHAINS[id];
   const year  = document.getElementById('vc_year')?.value || (new Date().getFullYear() - 1);
@@ -5696,9 +5704,9 @@ function renderVcFlow(id) {
           </div>`;
         card.appendChild(productAmtDiv);
         const pLabel = node.label;
-        const pHs = node.hs;
+        const pHs = resolveHs(node, year);
         card.onclick = () => vcProductClick(pLabel, pHs, isExp, node.icon || '');
-        fetchVcProductAmt(node.hs, year, isExp, productAmtDiv);
+        fetchVcProductAmt(pHs, year, isExp, productAmtDiv);
       } else {
         // 완성품 노드 (HS 없음 → 표시 전용)
         card.style.cssText = 'background:var(--navy);border-color:var(--amber);cursor:default;';
