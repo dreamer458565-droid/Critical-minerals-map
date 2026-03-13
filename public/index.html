@@ -879,6 +879,9 @@ table.result tbody td.center{text-align:center;}
       <div><strong>대상광물</strong>&nbsp; 61종</div>
       <div><strong>HS 코드</strong>&nbsp; 530개 항목</div>
       <div><strong>출처</strong>&nbsp; 관세청 무역통계</div>
+      <div style="margin-top:10px;">
+        <button onclick="downloadHsMappingCsv()" style="background:rgba(212,134,12,.18);border:1px solid rgba(212,134,12,.55);color:#F4C430;font-size:11px;font-weight:600;letter-spacing:.5px;padding:5px 14px;border-radius:3px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;" title="광종·HS코드·밸류체인 전체 매핑표 다운로드">📥 HS 매핑표 CSV</button>
+      </div>
     </div>
   </div>
 </header>
@@ -1475,7 +1478,6 @@ table.result tbody td.center{text-align:center;}
               </select>
               <button class="btn-query" style="padding:6px 14px;font-size:12px;" onclick="queryMapData()">🌍 실시간 조회</button>
               <span id="mapStatus" style="font-size:11px;color:var(--sub);"></span>
-              <button onclick="downloadHsMappingCsv()" style="padding:4px 10px;font-size:11px;background:var(--parchment);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--text);" title="HS코드·광종·산업·밸류체인 매핑표 CSV 다운로드">📥 매핑표</button>
             </div>
           </div>
           <!-- D3 세계 지도 컨테이너 -->
@@ -4784,6 +4786,11 @@ function selectMapCountry(info) {
   }).join('');
 }
 
+/* 6자리 HS → 10자리 한국 HSK 표시 변환 (API 쿼리는 6자리 유지, 표시용) */
+function toHs10(code) {
+  return String(code).replace(/\D/g, '').padEnd(10, '0');
+}
+
 /* 밸류체인별 세부 수입 내역 테이블 렌더 */
 function renderMapDetailTable(hsDetail, total, mineral, label) {
   const section  = document.getElementById('map-detail-section');
@@ -4836,7 +4843,7 @@ function renderMapDetailTable(hsDetail, total, mineral, label) {
         : '';
       html += `<tr style="border-bottom:1px solid var(--border);">
         ${stageTd}
-        <td style="padding:7px 10px;font-family:monospace;white-space:nowrap;">${d.hs}</td>
+        <td style="padding:7px 10px;font-family:monospace;white-space:nowrap;">${toHs10(d.hs)}</td>
         <td style="padding:7px 10px;color:var(--subtext);">${d.hsName}</td>
         <td style="padding:7px 10px;text-align:right;white-space:nowrap;">${Number(Math.round(d.totalAmt)).toLocaleString()}</td>
         <td style="padding:7px 10px;text-align:right;white-space:nowrap;font-weight:600;color:${color};">${pct}%</td>
@@ -4852,10 +4859,10 @@ function renderMapDetailTable(hsDetail, total, mineral, label) {
 
 /* HS코드·광종·산업·밸류체인 매핑표 CSV 다운로드 */
 function downloadHsMappingCsv() {
-  const rows = [['광종', '분류', 'HS코드', 'HS품목명', '공급단계(밸류체인)']];
+  const rows = [['광종', '분류', 'HS코드(10자리)', 'HS코드(6자리)', 'HS품목명', '공급단계(밸류체인)']];
   MINERAL_DB.forEach(m => {
     (m.hs || []).forEach((hs, i) => {
-      rows.push([m.ko, m.group || '', hs, m.hsName?.[i] || '', getSupplyStage(hs)]);
+      rows.push([m.ko, m.group || '', toHs10(hs), hs, m.hsName?.[i] || '', getSupplyStage(hs)]);
     });
   });
   const csv  = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
