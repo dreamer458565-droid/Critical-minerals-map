@@ -5484,12 +5484,12 @@ const INDUSTRY_CHAINS = {
         { ko: '구리', role: '모터 권선 소재', stageNote: '전도성 핵심금속' },
       ]},
       { label: '모터 부품', color: '#1A7A5E', nodes: [
-        { ko: null, label: '로터(회전자)', icon: '🔄', desc: 'NdFeB 자석 내장 IPM 로터', hs: ['850130','850150'], expMode: false },
-        { ko: null, label: '스테이터(고정자)', icon: '🔳', desc: '전기강판 코어+구리 권선', hs: ['850130','850150'], expMode: false },
+        { ko: null, label: '로터(회전자)', icon: '🔄', desc: 'NdFeB 자석 내장 IPM 로터', hs: ['850300'], expMode: false },
+        { ko: null, label: '스테이터(고정자)', icon: '🔳', desc: '전기강판 코어+구리 권선', hs: ['850300'], expMode: false },
       ]},
       { label: '완성품', color: '#D4860C', nodes: [
-        { ko: null, label: 'EV 구동모터', icon: '⚡', desc: '영구자석 동기모터(PMSM)', hs: ['850150'], expMode: true },
-        { ko: null, label: '풍력 발전기', icon: '🌬️', desc: 'NdFeB 직구동 발전기', hs: ['850164'], expMode: true },
+        { ko: null, label: 'EV 구동모터', icon: '⚡', desc: '영구자석 동기모터(PMSM)', hs: ['850153','850152'], expMode: true },
+        { ko: null, label: '풍력 발전기', icon: '🌬️', desc: 'NdFeB 직구동 발전기', hs: ['850164','850163'], expMode: true },
       ]},
     ],
     finalProduct: { label: '전기차·풍력발전', icon: '🏭', desc: 'EV 1대당 NdFeB 약 1~3kg' },
@@ -5877,7 +5877,7 @@ async function fetchVcDetailData(mEntry, year) {
       }
     }
 
-    _vcDetailTrendData   = { years, yearAmts, year };
+    _vcDetailTrendData   = { years, yearAmts, year, countryByYear };
     _vcDetailCountryData = { sortedCntry, selTotal };
     renderVcDetailChart(_vcDetailChartMode);
 
@@ -5914,22 +5914,53 @@ function renderVcDetailChart(mode) {
       },
     });
   } else if (mode === 'trend' && _vcDetailTrendData) {
-    const { years, yearAmts, year } = _vcDetailTrendData;
+    const { years, yearAmts, year, countryByYear } = _vcDetailTrendData;
     const labels = years.map(String);
-    const vals   = years.map(y => +(yearAmts[y] / 1e6).toFixed(1));
+    const PALETTE = ['#2E5B8A','#C0392B','#D4860C','#1A7A5E','#7B1FA2','#BDC3C7'];
+
+    // 전체 기간 국가 합산 → top4 추출
+    const totalByCountry = {};
+    Object.values(countryByYear || {}).forEach(yMap => {
+      Object.entries(yMap).forEach(([c,v]) => { totalByCountry[c] = (totalByCountry[c]||0) + v; });
+    });
+    const top4 = Object.entries(totalByCountry).sort((a,b)=>b[1]-a[1]).slice(0,4).map(e=>e[0]);
+
+    const datasets = [
+      ...top4.map((code, i) => ({
+        label: _VCD_CNAMES[code] || code,
+        data: labels.map(y => {
+          const yMap = (countryByYear||{})[+y] || {};
+          return +((yMap[code]||0) / 1e6).toFixed(2);
+        }),
+        backgroundColor: labels.map(l => PALETTE[i] + (l==year?'CC':'77')),
+        borderColor: PALETTE[i],
+        borderWidth: 0, stack: 'a',
+      })),
+      {
+        label: '기타',
+        data: labels.map(y => {
+          const yMap = (countryByYear||{})[+y] || {};
+          const top4Sum = top4.reduce((s,c)=>s+(yMap[c]||0), 0);
+          const total = Object.values(yMap).reduce((s,v)=>s+v, 0);
+          return +((total - top4Sum) / 1e6).toFixed(2);
+        }),
+        backgroundColor: labels.map(l => PALETTE[5] + (l==year?'CC':'77')),
+        borderColor: PALETTE[5], borderWidth: 0, stack: 'a',
+      },
+    ];
+
     _vcDetailChart = new Chart(canvas, {
       type: 'bar',
-      data: { labels, datasets: [{ data: vals,
-        backgroundColor: labels.map(l => l == year ? 'rgba(212,134,12,.8)' : 'rgba(46,91,138,.5)'),
-        borderColor: labels.map(l => l == year ? '#D4860C' : '#2E5B8A'),
-        borderWidth: 1, borderRadius: 3,
-      }]},
+      data: { labels, datasets },
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `$${ctx.parsed.y.toFixed(1)}M` } } },
+        plugins: {
+          legend: { position: 'bottom', labels: { font: { size: 9 }, padding: 5, boxWidth: 8 } },
+          tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: $${ctx.parsed.y.toFixed(1)}M` } },
+        },
         scales: {
-          x: { ticks: { font: { size: 10 } }, grid: { display: false } },
-          y: { ticks: { font: { size: 9 }, callback: v => `$${v}M` }, grid: { color: 'rgba(0,0,0,.05)' } },
+          x: { stacked: true, ticks: { font: { size: 10 } }, grid: { display: false } },
+          y: { stacked: true, ticks: { font: { size: 9 }, callback: v => `$${v}M` }, grid: { color: 'rgba(0,0,0,.05)' } },
         },
       },
     });
@@ -6055,7 +6086,7 @@ async function fetchVcProductData(hsList, year, isExp) {
         rankEl.innerHTML = '<div style="font-size:11px;color:var(--muted);">국가 데이터 없음</div>';
       }
     }
-    _vcProdTrendData = { years, yearAmts, year };
+    _vcProdTrendData = { years, yearAmts, year, countryByYear };
     _vcProdCountryData = { sortedCntry, selTotal };
     renderVcProductChart(_vcProdChartMode);
   } catch(e) { console.error('vcProductData error', e); }
@@ -6085,18 +6116,40 @@ function renderVcProductChart(mode) {
           tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed.toFixed(1)}%`}} } },
     });
   } else if (mode === 'trend' && _vcProdTrendData) {
-    const { years, yearAmts, year } = _vcProdTrendData;
-    const vals = years.map(y => +(yearAmts[y]/1e6).toFixed(1));
+    const { years, yearAmts, year, countryByYear } = _vcProdTrendData;
+    const labels = years.map(String);
+    const PALETTE = [ACCENT,'#2E5B8A','#D4860C','#1A7A5E','#7B1FA2','#BDC3C7'];
+    const totalByCountry = {};
+    Object.values(countryByYear||{}).forEach(yMap => {
+      Object.entries(yMap).forEach(([c,v])=>{ totalByCountry[c]=(totalByCountry[c]||0)+v; });
+    });
+    const top4 = Object.entries(totalByCountry).sort((a,b)=>b[1]-a[1]).slice(0,4).map(e=>e[0]);
+    const datasets = [
+      ...top4.map((code,i) => ({
+        label: _VCD_CNAMES[code]||code,
+        data: labels.map(y => +((((countryByYear||{})[+y]||{})[code]||0)/1e6).toFixed(2)),
+        backgroundColor: labels.map(l=>PALETTE[i]+(l==year?'CC':'77')),
+        borderColor: PALETTE[i], borderWidth:0, stack:'a',
+      })),
+      { label:'기타',
+        data: labels.map(y => {
+          const yMap=(countryByYear||{})[+y]||{};
+          const top4Sum=top4.reduce((s,c)=>s+(yMap[c]||0),0);
+          const total=Object.values(yMap).reduce((s,v)=>s+v,0);
+          return +((total-top4Sum)/1e6).toFixed(2);
+        }),
+        backgroundColor: labels.map(l=>PALETTE[5]+(l==year?'CC':'77')),
+        borderColor:PALETTE[5], borderWidth:0, stack:'a',
+      },
+    ];
     _vcProdChart = new Chart(canvas, {
       type: 'bar',
-      data: { labels: years.map(String), datasets: [{ data: vals,
-        backgroundColor: years.map(y => y==year ? ACCENT+'CC' : 'rgba(46,91,138,.4)'),
-        borderColor: years.map(y => y==year ? ACCENT : '#2E5B8A'),
-        borderWidth:1, borderRadius:3 }]},
+      data: { labels, datasets },
       options: { responsive:true, maintainAspectRatio:false,
-        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`$${ctx.parsed.y.toFixed(1)}M`}}},
-        scales:{x:{ticks:{font:{size:10}},grid:{display:false}},
-          y:{ticks:{font:{size:9},callback:v=>`$${v}M`},grid:{color:'rgba(0,0,0,.05)'}}} },
+        plugins:{legend:{position:'bottom',labels:{font:{size:9},padding:5,boxWidth:8}},
+          tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: $${ctx.parsed.y.toFixed(1)}M`}}},
+        scales:{x:{stacked:true,ticks:{font:{size:10}},grid:{display:false}},
+          y:{stacked:true,ticks:{font:{size:9},callback:v=>`$${v}M`},grid:{color:'rgba(0,0,0,.05)'}}} },
     });
   }
 }
