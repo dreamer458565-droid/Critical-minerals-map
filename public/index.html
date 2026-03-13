@@ -1914,9 +1914,9 @@ const MINERAL_DB = [
    hsName:['니켈코발트망간수산화물(NCM·NCA 전구체)','기타화학조제품(전구체 포함)'],
    hint:'NMC·NCA 배터리 전구체. 중국이 세계 생산의 약 80% 점유'},
   {ko:'NCM·NCA 양극재', en:'NCM/NCA Cathode', sym:'NCM', group:'배터리소재', risk:'높음', priority:'S',
-   hs:['285390','282090'],
-   hsName:['기타무기화합물(NCM·NCA 양극재)','기타산화망간계(양극소재)'],
-   hint:'삼원계 양극재(LiNiMnCoO₂·LiNiCoAlO₂). 고에너지밀도 EV 배터리 핵심'},
+   hs:['284190','285390','282590'],
+   hsName:['기타옥소금속산염(리튬니켈·코발트·망간 복합산화물)','기타무기화합물(NCM·NCA 혼합)','기타금속산화물·수산화물(NCM계)'],
+   hint:'삼원계 양극재(LiNiMnCoO₂·LiNiCoAlO₂). 국내 에코프로·포스코케미칼·엘앤에프가 생산, 수입보다 수출이 큰 품목'},
   {ko:'LFP 양극재',  en:'LFP Cathode',    sym:'LFP',  group:'배터리소재', risk:'높음', priority:'A',
    hs:['283529','284190'],
    hsName:['기타인산염(인산철리튬 LFP)','기타옥소금속산(LFP·LMFP 등)'],
@@ -5519,9 +5519,12 @@ const INDUSTRY_CHAINS = {
   },
 };
 
-let _vcActiveIndustry = null;
-let _vcActiveNodeKey  = null;
-let _vcDetailChart    = null;
+let _vcActiveIndustry  = null;
+let _vcActiveNodeKey   = null;
+let _vcDetailChart     = null;
+let _vcDetailTrendData   = null;
+let _vcDetailCountryData = null;
+let _vcDetailChartMode   = 'country';
 
 function vcInit() {
   // 연도 select 채우기
@@ -5762,27 +5765,43 @@ function vcNodeClick(nodeKey, industryId) {
     </div>
     <div class="vc-detail-stats" id="vcDetailStats">
       <div class="vc-detail-stat"><div class="vc-detail-stat-label">수입액</div><div class="vc-detail-stat-val" id="vcd-amt">조회중…</div></div>
-      <div class="vc-detail-stat"><div class="vc-detail-stat-label">주요 수입국</div><div class="vc-detail-stat-val" style="font-size:14px;" id="vcd-cntry">조회중…</div></div>
     </div>
-    <div style="font-size:11px;font-weight:700;color:var(--subtext);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px;">연도별 수입 추이</div>
-    <div style="height:130px;"><canvas id="vcDetailChartCanvas"></canvas></div>
-    <div style="margin-top:10px;font-size:10px;color:var(--muted);">HS코드: ${mEntry.hs.map(h => h + '____').join(', ')}</div>`;
+    <div id="vcd-rank-list" style="margin:8px 0 10px;">
+      <div style="font-size:11px;color:var(--muted);">국가별 비중 로딩 중…</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+      <div style="font-size:10px;font-weight:700;color:var(--subtext);letter-spacing:.8px;text-transform:uppercase;" id="vcd-chart-label">국가별 비중</div>
+      <div class="chart-tab-group" style="margin:0;">
+        <button class="chart-tab active" id="vcd-tab-country" onclick="vcDetailSwitchChart('country')">국가비중</button>
+        <button class="chart-tab" id="vcd-tab-trend" onclick="vcDetailSwitchChart('trend')">수입추이</button>
+      </div>
+    </div>
+    <div style="height:150px;"><canvas id="vcDetailChartCanvas"></canvas></div>
+    <div style="margin-top:8px;font-size:10px;color:var(--muted);">HS코드: ${mEntry.hs.map(h => h + '____').join(', ')}</div>`;
 
   fetchVcDetailData(mEntry, year);
 }
 
+const _VCD_CNAMES = {
+  CHN:'중국',USA:'미국',JPN:'일본',AUS:'호주',IDN:'인도네시아',PHL:'필리핀',
+  CHL:'칠레',ARG:'아르헨티나',CAN:'캐나다',ZAF:'남아공',FIN:'핀란드',COD:'콩고DRC',
+  BEL:'벨기에',NOR:'노르웨이',KAZ:'카자흐스탄',RUS:'러시아',DEU:'독일',GBR:'영국',
+  TWN:'대만',MYS:'말레이시아',SGP:'싱가포르',IND:'인도',VNM:'베트남',MNG:'몽골',
+  ZMB:'잠비아',PNG:'파푸아뉴기니',NAM:'나미비아',MOZ:'모잠비크',MDG:'마다가스카르',
+};
+
 async function fetchVcDetailData(mEntry, year) {
   try {
-    // 연도별 추이 (최근 5년)
     const curYear = new Date().getFullYear();
     const years = Array.from({length: 5}, (_, i) => curYear - 1 - i).reverse();
     const hsList = mEntry.hs.slice(0, 4);
 
-    // 각 연도별 합산
     const yearAmts = {};
-    const countryMap = {};
+    const countryByYear = {};
+
     await Promise.all(years.map(async y => {
       let amt = 0;
+      countryByYear[y] = {};
       await Promise.all(hsList.map(async hs => {
         try {
           const rows = await callTradeApi({ hsCd: hs, period: y });
@@ -5790,7 +5809,7 @@ async function fetchVcDetailData(mEntry, year) {
             const a = Number(r.impAmt || 0);
             amt += a;
             if (r.cntyCd && a > 0) {
-              countryMap[r.cntyCd] = (countryMap[r.cntyCd] || 0) + a;
+              countryByYear[y][r.cntyCd] = (countryByYear[y][r.cntyCd] || 0) + a;
             }
           });
         } catch {}
@@ -5798,59 +5817,101 @@ async function fetchVcDetailData(mEntry, year) {
       yearAmts[y] = amt;
     }));
 
-    // 선택 연도 수입액
+    // 수입액 표시
     const selAmt = yearAmts[year] || 0;
     const amtEl = document.getElementById('vcd-amt');
     if (amtEl) amtEl.textContent = selAmt > 0
       ? (selAmt >= 1e9 ? `$${(selAmt/1e9).toFixed(2)}B` : selAmt >= 1e6 ? `$${(selAmt/1e6).toFixed(0)}M` : `$${(selAmt/1e3).toFixed(0)}K`)
       : '데이터 없음';
 
-    // 주요 수입국 (상위 3개)
-    const cntryEl = document.getElementById('vcd-cntry');
-    const topCntry = Object.entries(countryMap).sort((a, b) => b[1] - a[1]).slice(0, 3)
-      .map(([code]) => {
-        const CNAMES = {CHN:'중국',USA:'미국',JPN:'일본',AUS:'호주',IDN:'인도네시아',PHL:'필리핀',
-          CHL:'칠레',ARG:'아르헨티나',CAN:'캐나다',ZAF:'남아공',FIN:'핀란드',COD:'콩고DRC',
-          BEL:'벨기에',NOR:'노르웨이',KAZ:'카자흐스탄',RUS:'러시아',DEU:'독일',GBR:'영국'};
-        return CNAMES[code] || code;
-      });
-    if (cntryEl) cntryEl.textContent = topCntry.length ? topCntry.join(' · ') : '정보 없음';
+    // 선택 연도 국가 비중
+    const selCountries = countryByYear[year] || {};
+    const selTotal = Object.values(selCountries).reduce((s, v) => s + v, 0);
+    const sortedCntry = Object.entries(selCountries).sort((a, b) => b[1] - a[1]);
 
-    // 연도별 차트
-    const canvas = document.getElementById('vcDetailChartCanvas');
-    if (canvas) {
-      if (_vcDetailChart) { _vcDetailChart.destroy(); _vcDetailChart = null; }
-      const labels = years.map(String);
-      const vals   = years.map(y => +(yearAmts[y] / 1e6).toFixed(1));
-      _vcDetailChart = new Chart(canvas, {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [{
-            data: vals,
-            backgroundColor: labels.map(l => l == year ? 'rgba(212,134,12,.8)' : 'rgba(46,91,138,.5)'),
-            borderColor:     labels.map(l => l == year ? '#D4860C' : '#2E5B8A'),
-            borderWidth: 1,
-            borderRadius: 3,
-          }],
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: { callbacks: { label: ctx => `$${ctx.parsed.y.toFixed(1)}M` }},
-          },
-          scales: {
-            x: { ticks: { font: { size: 10 } }, grid: { display: false } },
-            y: { ticks: { font: { size: 9 }, callback: v => `$${v}M` }, grid: { color: 'rgba(0,0,0,.05)' } },
-          },
-        },
-      });
+    const rankEl = document.getElementById('vcd-rank-list');
+    if (rankEl) {
+      if (selTotal > 0) {
+        const RANK_COLORS = ['#D4860C','#2E5B8A','#1A7A5E','#7B1FA2','#C0392B'];
+        const RANK_MEDALS = ['🥇','🥈','🥉'];
+        rankEl.innerHTML = sortedCntry.slice(0, 5).map(([code, amt], i) => {
+          const name = _VCD_CNAMES[code] || code;
+          const pct  = (amt / selTotal * 100).toFixed(1);
+          const medal = RANK_MEDALS[i] || `${i+1}.`;
+          return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+            <span style="font-size:13px;line-height:1;">${medal}</span>
+            <span style="font-size:11px;font-weight:600;min-width:52px;">${name}</span>
+            <div style="flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden;">
+              <div style="height:100%;width:${pct}%;background:${RANK_COLORS[i]};border-radius:4px;"></div>
+            </div>
+            <span style="font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--navy);min-width:40px;text-align:right;">${pct}%</span>
+          </div>`;
+        }).join('');
+      } else {
+        rankEl.innerHTML = '<div style="font-size:11px;color:var(--muted);">국가 데이터 없음</div>';
+      }
     }
+
+    _vcDetailTrendData   = { years, yearAmts, year };
+    _vcDetailCountryData = { sortedCntry, selTotal };
+    renderVcDetailChart(_vcDetailChartMode);
+
   } catch (e) {
     console.error('vcDetailData error', e);
   }
 }
+
+function renderVcDetailChart(mode) {
+  const canvas = document.getElementById('vcDetailChartCanvas');
+  if (!canvas) return;
+  if (_vcDetailChart) { _vcDetailChart.destroy(); _vcDetailChart = null; }
+  _vcDetailChartMode = mode;
+  document.getElementById('vcd-tab-country')?.classList.toggle('active', mode === 'country');
+  document.getElementById('vcd-tab-trend')?.classList.toggle('active', mode === 'trend');
+
+  if (mode === 'country' && _vcDetailCountryData?.selTotal > 0) {
+    const { sortedCntry, selTotal } = _vcDetailCountryData;
+    const PALETTE = ['#D4860C','#2E5B8A','#1A7A5E','#7B1FA2','#C0392B','#bbb'];
+    const top = sortedCntry.slice(0, 5);
+    const othersAmt = sortedCntry.slice(5).reduce((s, [,v]) => s + v, 0);
+    const labels = [...top.map(([c]) => _VCD_CNAMES[c] || c), ...(othersAmt > 0 ? ['기타'] : [])];
+    const vals   = [...top.map(([,v]) => +(v / selTotal * 100).toFixed(1)), ...(othersAmt > 0 ? [+(othersAmt / selTotal * 100).toFixed(1)] : [])];
+    const colors = PALETTE.slice(0, labels.length);
+    _vcDetailChart = new Chart(canvas, {
+      type: 'doughnut',
+      data: { labels, datasets: [{ data: vals, backgroundColor: colors, borderWidth: 1, borderColor: '#fff' }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'right', labels: { font: { size: 10 }, padding: 5, boxWidth: 10 } },
+          tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed.toFixed(1)}%` } },
+        },
+      },
+    });
+  } else if (mode === 'trend' && _vcDetailTrendData) {
+    const { years, yearAmts, year } = _vcDetailTrendData;
+    const labels = years.map(String);
+    const vals   = years.map(y => +(yearAmts[y] / 1e6).toFixed(1));
+    _vcDetailChart = new Chart(canvas, {
+      type: 'bar',
+      data: { labels, datasets: [{ data: vals,
+        backgroundColor: labels.map(l => l == year ? 'rgba(212,134,12,.8)' : 'rgba(46,91,138,.5)'),
+        borderColor: labels.map(l => l == year ? '#D4860C' : '#2E5B8A'),
+        borderWidth: 1, borderRadius: 3,
+      }]},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `$${ctx.parsed.y.toFixed(1)}M` } } },
+        scales: {
+          x: { ticks: { font: { size: 10 } }, grid: { display: false } },
+          y: { ticks: { font: { size: 9 }, callback: v => `$${v}M` }, grid: { color: 'rgba(0,0,0,.05)' } },
+        },
+      },
+    });
+  }
+}
+
+function vcDetailSwitchChart(mode) { renderVcDetailChart(mode); }
 
 // switchTab에 밸류체인 탭 초기화 추가
 (function patchSwitchTab() {
