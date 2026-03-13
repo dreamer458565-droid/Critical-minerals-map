@@ -31,8 +31,13 @@ const ALLOWED_ORIGINS = [
 
 function isAllowedOrigin(req) {
   const origin  = req.headers['origin']  || '';
-  const referer = req.headers['referer'] || '';
-  const check   = origin || referer;
+  let   referer = req.headers['referer'] || '';
+  // Referer는 전체 URL — origin 부분만 추출해야 trailing slash/경로를 제거할 수 있음
+  // 예: 'https://xyz.vercel.app/' → 'https://xyz.vercel.app'
+  if (referer) {
+    try { referer = new URL(referer).origin; } catch { referer = ''; }
+  }
+  const check = origin || referer;
   // origin/referer 헤더가 아예 없으면 서버 간 호출로 간주 → 허용
   if (!check) return true;
   return ALLOWED_ORIGINS.some(re => re.test(check));
@@ -262,7 +267,15 @@ export default async function handler(req, res) {
     const resultMsg  = resultMsgMatch  ? resultMsgMatch[1]  : '';
 
     if (resultCode && resultCode !== '00') {
-      return res.status(502).json({ error: resultMsg || 'API_ERROR', resultCode });
+      // 관세청 API는 데이터 없을 때도 non-'00' 코드를 반환함
+      // → 클라이언트에 502를 주지 않고 빈 결과로 처리 (failCount 방지)
+      console.warn(`[trade] upstream resultCode=${resultCode} "${resultMsg}"`, { startYm, endYm, itemCode });
+      return res.status(200).json({
+        response: {
+          header: { resultCode: '00', resultMsg: 'OK' },
+          body: { items: { item: [] }, detail: [], totalCount: 0 },
+        },
+      });
     }
 
     // XML → 아이템 파싱
