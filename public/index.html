@@ -3604,10 +3604,13 @@ function renderMDonutChart(data) {
       const c = r.cntyNm || COUNTRY_NAMES[r.cntyCd] || r.cntyCd || '기타';
       byCountry[c] = (byCountry[c]||0) + parseFloat(r.impAmt||r.expAmt||0);
     });
-    const sorted = Object.entries(byCountry).sort((a,b)=>b[1]-a[1]).slice(0,10);
-    labels = sorted.map(e=>e[0]);
-    values = sorted.map(e=>e[1]);
-    colors = COUNTRY_COLORS;
+    const allSorted = Object.entries(byCountry).sort((a,b)=>b[1]-a[1]);
+    const top10 = allSorted.slice(0, 10);
+    const etcAmt = allSorted.slice(10).reduce((s, e) => s + e[1], 0);
+    const finalEntries = etcAmt > 0 ? [...top10, ['기타', etcAmt]] : top10;
+    labels = finalEntries.map(e=>e[0]);
+    values = finalEntries.map(e=>e[1]);
+    colors = [...COUNTRY_COLORS.slice(0, top10.length), '#BDC3C7'];
     const titleEl = document.getElementById('m-donut-title');
     if(titleEl) titleEl.textContent = '국가별 수입 비중';
   }
@@ -4213,10 +4216,13 @@ function renderHCountryChart(data) {
       const c=r.cntyNm||COUNTRY_NAMES[r.cntyCd]||r.cntyCd||'기타';
       byCountry[c]=(byCountry[c]||0)+parseFloat(r.impAmt||r.expAmt||0);
     });
-    const sorted=Object.entries(byCountry).sort((a,b)=>b[1]-a[1]).slice(0,10);
-    labels=sorted.map(e=>e[0]);
-    values=sorted.map(e=>e[1]);
-    colors=COUNTRY_COLORS;
+    const allSorted=Object.entries(byCountry).sort((a,b)=>b[1]-a[1]);
+    const top10=allSorted.slice(0,10);
+    const etcAmt=allSorted.slice(10).reduce((s,e)=>s+e[1],0);
+    const finalEntries=etcAmt>0?[...top10,['기타',etcAmt]]:top10;
+    labels=finalEntries.map(e=>e[0]);
+    values=finalEntries.map(e=>e[1]);
+    colors=[...COUNTRY_COLORS.slice(0,top10.length),'#BDC3C7'];
     const titleEl = document.getElementById('h-donut-title');
     if(titleEl) titleEl.textContent = '국가별 수입 비중';
   }
@@ -5423,8 +5429,8 @@ const INDUSTRY_CHAINS = {
         { ko: '분리막', role: '안전 격리 필름', stageNote: '일본 Asahi·Toray' },
       ]},
       { label: '완성품', color: '#D4860C', nodes: [
-        { ko: null, label: '배터리 셀', icon: '🔋', desc: 'NCM/LFP/NCA 파우치·원통형·각형', hs: null },
-        { ko: null, label: '배터리 팩', icon: '⚡', desc: 'BMS 포함 EV·ESS용 팩', hs: null },
+        { ko: null, label: '배터리 셀', icon: '🔋', desc: 'NCM/LFP/NCA 파우치·원통형·각형', hs: ['850760','850780'], expMode: true },
+        { ko: null, label: '배터리 팩', icon: '⚡', desc: 'BMS 포함 EV·ESS용 팩', hs: ['850760'], expMode: true },
       ]},
     ],
     finalProduct: { label: '전기자동차 (EV)', icon: '🚗', desc: 'EV 1대당 배터리 소재 약 120~180kg' },
@@ -5449,12 +5455,12 @@ const INDUSTRY_CHAINS = {
         { ko: '고순도 불화물', role: 'CVD 세정·배선가스', stageNote: 'NF3·WF6' },
       ]},
       { label: '중간 제품', color: '#1A7A5E', nodes: [
-        { ko: null, label: '실리콘 웨이퍼', icon: '⬜', desc: '300mm 고순도 Si 기판', hs: null },
-        { ko: null, label: 'GaN/SiC 웨이퍼', icon: '🟦', desc: '전력반도체용 화합물 기판', hs: null },
+        { ko: null, label: '실리콘 웨이퍼', icon: '⬜', desc: '300mm 고순도 Si 기판', hs: ['381800'], expMode: false },
+        { ko: null, label: 'GaN/SiC 웨이퍼', icon: '🟦', desc: '전력반도체용 화합물 기판', hs: ['281221','381800'], expMode: false },
       ]},
       { label: '완성품', color: '#D4860C', nodes: [
-        { ko: null, label: '메모리 반도체', icon: '🧠', desc: 'DRAM·NAND Flash', hs: null },
-        { ko: null, label: '시스템 반도체', icon: '⚙️', desc: 'AP·GPU·파운드리', hs: null },
+        { ko: null, label: '메모리 반도체', icon: '🧠', desc: 'DRAM·NAND Flash', hs: ['854231','854232'], expMode: true },
+        { ko: null, label: '시스템 반도체', icon: '⚙️', desc: 'AP·GPU·파운드리', hs: ['854239','854234'], expMode: true },
       ]},
     ],
     finalProduct: { label: '전자·AI 디바이스', icon: '📱', desc: '스마트폰·서버·자동차 반도체' },
@@ -5478,12 +5484,12 @@ const INDUSTRY_CHAINS = {
         { ko: '구리', role: '모터 권선 소재', stageNote: '전도성 핵심금속' },
       ]},
       { label: '모터 부품', color: '#1A7A5E', nodes: [
-        { ko: null, label: '로터(회전자)', icon: '🔄', desc: 'NdFeB 자석 내장 IPM 로터', hs: null },
-        { ko: null, label: '스테이터(고정자)', icon: '🔳', desc: '전기강판 코어+구리 권선', hs: null },
+        { ko: null, label: '로터(회전자)', icon: '🔄', desc: 'NdFeB 자석 내장 IPM 로터', hs: ['850130','850150'], expMode: false },
+        { ko: null, label: '스테이터(고정자)', icon: '🔳', desc: '전기강판 코어+구리 권선', hs: ['850130','850150'], expMode: false },
       ]},
       { label: '완성품', color: '#D4860C', nodes: [
-        { ko: null, label: 'EV 구동모터', icon: '⚡', desc: '영구자석 동기모터(PMSM)', hs: null },
-        { ko: null, label: '풍력 발전기', icon: '🌬️', desc: 'NdFeB 직구동 발전기', hs: null },
+        { ko: null, label: 'EV 구동모터', icon: '⚡', desc: '영구자석 동기모터(PMSM)', hs: ['850150'], expMode: true },
+        { ko: null, label: '풍력 발전기', icon: '🌬️', desc: 'NdFeB 직구동 발전기', hs: ['850164'], expMode: true },
       ]},
     ],
     finalProduct: { label: '전기차·풍력발전', icon: '🏭', desc: 'EV 1대당 NdFeB 약 1~3kg' },
@@ -5507,12 +5513,12 @@ const INDUSTRY_CHAINS = {
         { ko: '분리막', role: '셀 격리 필름', stageNote: 'PE/PP 미세다공막' },
       ]},
       { label: '셀·모듈', color: '#1A7A5E', nodes: [
-        { ko: null, label: 'LFP 배터리 셀', icon: '🔋', desc: '각형·파우치형 ESS 셀', hs: null },
-        { ko: null, label: 'VRFB 전해액', icon: '🧪', desc: '바나듐 황산 전해액 V4+/V5+', hs: null },
+        { ko: null, label: 'LFP 배터리 셀', icon: '🔋', desc: '각형·파우치형 ESS 셀', hs: ['850760'], expMode: true },
+        { ko: null, label: 'VRFB 전해액', icon: '🧪', desc: '바나듐 황산 전해액 V4+/V5+', hs: ['282530'], expMode: false },
       ]},
       { label: '시스템', color: '#D4860C', nodes: [
-        { ko: null, label: 'BESS 시스템', icon: '🏭', desc: '전력망 안정화 대용량 ESS', hs: null },
-        { ko: null, label: '가정용 ESS', icon: '🏠', desc: '태양광 연계 소형 ESS', hs: null },
+        { ko: null, label: 'BESS 시스템', icon: '🏭', desc: '전력망 안정화 대용량 ESS', hs: ['850760'], expMode: true },
+        { ko: null, label: '가정용 ESS', icon: '🏠', desc: '태양광 연계 소형 ESS', hs: ['850760'], expMode: true },
       ]},
     ],
     finalProduct: { label: '재생에너지 저장·그리드', icon: '⚡', desc: '태양광·풍력 연계 전력 저장' },
@@ -5665,8 +5671,27 @@ function renderVcFlow(id) {
         // 비동기 수입액 조회
         if (mEntry) fetchVcNodeAmt(mEntry, year, amtDiv);
 
+      } else if (node.hs && node.hs.length) {
+        // 완성품/중간제품 노드 (HS 있음 → 클릭 가능)
+        const isExp = node.expMode === true;
+        card.style.cssText = `background:var(--navy);border-color:${isExp ? '#1ABC9C' : 'rgba(255,255,255,.2)'};cursor:pointer;`;
+        const productAmtDiv = document.createElement('div');
+        productAmtDiv.className = 'vc-node-amt loading';
+        productAmtDiv.textContent = '로딩 중…';
+        card.innerHTML = `
+          <div style="text-align:center;padding:4px 0 2px;">
+            <div style="font-size:18px;">${node.icon || ''}</div>
+            <div style="font-size:11px;font-weight:700;color:#F4C430;margin-top:3px;">${node.label}</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.45);margin-top:2px;">${node.desc || ''}</div>
+            <div style="font-size:9px;font-weight:700;color:${isExp ? '#1ABC9C' : 'rgba(255,255,255,.4)'};margin-top:3px;">${isExp ? '▲ 수출' : '수입'}</div>
+          </div>`;
+        card.appendChild(productAmtDiv);
+        const pLabel = node.label;
+        const pHs = node.hs;
+        card.onclick = () => vcProductClick(pLabel, pHs, isExp, node.icon || '');
+        fetchVcProductAmt(node.hs, year, isExp, productAmtDiv);
       } else {
-        // 완성품 노드 (데이터 없음)
+        // 완성품 노드 (HS 없음 → 표시 전용)
         card.style.cssText = 'background:var(--navy);border-color:var(--amber);cursor:default;';
         card.innerHTML = `
           <div style="text-align:center;padding:4px 0;">
@@ -5912,6 +5937,170 @@ function renderVcDetailChart(mode) {
 }
 
 function vcDetailSwitchChart(mode) { renderVcDetailChart(mode); }
+
+/* ── 완성품 노드: 수출입 금액 미리보기 ── */
+async function fetchVcProductAmt(hsList, year, isExp, amtDiv) {
+  try {
+    let total = 0;
+    const results = await Promise.all(
+      hsList.slice(0, 3).map(hs => callTradeApi({ hsCd: hs, period: year }).catch(() => []))
+    );
+    results.forEach(rows => rows.forEach(r => { total += Number(isExp ? r.expAmt : r.impAmt || 0); }));
+    if (total > 0) {
+      const fmt = total >= 1e9 ? `$${(total/1e9).toFixed(1)}B` : total >= 1e6 ? `$${(total/1e6).toFixed(0)}M` : `$${(total/1e3).toFixed(0)}K`;
+      amtDiv.className = 'vc-node-amt';
+      amtDiv.textContent = `${year}년 ${fmt}`;
+    } else {
+      amtDiv.className = 'vc-node-amt error';
+      amtDiv.textContent = `${year}년 데이터 없음`;
+    }
+  } catch { amtDiv.className = 'vc-node-amt error'; amtDiv.textContent = '조회 오류'; }
+}
+
+/* ── 완성품 노드 클릭: 수출입 상세 패널 ── */
+function vcProductClick(label, hsList, isExp, icon) {
+  const hsArr = Array.isArray(hsList) ? hsList : String(hsList).split(',');
+  const year = document.getElementById('vc_year')?.value || (new Date().getFullYear() - 1);
+  const panel = document.getElementById('vcDetailContent');
+  const tradeLabel = isExp ? '수출액' : '수입액';
+  const tradeColor = isExp ? '#1ABC9C' : '#D4860C';
+  const hsJoined = hsArr.join(',');
+  panel.innerHTML = `
+    <div class="vc-detail-title">${icon} ${label}</div>
+    <div style="font-size:11px;color:${tradeColor};font-weight:700;margin:4px 0 8px;">▲ 한국 ${tradeLabel} 기준</div>
+    <div class="vc-year-select">
+      <label>조회 연도</label>
+      <select id="vcProductYear" onchange="vcProductClick('${label}','${hsJoined}',${isExp},'${icon}')">
+        ${Array.from({length: new Date().getFullYear() - 2017}, (_, i) => new Date().getFullYear() - 1 - i)
+            .map(y => `<option value="${y}"${y == year ? ' selected' : ''}>${y}년</option>`).join('')}
+      </select>
+    </div>
+    <div class="vc-detail-stats" id="vcProdStats">
+      <div class="vc-detail-stat"><div class="vc-detail-stat-label">${tradeLabel}</div><div class="vc-detail-stat-val" id="vcp-amt">조회중…</div></div>
+    </div>
+    <div id="vcp-rank-list" style="margin:8px 0 10px;">
+      <div style="font-size:11px;color:var(--muted);">국가별 비중 로딩 중…</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+      <div style="font-size:10px;font-weight:700;color:var(--subtext);letter-spacing:.8px;text-transform:uppercase;">${isExp ? '수출 대상국' : '수입국'} 비중</div>
+      <div class="chart-tab-group" style="margin:0;">
+        <button class="chart-tab active" id="vcp-tab-country" onclick="vcProductSwitchChart('country')">국가비중</button>
+        <button class="chart-tab" id="vcp-tab-trend" onclick="vcProductSwitchChart('trend')">추이</button>
+      </div>
+    </div>
+    <div style="height:150px;"><canvas id="vcProductChartCanvas"></canvas></div>
+    <div style="margin-top:8px;font-size:10px;color:var(--muted);">HS코드: ${hsArr.join(', ')}</div>`;
+
+  fetchVcProductData(hsArr, year, isExp);
+}
+
+let _vcProdChart = null;
+let _vcProdTrendData = null;
+let _vcProdCountryData = null;
+let _vcProdChartMode = 'country';
+let _vcProdIsExp = false;
+
+async function fetchVcProductData(hsList, year, isExp) {
+  try {
+    _vcProdIsExp = isExp;
+    const curYear = new Date().getFullYear();
+    const years = Array.from({length: 5}, (_, i) => curYear - 1 - i).reverse();
+    const yearAmts = {};
+    const countryByYear = {};
+
+    await Promise.all(years.map(async y => {
+      let amt = 0;
+      countryByYear[y] = {};
+      await Promise.all(hsList.slice(0,4).map(async hs => {
+        try {
+          const rows = await callTradeApi({ hsCd: hs, period: y });
+          rows.forEach(r => {
+            const a = Number(isExp ? r.expAmt : r.impAmt || 0);
+            amt += a;
+            if (r.cntyCd && a > 0) countryByYear[y][r.cntyCd] = (countryByYear[y][r.cntyCd] || 0) + a;
+          });
+        } catch {}
+      }));
+      yearAmts[y] = amt;
+    }));
+
+    const selAmt = yearAmts[year] || 0;
+    const amtEl = document.getElementById('vcp-amt');
+    if (amtEl) amtEl.textContent = selAmt > 0
+      ? (selAmt >= 1e9 ? `$${(selAmt/1e9).toFixed(2)}B` : selAmt >= 1e6 ? `$${(selAmt/1e6).toFixed(0)}M` : `$${(selAmt/1e3).toFixed(0)}K`)
+      : '데이터 없음';
+
+    const selCountries = countryByYear[year] || {};
+    const selTotal = Object.values(selCountries).reduce((s,v) => s+v, 0);
+    const sortedCntry = Object.entries(selCountries).sort((a,b) => b[1]-a[1]);
+
+    const rankEl = document.getElementById('vcp-rank-list');
+    if (rankEl) {
+      if (selTotal > 0) {
+        const RANK_COLORS = ['#1ABC9C','#2E5B8A','#D4860C','#7B1FA2','#C0392B'];
+        const MEDALS = ['🥇','🥈','🥉'];
+        rankEl.innerHTML = sortedCntry.slice(0,5).map(([code,amt],i) => {
+          const name = _VCD_CNAMES[code] || code;
+          const pct = (amt / selTotal * 100).toFixed(1);
+          return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
+            <span style="font-size:13px;line-height:1;">${MEDALS[i]||`${i+1}.`}</span>
+            <span style="font-size:11px;font-weight:600;min-width:52px;">${name}</span>
+            <div style="flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden;">
+              <div style="height:100%;width:${pct}%;background:${RANK_COLORS[i]};border-radius:4px;"></div>
+            </div>
+            <span style="font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--navy);min-width:40px;text-align:right;">${pct}%</span>
+          </div>`;
+        }).join('');
+      } else {
+        rankEl.innerHTML = '<div style="font-size:11px;color:var(--muted);">국가 데이터 없음</div>';
+      }
+    }
+    _vcProdTrendData = { years, yearAmts, year };
+    _vcProdCountryData = { sortedCntry, selTotal };
+    renderVcProductChart(_vcProdChartMode);
+  } catch(e) { console.error('vcProductData error', e); }
+}
+
+function renderVcProductChart(mode) {
+  const canvas = document.getElementById('vcProductChartCanvas');
+  if (!canvas) return;
+  if (_vcProdChart) { _vcProdChart.destroy(); _vcProdChart = null; }
+  _vcProdChartMode = mode;
+  document.getElementById('vcp-tab-country')?.classList.toggle('active', mode === 'country');
+  document.getElementById('vcp-tab-trend')?.classList.toggle('active', mode === 'trend');
+  const ACCENT = _vcProdIsExp ? '#1ABC9C' : '#D4860C';
+
+  if (mode === 'country' && _vcProdCountryData?.selTotal > 0) {
+    const { sortedCntry, selTotal } = _vcProdCountryData;
+    const PALETTE = ['#1ABC9C','#2E5B8A','#D4860C','#7B1FA2','#C0392B','#bbb'];
+    const top = sortedCntry.slice(0,5);
+    const othersAmt = sortedCntry.slice(5).reduce((s,[,v])=>s+v,0);
+    const labels = [...top.map(([c])=>_VCD_CNAMES[c]||c), ...(othersAmt>0?['기타']:[])];
+    const vals   = [...top.map(([,v])=>+(v/selTotal*100).toFixed(1)), ...(othersAmt>0?[+(othersAmt/selTotal*100).toFixed(1)]:[])];
+    _vcProdChart = new Chart(canvas, {
+      type: 'doughnut',
+      data: { labels, datasets: [{ data: vals, backgroundColor: PALETTE.slice(0,labels.length), borderWidth:1, borderColor:'#fff' }] },
+      options: { responsive:true, maintainAspectRatio:false,
+        plugins: { legend:{position:'right',labels:{font:{size:10},padding:5,boxWidth:10}},
+          tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed.toFixed(1)}%`}} } },
+    });
+  } else if (mode === 'trend' && _vcProdTrendData) {
+    const { years, yearAmts, year } = _vcProdTrendData;
+    const vals = years.map(y => +(yearAmts[y]/1e6).toFixed(1));
+    _vcProdChart = new Chart(canvas, {
+      type: 'bar',
+      data: { labels: years.map(String), datasets: [{ data: vals,
+        backgroundColor: years.map(y => y==year ? ACCENT+'CC' : 'rgba(46,91,138,.4)'),
+        borderColor: years.map(y => y==year ? ACCENT : '#2E5B8A'),
+        borderWidth:1, borderRadius:3 }]},
+      options: { responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`$${ctx.parsed.y.toFixed(1)}M`}}},
+        scales:{x:{ticks:{font:{size:10}},grid:{display:false}},
+          y:{ticks:{font:{size:9},callback:v=>`$${v}M`},grid:{color:'rgba(0,0,0,.05)'}}} },
+    });
+  }
+}
+function vcProductSwitchChart(mode) { renderVcProductChart(mode); }
 
 // switchTab에 밸류체인 탭 초기화 추가
 (function patchSwitchTab() {
