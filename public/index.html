@@ -5531,6 +5531,56 @@ const INDUSTRY_CHAINS = {
     ],
     finalProduct: { label: '재생에너지 저장·그리드', icon: '⚡', desc: '태양광·풍력 연계 전력 저장' },
   },
+
+  shipbuilding: {
+    label: '선박 (Shipbuilding)',
+    icon: '🚢',
+    insight: '한국은 2024년 글로벌 선박 수주량 1위(점유율 약 45%)로, 현대중공업·삼성중공업·한화오션이 LNG 운반선·컨테이너선·VLCC를 주력으로 수출합니다. 9% 니켈강 LNG탱크와 고장력 후판이 핵심 소재이며, 중국의 저가 물량 공세가 구조적 경쟁 리스크입니다.',
+    stages: [
+      { label: '핵심 원소', color: '#4E342E', nodes: [
+        { ko: '망간', role: '구조강 합금 강도', stageNote: '고장력 후판(HT36·HT40) 필수 첨가원소' },
+        { ko: '니켈', role: 'LNG탱크 9%니켈강', stageNote: '-163°C 극저온 선재 필수' },
+        { ko: '구리', role: '전기배선·열교환기', stageNote: '선박 전기계통·냉각시스템 전반' },
+        { ko: '알루미늄', role: '상부구조물 경량화', stageNote: '선교·거주구역 알루미늄 합금' },
+      ]},
+      { label: '구조 소재', color: '#1A5276', nodes: [
+        { ko: null, label: '후판 (조선강)', icon: '🔩', desc: '20~80mm 두꺼운 고강도 구조강판', hs: ['720851','720852'], expMode: false },
+        { ko: null, label: '선박 엔진', icon: '⚙️', desc: 'MAN·WinGD 대형 2행정 저속 디젤', hs: ['840820'], expMode: false },
+      ]},
+      { label: '완성 선박', color: '#D4860C', nodes: [
+        { ko: null, label: 'LNG 운반선', icon: '🚢', desc: 'GTT 멤브레인 LNG 카고·극저온 단열', hs: ['890120'], expMode: true },
+        { ko: null, label: '컨테이너·벌크선', icon: '🛳️', desc: '초대형 컨테이너·건화물 선박', hs: ['890190'], expMode: true },
+        { ko: null, label: '유조선 (VLCC)', icon: '⛽', desc: '초대형 원유 운반선·아프라막스', hs: ['890120'], expMode: true },
+      ]},
+    ],
+    finalProduct: { label: '글로벌 해운 시장', icon: '🌊', desc: '유럽·중동·아시아 선주사 수주' },
+  },
+
+  display: {
+    label: 'OLED 디스플레이 (Display)',
+    icon: '📺',
+    insight: '삼성디스플레이(모바일 OLED)와 LG디스플레이(대형 OLED TV)는 글로벌 OLED 시장을 양분합니다. 삼성은 애플 iPhone에 모바일 OLED를 독점 공급하며, LG는 77"·97" 게이밍·프리미엄 TV 시장을 주도합니다. ITO 투명전극(인듐)과 OLED 유기발광소재의 일본·미국 의존도가 주요 리스크입니다.',
+    stages: [
+      { label: '핵심 원소', color: '#4A148C', nodes: [
+        { ko: '인듐', role: 'ITO 투명전극', stageNote: 'In₂O₃·SnO₂ 스퍼터 타깃' },
+        { ko: '갈륨', role: 'IGZO TFT 채널', stageNote: 'In-Ga-Zn-O 박막트랜지스터' },
+        { ko: '희토류(전체)', role: '인광 발광층 도펀트', stageNote: 'Ir 착체·TADF 유기소재' },
+      ]},
+      { label: '공정 소재', color: '#1A5276', nodes: [
+        { ko: null, label: 'ITO 스퍼터 타깃', icon: '🎯', desc: '인듐주석산화물 투명전극 증착재', hs: ['381800','811229'], expMode: false },
+        { ko: null, label: 'OLED 유기발광 소재', icon: '🧪', desc: 'HTL·ETL·발광층 유기분자재료(일·미)', hs: ['293499','382499'], expMode: false },
+      ]},
+      { label: 'OLED 패널', color: '#1A7A5E', nodes: [
+        { ko: null, label: '모바일 OLED', icon: '📱', desc: 'SDC 플렉시블·폴더블 패널 (애플·삼성)', hs: ['852412'], hsLegacy: ['901380'], expMode: true },
+        { ko: null, label: 'OLED TV 패널', icon: '📺', desc: 'LGD 대형 OLED W-OLED 패널(55"~97")', hs: ['852412'], hsLegacy: ['901380'], expMode: true },
+      ]},
+      { label: '완성 기기', color: '#D4860C', nodes: [
+        { ko: null, label: 'OLED TV', icon: '📺', desc: 'LG·삼성 OLED TV 글로벌 수출', hs: ['852872'], expMode: true },
+        { ko: null, label: '스마트폰 (OLED)', icon: '📱', desc: '갤럭시 폴드·플립 등 OLED 탑재 단말', hs: ['851713','851714'], hsLegacy: ['851712'], expMode: true },
+      ]},
+    ],
+    finalProduct: { label: '글로벌 디스플레이 시장', icon: '🌐', desc: '애플·삼성·LG·소니 완성품 수요' },
+  },
 };
 
 let _vcActiveIndustry  = null;
