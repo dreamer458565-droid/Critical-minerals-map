@@ -1281,6 +1281,18 @@ table.result tbody td.center{text-align:center;}
         <div class="chart-body"><canvas id="m-trend-chart" style="max-height:230px"></canvas></div>
       </div>
     </div>
+    <!-- 국가별 비중 변화 추이 (다년도 조회 시 표시) -->
+    <div class="chart-box" id="m-country-trend-box" style="display:none;margin-bottom:20px;">
+      <div class="chart-box-header">
+        <div class="chart-box-title">국가별 비중 변화 추이</div>
+        <div class="chart-tab-group" id="m-ct-topn-tabs">
+          <button class="chart-tab active" onclick="switchMCtTopN(5,this)">TOP5</button>
+          <button class="chart-tab" onclick="switchMCtTopN(8,this)">TOP8</button>
+        </div>
+      </div>
+      <div class="chart-body" style="min-height:200px;"><canvas id="m-country-trend-chart" style="max-height:260px"></canvas></div>
+    </div>
+
     <!-- 공급단계별 차트 (2분할) -->
     <div class="chart-grid" id="m-supply-area" style="margin-top:0;">
       <div class="chart-box">
@@ -3440,6 +3452,7 @@ function renderMineralResult(data) {
     `${selectedMineral.ko} · ${document.getElementById('m_start').value}~${document.getElementById('m_end').value}`;
   renderMDonutChart(data);
   renderMTrendChart(data);
+  renderMCountryTrend(data);
   renderMSupplyChart(data);
   renderMSupplyDetail(data);
   renderMCountrySummary(data);
@@ -3447,6 +3460,84 @@ function renderMineralResult(data) {
 }
 
 let mTableView = 'year'; // 'year' | 'month'
+let _mCtChart = null;
+let _mCtTopN = 5;
+let _mCtData = null;
+
+/* ── 국가별 비중 변화 추이 (연도별 stacked bar) ── */
+function renderMCountryTrend(data, topN) {
+  _mCtData = data;
+  if (topN !== undefined) _mCtTopN = topN;
+  const box = document.getElementById('m-country-trend-box');
+  const canvas = document.getElementById('m-country-trend-chart');
+  if (!box || !canvas) return;
+
+  // 연도 목록
+  const years = [...new Set(data.map(r => String(r.period).slice(0,4)))].sort();
+  if (years.length < 2) { box.style.display = 'none'; return; }
+  box.style.display = '';
+
+  // 연도×국가 합산
+  const byYearCountry = {};
+  data.forEach(r => {
+    const y = String(r.period).slice(0,4);
+    const c = r.cntyNm || COUNTRY_NAMES[r.cntyCd] || r.cntyCd || '기타';
+    if (!byYearCountry[y]) byYearCountry[y] = {};
+    byYearCountry[y][c] = (byYearCountry[y][c] || 0) + parseFloat(r.impAmt || 0);
+  });
+
+  // TOP N 국가 선정 (전체 기간 합산 기준)
+  const totalByCountry = {};
+  Object.values(byYearCountry).forEach(yMap => {
+    Object.entries(yMap).forEach(([c, v]) => { totalByCountry[c] = (totalByCountry[c] || 0) + v; });
+  });
+  const top = Object.entries(totalByCountry).sort((a,b)=>b[1]-a[1]).slice(0, _mCtTopN).map(e=>e[0]);
+
+  // 비중 계산 (TOP N + 기타)
+  const labels = years;
+  const countries = [...top, '기타'];
+  const PALETTE = ['#2E5B8A','#D4860C','#1A7A5E','#7B1FA2','#C0392B','#2980B9','#E67E22','#16A085'];
+  const datasets = countries.map((c, i) => ({
+    label: c,
+    data: years.map(y => {
+      const yMap = byYearCountry[y] || {};
+      const total = Object.values(yMap).reduce((s,v)=>s+v, 0);
+      if (!total) return 0;
+      const amt = c === '기타'
+        ? Object.entries(yMap).filter(([k]) => !top.includes(k)).reduce((s,[,v])=>s+v, 0)
+        : (yMap[c] || 0);
+      return parseFloat((amt / total * 100).toFixed(1));
+    }),
+    backgroundColor: PALETTE[i % PALETTE.length] + 'CC',
+    borderColor: PALETTE[i % PALETTE.length],
+    borderWidth: 1,
+    borderRadius: 2,
+  }));
+
+  if (_mCtChart) { _mCtChart.destroy(); _mCtChart = null; }
+  _mCtChart = new Chart(canvas, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 8, boxWidth: 10 } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y}%` } },
+      },
+      scales: {
+        x: { stacked: true, grid: { display: false }, ticks: { font: { size: 11 } } },
+        y: { stacked: true, min: 0, max: 100, ticks: { callback: v => v+'%', font: { size: 10 } }, grid: { color: '#eee' } },
+      },
+    },
+  });
+}
+
+function switchMCtTopN(n, btn) {
+  _mCtTopN = n;
+  document.querySelectorAll('#m-ct-topn-tabs .chart-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (_mCtData) renderMCountryTrend(_mCtData, n);
+}
 
 /* ── 국가별 비중 요약 테이블 ── */
 function renderMCountrySummary(data) {
