@@ -5747,10 +5747,10 @@ async function fetchVcNodeAmt(mEntry, year, amtDiv) {
                 : totalAmt >= 1e6 ? `$${(totalAmt / 1e6).toFixed(0)}M`
                 : `$${(totalAmt / 1e3).toFixed(0)}K`;
       amtDiv.className = 'vc-node-amt';
-      amtDiv.textContent = `${year}년 ${fmt}`;
+      amtDiv.textContent = `수입 ${fmt}`;
     } else {
       amtDiv.className = 'vc-node-amt error';
-      amtDiv.textContent = `${year}년 데이터 없음`;
+      amtDiv.textContent = '';
     }
   } catch {
     amtDiv.className = 'vc-node-amt error';
@@ -5974,10 +5974,12 @@ function vcDetailSwitchChart(mode) { renderVcDetailChart(mode); }
 async function fetchVcProductAmt(hsList, year, isExp, amtDiv) {
   try {
     let total = 0;
+    const dir = isExp ? 'EXP' : 'IMP';
+    const amtKey = isExp ? 'expAmt' : 'impAmt';
     const results = await Promise.all(
-      hsList.slice(0, 3).map(hs => callTradeApi({ hsCd: hs, period: year }).catch(() => []))
+      hsList.slice(0, 3).map(hs => callTradeApi({ hsCd: hs, period: year, impExpDivCd: dir }).catch(() => []))
     );
-    results.forEach(rows => rows.forEach(r => { total += Number(isExp ? r.expAmt : r.impAmt || 0); }));
+    results.forEach(rows => rows.forEach(r => { total += Number(r[amtKey] || 0); }));
     if (total > 0) {
       const fmt = total >= 1e9 ? `$${(total/1e9).toFixed(1)}B` : total >= 1e6 ? `$${(total/1e6).toFixed(0)}M` : `$${(total/1e3).toFixed(0)}K`;
       amtDiv.className = 'vc-node-amt';
@@ -6045,11 +6047,13 @@ async function fetchVcProductData(hsList, year, isExp) {
     await Promise.all(years.map(async y => {
       let amt = 0;
       countryByYear[y] = {};
+      const dir2 = isExp ? 'EXP' : 'IMP';
+      const amtKey2 = isExp ? 'expAmt' : 'impAmt';
       await Promise.all(hsList.slice(0,4).map(async hs => {
         try {
-          const rows = await callTradeApi({ hsCd: hs, period: y });
+          const rows = await callTradeApi({ hsCd: hs, period: y, impExpDivCd: dir2 });
           rows.forEach(r => {
-            const a = Number(isExp ? r.expAmt : r.impAmt || 0);
+            const a = Number(r[amtKey2] || 0);
             amt += a;
             if (r.cntyCd && a > 0) countryByYear[y][r.cntyCd] = (countryByYear[y][r.cntyCd] || 0) + a;
           });
