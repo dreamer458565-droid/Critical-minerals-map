@@ -800,7 +800,7 @@ table.result tbody td.center{text-align:center;}
 /* 플로우 컨테이너 */
 .vc-flow{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:12px;}
 .vc-stage-wrap{display:flex;align-items:center;flex-shrink:0;}
-.vc-stage{min-width:170px;max-width:200px;display:flex;flex-direction:column;gap:0;}
+.vc-stage{min-width:180px;max-width:220px;display:flex;flex-direction:column;gap:0;}
 .vc-stage-header{text-align:center;padding:8px 12px;border-radius:6px 6px 0 0;font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.9);}
 .vc-stage-body{display:flex;flex-direction:column;gap:6px;padding:10px 8px;background:rgba(0,0,0,.03);border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;flex:1;}
 
@@ -822,7 +822,7 @@ table.result tbody td.center{text-align:center;}
 .vc-node-country{font-size:10px;color:var(--subtext);margin-top:2px;}
 
 /* 최종제품 노드 */
-.vc-final{min-width:150px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#0F1C33,#2E5B8A);border-radius:8px;padding:20px 14px;text-align:center;}
+.vc-final{min-width:180px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#0F1C33,#2E5B8A);border-radius:8px;padding:20px 18px;text-align:center;}
 .vc-final-icon{font-size:36px;margin-bottom:8px;}
 .vc-final-name{font-size:14px;font-weight:700;color:#F4C430;line-height:1.3;}
 .vc-final-desc{font-size:11px;color:rgba(255,255,255,.55);margin-top:4px;}
@@ -1774,8 +1774,8 @@ table.result tbody td.center{text-align:center;}
           <div class="panel-title" id="vcFlowTitle">산업 선택 후 공급망이 표시됩니다</div>
           <div class="panel-tag" id="vcFlowTag">데이터: 관세청</div>
         </div>
-        <div class="panel-body" style="padding:16px;">
-          <div id="vcFlowContainer" style="min-height:180px;"></div>
+        <div class="panel-body" style="padding:16px;overflow-x:auto;">
+          <div id="vcFlowContainer" style="min-height:180px;min-width:max-content;"></div>
         </div>
       </div>
       <!-- 요약 인사이트 -->
@@ -5432,8 +5432,12 @@ const INDUSTRY_CHAINS = {
         { ko: null, label: '배터리 셀', icon: '🔋', desc: 'NCM/LFP/NCA 파우치·원통형·각형', hs: ['850760','850780'], expMode: true },
         { ko: null, label: '배터리 팩', icon: '⚡', desc: 'BMS 포함 EV·ESS용 팩', hs: ['850760'], expMode: true },
       ]},
+      { label: '완성차', color: '#6A1B9A', nodes: [
+        { ko: null, label: '전기차 (EV)', icon: '🚗', desc: 'Hyundai Ioniq·Kia EV 시리즈', hs: ['870380'], expMode: true },
+        { ko: null, label: 'PHEV·HEV', icon: '🔌', desc: '플러그인·하이브리드 차량', hs: ['870340','870350'], expMode: true },
+      ]},
     ],
-    finalProduct: { label: '전기자동차 (EV)', icon: '🚗', desc: 'EV 1대당 배터리 소재 약 120~180kg' },
+    finalProduct: { label: '글로벌 EV 시장', icon: '🌍', desc: '미국·유럽·동남아 수출 / IRA 요건 충족' },
   },
 
   semiconductor: {
@@ -5456,7 +5460,7 @@ const INDUSTRY_CHAINS = {
       ]},
       { label: '중간 제품', color: '#1A7A5E', nodes: [
         { ko: null, label: '실리콘 웨이퍼', icon: '⬜', desc: '300mm 고순도 Si 기판', hs: ['381800'], expMode: false },
-        { ko: null, label: 'GaN/SiC 웨이퍼', icon: '🟦', desc: '전력반도체용 화합물 기판', hs: ['281221','381800'], expMode: false },
+        { ko: null, label: 'GaN/SiC 웨이퍼', icon: '🟦', desc: '전력반도체용 화합물 기판', hs: ['284920','381800'], expMode: false },
       ]},
       { label: '완성품', color: '#D4860C', nodes: [
         { ko: null, label: '메모리 반도체', icon: '🧠', desc: 'DRAM·NAND Flash', hs: ['854231','854232'], expMode: true },
