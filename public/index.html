@@ -53,6 +53,16 @@ header::after{content:'';position:absolute;top:0;right:0;bottom:0;width:40%;back
 .kpi-value.danger{color:#FF8272;}
 .kpi-value.ok{color:#6DEBA0;}
 .kpi-desc{font-size:11px;color:rgba(255,255,255,.35);margin-top:4px;}
+.kpi-label{position:relative;}
+.kpi-info-btn{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,.15);color:rgba(255,255,255,.5);font-size:8px;font-weight:700;cursor:pointer;margin-left:5px;vertical-align:middle;border:none;font-family:'DM Mono',monospace;transition:background .15s;line-height:1;}
+.kpi-info-btn:hover{background:rgba(244,196,48,.35);color:#F4C430;}
+.kpi-tooltip{position:absolute;bottom:calc(100% + 10px);left:0;z-index:200;width:230px;background:#0F1C33;border:1px solid rgba(244,196,48,.3);border-radius:6px;padding:12px 14px;opacity:0;pointer-events:none;transition:opacity .15s;box-shadow:0 4px 20px rgba(0,0,0,.5);}
+.kpi-tooltip.visible{opacity:1;pointer-events:auto;}
+.kpi-tooltip::after{content:'';position:absolute;top:100%;left:16px;border:5px solid transparent;border-top-color:#0F1C33;}
+.kpi-tooltip-title{font-size:11px;font-weight:700;color:#F4C430;letter-spacing:.5px;margin-bottom:7px;font-family:'Noto Sans KR',sans-serif;}
+.kpi-tooltip-body{font-size:11px;color:rgba(255,255,255,.75);line-height:1.65;font-family:'Noto Sans KR',sans-serif;}
+.kpi-tooltip-body b{color:#fff;}
+.kpi-tooltip-src{margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.1);font-size:10px;color:rgba(255,255,255,.35);}
 
 /* PAGE */
 .page{display:none;}.page.active{display:block;}
@@ -925,11 +935,66 @@ table.result tbody td.center{text-align:center;}
 <!-- KPI BAND -->
 <div class="kpi-band" id="kpiBand">
   <div class="kpi-row">
-    <div class="kpi-card"><div class="kpi-label">총 수입액</div><div class="kpi-value" id="kpi-total">$12.4B</div><div class="kpi-desc" id="kpi-total-d">전년 대비 +8.2%</div></div>
-    <div class="kpi-card"><div class="kpi-label">중국 의존 광물</div><div class="kpi-value danger" id="kpi-cn">38종</div><div class="kpi-desc">의존도 50% 이상</div></div>
-    <div class="kpi-card"><div class="kpi-label">FEOC 해당 품목</div><div class="kpi-value danger" id="kpi-feoc">23종</div><div class="kpi-desc">IRA 규제 대상</div></div>
-    <div class="kpi-card"><div class="kpi-label">FTA국 조달</div><div class="kpi-value ok" id="kpi-fta">62%</div><div class="kpi-desc" id="kpi-fta-d">목표치 70%</div></div>
-    <div class="kpi-card"><div class="kpi-label">공급망 위험지수</div><div class="kpi-value danger" id="kpi-risk">HIGH</div><div class="kpi-desc" id="kpi-risk-d">희토류·흑연 중심</div></div>
+    <div class="kpi-card">
+      <div class="kpi-label">총 수입액
+        <button class="kpi-info-btn" onclick="toggleKpiTip(this)" aria-label="설명">i</button>
+        <div class="kpi-tooltip">
+          <div class="kpi-tooltip-title">총 수입액 산출 기준</div>
+          <div class="kpi-tooltip-body">관세청 무역통계 API에서 <b>핵심광물 HS코드</b>에 해당하는 품목의 연간 수입 신고액을 합산한 값입니다. 단위는 <b>천 USD</b>를 B(십억$) 단위로 환산하여 표시합니다.</div>
+          <div class="kpi-tooltip-src">출처: 관세청 수출입무역통계 (실시간 조회)</div>
+        </div>
+      </div>
+      <div class="kpi-value" id="kpi-total">$12.4B</div>
+      <div class="kpi-desc" id="kpi-total-d">전년 대비 +8.2%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">중국 의존 광물
+        <button class="kpi-info-btn" onclick="toggleKpiTip(this)" aria-label="설명">i</button>
+        <div class="kpi-tooltip">
+          <div class="kpi-tooltip-title">중국 의존 광물 기준</div>
+          <div class="kpi-tooltip-body">조회 기간 내 수입액 기준 <b>중국 비중이 50% 이상</b>인 광물의 수입니다. 희토류·흑연·리튬 등 배터리·반도체 핵심 소재가 다수 포함됩니다.</div>
+          <div class="kpi-tooltip-src">기준: 중국(CHN) 수입비중 ≥ 50%</div>
+        </div>
+      </div>
+      <div class="kpi-value danger" id="kpi-cn">38종</div>
+      <div class="kpi-desc">의존도 50% 이상</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">FEOC 해당 품목
+        <button class="kpi-info-btn" onclick="toggleKpiTip(this)" aria-label="설명">i</button>
+        <div class="kpi-tooltip">
+          <div class="kpi-tooltip-title">FEOC란?</div>
+          <div class="kpi-tooltip-body">미국 <b>IRA(인플레이션 감축법)</b>상 <b>우려 외국 기업(FEOC)</b> 지정 국가 — 중국·러시아·북한·이란·미얀마 — 로부터의 수입 비중이 <b>50% 초과</b>인 광물·소재 품목 수입니다. FEOC 해당 시 미국 전기차 세액공제(최대 $7,500) 적용이 제한됩니다.</div>
+          <div class="kpi-tooltip-src">기준: FEOC 5개국 합산 비중 &gt; 50%</div>
+        </div>
+      </div>
+      <div class="kpi-value danger" id="kpi-feoc">23종</div>
+      <div class="kpi-desc">IRA 규제 대상</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">FTA국 조달
+        <button class="kpi-info-btn" onclick="toggleKpiTip(this)" aria-label="설명">i</button>
+        <div class="kpi-tooltip">
+          <div class="kpi-tooltip-title">FTA국 조달 비율</div>
+          <div class="kpi-tooltip-body">한국이 <b>FTA를 체결한 국가</b>로부터의 핵심광물 수입액이 전체 수입액에서 차지하는 비율입니다. 미국 IRA 광물 요건 충족 및 공급망 다변화 관점에서 <b>목표치 70%</b>를 설정하고 있습니다.</div>
+          <div class="kpi-tooltip-src">한국 FTA 체결국 기준 (52개국)</div>
+        </div>
+      </div>
+      <div class="kpi-value ok" id="kpi-fta">62%</div>
+      <div class="kpi-desc" id="kpi-fta-d">목표치 70%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">공급망 위험지수
+        <button class="kpi-info-btn" onclick="toggleKpiTip(this)" aria-label="설명">i</button>
+        <div class="kpi-tooltip">
+          <div class="kpi-tooltip-title">공급망 위험지수 산출</div>
+          <div class="kpi-tooltip-body">핵심광물별 <b>중국 의존도</b>와 <b>FEOC 해당 비율</b>을 가중 평균하여 산출합니다.<br>· <b>HIGH</b>: 평균 의존도 60% 이상 또는 FEOC 비율 50% 이상<br>· <b>MODERATE</b>: 40~60%<br>· <b>LOW</b>: 40% 미만<br>현재 희토류·흑연의 높은 중국 의존도가 주요 원인입니다.</div>
+          <div class="kpi-tooltip-src">산출: 중국의존도 × 0.6 + FEOC비율 × 0.4</div>
+        </div>
+      </div>
+      <div class="kpi-value danger" id="kpi-risk">HIGH</div>
+      <div class="kpi-desc" id="kpi-risk-d">희토류·흑연 중심</div>
+    </div>
   </div>
 </div>
 
@@ -4934,6 +4999,30 @@ function renderMapDetailTable(hsDetail, total, mineral, label) {
   tableDiv.innerHTML = html;
   section.style.display = 'block';
 }
+
+/* KPI 카드 툴팁 토글 */
+function toggleKpiTip(btn) {
+  const tip = btn.parentElement.querySelector('.kpi-tooltip');
+  if (!tip) return;
+  const isVisible = tip.classList.contains('visible');
+  // 다른 열린 툴팁 모두 닫기
+  document.querySelectorAll('.kpi-tooltip.visible').forEach(t => t.classList.remove('visible'));
+  if (!isVisible) {
+    tip.classList.add('visible');
+    // 화면 밖으로 벗어나면 오른쪽 정렬로 보정
+    const rect = tip.getBoundingClientRect();
+    if (rect.right > window.innerWidth - 10) {
+      tip.style.left = 'auto';
+      tip.style.right = '0';
+    }
+  }
+}
+// 툴팁 외부 클릭 시 닫기
+document.addEventListener('click', e => {
+  if (!e.target.closest('.kpi-label')) {
+    document.querySelectorAll('.kpi-tooltip.visible').forEach(t => t.classList.remove('visible'));
+  }
+});
 
 /* HS코드·광종·산업·밸류체인 매핑표 CSV 다운로드 */
 function downloadHsMappingCsv() {
