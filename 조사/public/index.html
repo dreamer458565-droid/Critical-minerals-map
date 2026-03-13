@@ -53,16 +53,6 @@ header::after{content:'';position:absolute;top:0;right:0;bottom:0;width:40%;back
 .kpi-value.danger{color:#FF8272;}
 .kpi-value.ok{color:#6DEBA0;}
 .kpi-desc{font-size:11px;color:rgba(255,255,255,.35);margin-top:4px;}
-.kpi-label{position:relative;}
-.kpi-info-btn{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,.15);color:rgba(255,255,255,.5);font-size:8px;font-weight:700;cursor:pointer;margin-left:5px;vertical-align:middle;border:none;font-family:'DM Mono',monospace;transition:background .15s;line-height:1;}
-.kpi-info-btn:hover{background:rgba(244,196,48,.35);color:#F4C430;}
-.kpi-tooltip{position:absolute;bottom:calc(100% + 10px);left:0;z-index:200;width:230px;background:#0F1C33;border:1px solid rgba(244,196,48,.3);border-radius:6px;padding:12px 14px;opacity:0;pointer-events:none;transition:opacity .15s;box-shadow:0 4px 20px rgba(0,0,0,.5);}
-.kpi-tooltip.visible{opacity:1;pointer-events:auto;}
-.kpi-tooltip::after{content:'';position:absolute;top:100%;left:16px;border:5px solid transparent;border-top-color:#0F1C33;}
-.kpi-tooltip-title{font-size:11px;font-weight:700;color:#F4C430;letter-spacing:.5px;margin-bottom:7px;font-family:'Noto Sans KR',sans-serif;}
-.kpi-tooltip-body{font-size:11px;color:rgba(255,255,255,.75);line-height:1.65;font-family:'Noto Sans KR',sans-serif;}
-.kpi-tooltip-body b{color:#fff;}
-.kpi-tooltip-src{margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.1);font-size:10px;color:rgba(255,255,255,.35);}
 
 /* PAGE */
 .page{display:none;}.page.active{display:block;}
@@ -782,70 +772,6 @@ table.result tbody td.center{text-align:center;}
 .cond-input:focus-visible,.cond-select:focus-visible{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(212,134,12,.15);}
 
 /* ═══════════════════════════════════════
-   밸류체인 탭 (page4)
-═══════════════════════════════════════ */
-/* 우선순위 배지 */
-.priority-badge{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.5px;padding:1px 5px;border-radius:2px;vertical-align:middle;margin-left:4px;text-transform:uppercase;}
-.priority-badge.s{background:#7B1FA2;color:#fff;}
-.priority-badge.a{background:#C0392B;color:#fff;}
-.priority-badge.b{background:#2980B9;color:#fff;}
-.priority-badge.c{background:#7A6E5A;color:#fff;}
-
-/* 산업 선택 탭 */
-.vc-industry-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;}
-.vc-ind-btn{padding:10px 22px;border:2px solid var(--border);border-radius:6px;background:var(--white);color:var(--subtext);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Noto Sans KR',sans-serif;}
-.vc-ind-btn:hover{border-color:var(--amber);color:var(--amber);}
-.vc-ind-btn.active{background:var(--navy);border-color:var(--amber);color:#F4C430;}
-
-/* 플로우 컨테이너 */
-.vc-flow{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:12px;}
-.vc-stage-wrap{display:flex;align-items:center;flex-shrink:0;}
-.vc-stage{min-width:170px;max-width:200px;display:flex;flex-direction:column;gap:0;}
-.vc-stage-header{text-align:center;padding:8px 12px;border-radius:6px 6px 0 0;font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.9);}
-.vc-stage-body{display:flex;flex-direction:column;gap:6px;padding:10px 8px;background:rgba(0,0,0,.03);border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;flex:1;}
-
-/* 노드 카드 */
-.vc-node{background:var(--white);border:1px solid var(--border);border-radius:5px;padding:9px 11px;cursor:pointer;transition:all .18s;position:relative;}
-.vc-node:hover{border-color:var(--amber);box-shadow:0 2px 10px rgba(212,134,12,.2);transform:translateY(-1px);}
-.vc-node.active-node{border-color:var(--navy);background:#EBF5FB;box-shadow:0 2px 12px rgba(46,91,138,.25);}
-.vc-node-top{display:flex;justify-content:space-between;align-items:flex-start;gap:4px;}
-.vc-node-name{font-size:12px;font-weight:700;color:var(--navy);line-height:1.3;}
-.vc-node-sym{font-size:10px;font-weight:700;color:var(--subtext);font-family:'JetBrains Mono',monospace;flex-shrink:0;}
-.vc-node-risk{display:inline-block;font-size:8.5px;font-weight:700;padding:1px 5px;border-radius:2px;margin-top:3px;letter-spacing:.3px;}
-.vc-node-risk.극심{background:#FCEAE8;color:#C0392B;}
-.vc-node-risk.높음{background:#FFF3E0;color:#D4860C;}
-.vc-node-risk.중간{background:#EBF5FB;color:#2980B9;}
-.vc-node-risk.낮음{background:#E6F4EA;color:#27AE60;}
-.vc-node-amt{font-size:11px;font-weight:600;color:var(--navy);margin-top:5px;font-family:'JetBrains Mono',monospace;}
-.vc-node-amt.loading{color:var(--muted);font-weight:400;font-size:10px;}
-.vc-node-amt.error{color:var(--muted);font-size:10px;}
-.vc-node-country{font-size:10px;color:var(--subtext);margin-top:2px;}
-
-/* 최종제품 노드 */
-.vc-final{min-width:150px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#0F1C33,#2E5B8A);border-radius:8px;padding:20px 14px;text-align:center;}
-.vc-final-icon{font-size:36px;margin-bottom:8px;}
-.vc-final-name{font-size:14px;font-weight:700;color:#F4C430;line-height:1.3;}
-.vc-final-desc{font-size:11px;color:rgba(255,255,255,.55);margin-top:4px;}
-.vc-final-value{margin-top:10px;font-size:12px;font-weight:600;color:rgba(255,255,255,.8);font-family:'JetBrains Mono',monospace;}
-
-/* 화살표 */
-.vc-arrow{display:flex;align-items:center;padding:0 6px;flex-shrink:0;color:var(--border);font-size:20px;user-select:none;}
-
-/* 우측 상세 패널 */
-.vc-detail-panel{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:20px;min-height:200px;}
-.vc-detail-empty{color:var(--subtext);font-size:13px;text-align:center;padding:40px 0;}
-.vc-detail-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px;}
-.vc-detail-hint{font-size:12px;color:var(--subtext);margin-bottom:14px;line-height:1.6;}
-.vc-detail-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-.vc-detail-stat{background:var(--cream);border-radius:4px;padding:10px 12px;}
-.vc-detail-stat-label{font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--subtext);text-transform:uppercase;margin-bottom:4px;}
-.vc-detail-stat-val{font-size:18px;font-weight:700;color:var(--navy);font-family:'DM Serif Display',serif;}
-.vc-detail-chart{height:120px;margin-top:8px;}
-.vc-year-select{display:flex;gap:8px;align-items:center;margin-bottom:16px;}
-.vc-year-select label{font-size:11px;color:var(--subtext);}
-.vc-year-select select{font-size:12px;border:1px solid var(--border);border-radius:4px;padding:4px 8px;background:var(--white);}
-
-/* ═══════════════════════════════════════
    테이블 가로 스크롤 인디케이터
 ═══════════════════════════════════════ */
 .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative;}
@@ -953,9 +879,6 @@ table.result tbody td.center{text-align:center;}
       <div><strong>대상광물</strong>&nbsp; 61종</div>
       <div><strong>HS 코드</strong>&nbsp; 530개 항목</div>
       <div><strong>출처</strong>&nbsp; 관세청 무역통계</div>
-      <div style="margin-top:10px;">
-        <button onclick="downloadHsMappingCsv()" style="background:rgba(212,134,12,.18);border:1px solid rgba(212,134,12,.55);color:#F4C430;font-size:11px;font-weight:600;letter-spacing:.5px;padding:5px 14px;border-radius:3px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;" title="광종·HS코드·밸류체인 전체 매핑표 다운로드">📥 HS 매핑표 CSV</button>
-      </div>
     </div>
   </div>
 </header>
@@ -975,7 +898,6 @@ table.result tbody td.center{text-align:center;}
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page1" onclick="switchTab(1)">⛏️&ensp;광종별 조회</button>
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page2" onclick="switchTab(2)">🔢&ensp;HS코드별 조회</button>
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page3" onclick="switchTab(3)">🗺️&ensp;수입지도</button>
-    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page4" onclick="switchTab(4)">🔗&ensp;밸류체인</button>
   </div>
 </div>
 
@@ -1000,66 +922,11 @@ table.result tbody td.center{text-align:center;}
 <!-- KPI BAND -->
 <div class="kpi-band" id="kpiBand">
   <div class="kpi-row">
-    <div class="kpi-card">
-      <div class="kpi-label">총 수입액
-        <button class="kpi-info-btn" onclick="toggleKpiTip(this)" aria-label="설명">i</button>
-        <div class="kpi-tooltip">
-          <div class="kpi-tooltip-title">총 수입액 산출 기준</div>
-          <div class="kpi-tooltip-body">관세청 무역통계 API에서 <b>핵심광물 HS코드</b>에 해당하는 품목의 연간 수입 신고액을 합산한 값입니다. 단위는 <b>천 USD</b>를 B(십억$) 단위로 환산하여 표시합니다.</div>
-          <div class="kpi-tooltip-src">출처: 관세청 수출입무역통계 (실시간 조회)</div>
-        </div>
-      </div>
-      <div class="kpi-value" id="kpi-total">$12.4B</div>
-      <div class="kpi-desc" id="kpi-total-d">전년 대비 +8.2%</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">중국 의존 광물
-        <button class="kpi-info-btn" onclick="toggleKpiTip(this)" aria-label="설명">i</button>
-        <div class="kpi-tooltip">
-          <div class="kpi-tooltip-title">중국 의존 광물 기준</div>
-          <div class="kpi-tooltip-body">조회 기간 내 수입액 기준 <b>중국 비중이 50% 이상</b>인 광물의 수입니다. 희토류·흑연·리튬 등 배터리·반도체 핵심 소재가 다수 포함됩니다.</div>
-          <div class="kpi-tooltip-src">기준: 중국(CHN) 수입비중 ≥ 50%</div>
-        </div>
-      </div>
-      <div class="kpi-value danger" id="kpi-cn">38종</div>
-      <div class="kpi-desc">의존도 50% 이상</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">FEOC 해당 품목
-        <button class="kpi-info-btn" onclick="toggleKpiTip(this)" aria-label="설명">i</button>
-        <div class="kpi-tooltip">
-          <div class="kpi-tooltip-title">FEOC란?</div>
-          <div class="kpi-tooltip-body">미국 <b>IRA(인플레이션 감축법)</b>상 <b>우려 외국 기업(FEOC)</b> 지정 국가 — 중국·러시아·북한·이란·미얀마 — 로부터의 수입 비중이 <b>50% 초과</b>인 광물·소재 품목 수입니다. FEOC 해당 시 미국 전기차 세액공제(최대 $7,500) 적용이 제한됩니다.</div>
-          <div class="kpi-tooltip-src">기준: FEOC 5개국 합산 비중 &gt; 50%</div>
-        </div>
-      </div>
-      <div class="kpi-value danger" id="kpi-feoc">23종</div>
-      <div class="kpi-desc">IRA 규제 대상</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">FTA국 조달
-        <button class="kpi-info-btn" onclick="toggleKpiTip(this)" aria-label="설명">i</button>
-        <div class="kpi-tooltip">
-          <div class="kpi-tooltip-title">FTA국 조달 비율</div>
-          <div class="kpi-tooltip-body">한국이 <b>FTA를 체결한 국가</b>로부터의 핵심광물 수입액이 전체 수입액에서 차지하는 비율입니다. 미국 IRA 광물 요건 충족 및 공급망 다변화 관점에서 <b>목표치 70%</b>를 설정하고 있습니다.</div>
-          <div class="kpi-tooltip-src">한국 FTA 체결국 기준 (52개국)</div>
-        </div>
-      </div>
-      <div class="kpi-value ok" id="kpi-fta">62%</div>
-      <div class="kpi-desc" id="kpi-fta-d">목표치 70%</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">공급망 위험지수
-        <button class="kpi-info-btn" onclick="toggleKpiTip(this)" aria-label="설명">i</button>
-        <div class="kpi-tooltip">
-          <div class="kpi-tooltip-title">공급망 위험지수 산출</div>
-          <div class="kpi-tooltip-body">핵심광물별 <b>중국 의존도</b>와 <b>FEOC 해당 비율</b>을 가중 평균하여 산출합니다.<br>· <b>HIGH</b>: 평균 의존도 60% 이상 또는 FEOC 비율 50% 이상<br>· <b>MODERATE</b>: 40~60%<br>· <b>LOW</b>: 40% 미만<br>현재 희토류·흑연의 높은 중국 의존도가 주요 원인입니다.</div>
-          <div class="kpi-tooltip-src">산출: 중국의존도 × 0.6 + FEOC비율 × 0.4</div>
-        </div>
-      </div>
-      <div class="kpi-value danger" id="kpi-risk">HIGH</div>
-      <div class="kpi-desc" id="kpi-risk-d">희토류·흑연 중심</div>
-    </div>
+    <div class="kpi-card"><div class="kpi-label">총 수입액</div><div class="kpi-value" id="kpi-total">$12.4B</div><div class="kpi-desc" id="kpi-total-d">전년 대비 +8.2%</div></div>
+    <div class="kpi-card"><div class="kpi-label">중국 의존 광물</div><div class="kpi-value danger" id="kpi-cn">38종</div><div class="kpi-desc">의존도 50% 이상</div></div>
+    <div class="kpi-card"><div class="kpi-label">FEOC 해당 품목</div><div class="kpi-value danger" id="kpi-feoc">23종</div><div class="kpi-desc">IRA 규제 대상</div></div>
+    <div class="kpi-card"><div class="kpi-label">FTA국 조달</div><div class="kpi-value ok" id="kpi-fta">62%</div><div class="kpi-desc" id="kpi-fta-d">목표치 70%</div></div>
+    <div class="kpi-card"><div class="kpi-label">공급망 위험지수</div><div class="kpi-value danger" id="kpi-risk">HIGH</div><div class="kpi-desc" id="kpi-risk-d">희토류·흑연 중심</div></div>
   </div>
 </div>
 
@@ -1281,18 +1148,6 @@ table.result tbody td.center{text-align:center;}
         <div class="chart-body"><canvas id="m-trend-chart" style="max-height:230px"></canvas></div>
       </div>
     </div>
-    <!-- 국가별 비중 변화 추이 (다년도 조회 시 표시) -->
-    <div class="chart-box" id="m-country-trend-box" style="display:none;margin-bottom:20px;">
-      <div class="chart-box-header">
-        <div class="chart-box-title">국가별 비중 변화 추이</div>
-        <div class="chart-tab-group" id="m-ct-topn-tabs">
-          <button class="chart-tab active" onclick="switchMCtTopN(5,this)">TOP5</button>
-          <button class="chart-tab" onclick="switchMCtTopN(8,this)">TOP8</button>
-        </div>
-      </div>
-      <div class="chart-body" style="min-height:200px;"><canvas id="m-country-trend-chart" style="max-height:260px"></canvas></div>
-    </div>
-
     <!-- 공급단계별 차트 (2분할) -->
     <div class="chart-grid" id="m-supply-area" style="margin-top:0;">
       <div class="chart-box">
@@ -1615,9 +1470,6 @@ table.result tbody td.center{text-align:center;}
               <select class="cond-select" style="width:88px;font-size:12px" id="mapStartYearSel"></select>
               <span style="font-size:12px;color:var(--sub);">~</span>
               <select class="cond-select" style="width:88px;font-size:12px" id="mapEndYearSel"></select>
-              <select class="cond-select" style="width:108px;font-size:12px" id="mapStageSel">
-                <option value="all">전체 단계</option>
-              </select>
               <button class="btn-query" style="padding:6px 14px;font-size:12px;" onclick="queryMapData()">🌍 실시간 조회</button>
               <span id="mapStatus" style="font-size:11px;color:var(--sub);"></span>
             </div>
@@ -1675,15 +1527,6 @@ table.result tbody td.center{text-align:center;}
             <div class="cdetail-bar"><div class="cdetail-bar-fill" style="width:40.2%;background:#D4860C;height:5px;border-radius:3px"></div></div>
           </div>
         </div>
-        <!-- 밸류체인 세부 수입 내역 -->
-        <div id="map-detail-section" style="display:none;margin-top:20px;">
-          <div style="font-weight:600;font-size:14px;margin-bottom:10px;color:var(--text);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-            <span>밸류체인별 세부 수입 내역</span>
-            <span id="map-detail-label" style="font-weight:400;font-size:12px;color:var(--subtext)"></span>
-            <button onclick="downloadMapDetailCsv()" style="margin-left:auto;padding:4px 12px;font-size:11px;background:var(--parchment);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--text);font-family:'Noto Sans KR',sans-serif;" title="현재 조회 결과를 HS코드별 수입국 비중 포함 CSV로 다운로드">📥 수입국 비중 CSV</button>
-          </div>
-          <div id="map-detail-table" style="overflow-x:auto;"></div>
-        </div>
       </div>
 
       <!-- 우측 패널 -->
@@ -1735,62 +1578,6 @@ table.result tbody td.center{text-align:center;}
   </div>
 </div>
 
-<!-- PAGE 5: 밸류체인 -->
-<div class="page" id="page4" role="tabpanel" aria-labelledby="tab4">
-<div class="main">
-  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-    <div>
-      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--subtext);text-transform:uppercase;margin-bottom:6px;">산업별 공급망 흐름도</div>
-      <div style="font-size:22px;font-weight:700;color:var(--navy);">핵심광물 → 소재 → 최종제품 <span style="font-size:14px;color:var(--subtext);font-weight:400;">밸류체인 분석</span></div>
-    </div>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <label style="font-size:11px;color:var(--subtext);">기준연도</label>
-      <select id="vc_year" style="font-size:12px;border:1px solid var(--border);border-radius:4px;padding:5px 10px;background:var(--white);"></select>
-      <span style="font-size:11px;color:var(--subtext);">노드 클릭 시 상세 수입데이터 조회</span>
-    </div>
-  </div>
-
-  <!-- 산업 선택 -->
-  <div class="vc-industry-tabs" id="vcIndustryTabs"></div>
-
-  <!-- 우선순위 범례 -->
-  <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:18px;">
-    <span style="font-size:11px;font-weight:700;color:var(--subtext);">우선순위</span>
-    <span><span class="priority-badge s">S</span> <span style="font-size:11px;color:var(--subtext);">전략필수</span></span>
-    <span><span class="priority-badge a">A</span> <span style="font-size:11px;color:var(--subtext);">중요</span></span>
-    <span><span class="priority-badge b">B</span> <span style="font-size:11px;color:var(--subtext);">모니터링</span></span>
-    <span style="margin-left:14px;font-size:11px;font-weight:700;color:var(--subtext);">위험도</span>
-    <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#FCEAE8;border:1px solid #C0392B;"></span><span style="font-size:11px;color:var(--subtext);">극심</span>
-    <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#FFF3E0;border:1px solid #D4860C;"></span><span style="font-size:11px;color:var(--subtext);">높음</span>
-    <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#EBF5FB;border:1px solid #2980B9;"></span><span style="font-size:11px;color:var(--subtext);">중간</span>
-  </div>
-
-  <!-- 플로우 + 상세 패널 -->
-  <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;">
-    <div>
-      <!-- 플로우 다이어그램 -->
-      <div class="panel" style="overflow:hidden;">
-        <div class="panel-header">
-          <div class="panel-title" id="vcFlowTitle">산업 선택 후 공급망이 표시됩니다</div>
-          <div class="panel-tag" id="vcFlowTag">데이터: 관세청</div>
-        </div>
-        <div class="panel-body" style="padding:16px;">
-          <div id="vcFlowContainer" style="min-height:180px;"></div>
-        </div>
-      </div>
-      <!-- 요약 인사이트 -->
-      <div id="vcInsightBox" style="display:none;margin-top:16px;background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:14px 18px;font-size:12px;color:var(--text);line-height:1.7;"></div>
-    </div>
-    <!-- 우측 상세 패널 -->
-    <div class="vc-detail-panel">
-      <div id="vcDetailContent">
-        <div class="vc-detail-empty">← 왼쪽 플로우에서<br>광종/소재 노드를 클릭하면<br>실시간 수입 데이터가 표시됩니다</div>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-
 <!-- FOOTER -->
 
 <footer>
@@ -1818,8 +1605,8 @@ function switchTab(idx){
 }
 
 // ── 광종 분류탭 동적 생성 (USGS 2025 60종 기준) ──────────────
-const MCAT_GROUPS = ['이차전지','배터리소재','반도체·전자','희토류·자석','산업금속','화학·기타'];
-const MCAT_ICONS  = ['⚡','🔋','💻','🧲','🏗','⚗'];
+const MCAT_GROUPS = ['이차전지','반도체·전자','희토류·자석','산업금속','화학·기타'];
+const MCAT_ICONS  = ['⚡','💻','🧲','🏗','⚗'];
 
 function buildMcatChips() {
   const tabsEl  = document.getElementById('mcatTabs');
@@ -1879,91 +1666,51 @@ document.addEventListener('DOMContentLoaded', () => { buildMcatChips(); buildHsQ
 ════════════════════════════════════════════════ */
 const MINERAL_DB = [
   // ══ 이차전지 ══
-  {ko:'리튬',       en:'Lithium',       sym:'Li',   group:'이차전지', risk:'높음', priority:'S',
+  {ko:'리튬',       en:'Lithium',       sym:'Li',   group:'이차전지', risk:'높음',
    hs:['253090','282520','283691','282739','284390','850760','850780'],
-   hsName:['리튬광석(기타광물)','수산화리튬','탄산리튬','염화리튬','인산철리튬 등','리튬이온축전지','리튬배터리팩'],
-   hint:'EV·ESS 배터리 핵심 원료. 칠레·호주·아르헨티나 트라이앵글 집중'},
-  {ko:'코발트',     en:'Cobalt',        sym:'Co',   group:'이차전지', risk:'높음', priority:'S',
+   hsName:['리튬광석(기타광물)','수산화리튬','탄산리튬','염화리튬','인산철리튬 등','리튬이온축전지','리튬배터리팩']},
+  {ko:'코발트',     en:'Cobalt',        sym:'Co',   group:'이차전지', risk:'높음',
    hs:['260500','282200','282300','810520','810510','810530','282210','282290'],
-   hsName:['코발트광','산화코발트','수산화코발트','코발트분말','코발트괴·스크랩','코발트합금','염화코발트','코발트화합물'],
-   hint:'NCM·NCA 양극재 필수 원소. 콩고(DRC) 광산 집중, 중국 정련 지배'},
-  {ko:'니켈',       en:'Nickel',        sym:'Ni',   group:'이차전지', risk:'중간', priority:'A',
+   hsName:['코발트광','산화코발트','수산화코발트','코발트분말','코발트괴·스크랩','코발트합금','염화코발트','코발트화합물']},
+  {ko:'니켈',       en:'Nickel',        sym:'Ni',   group:'이차전지', risk:'중간',
    hs:['260400','750110','750120','750210','750220','750300','750400','750500','750600','282530','282570'],
-   hsName:['니켈광','니켈매트','니켈소결체','니켈괴(정제)','니켈합금괴','니켈웨이스트','니켈분말','니켈판','니켈합금','황산니켈','탄산니켈'],
-   hint:'고니켈 양극재 전환으로 수요 급증. 필리핀·인도네시아산 편중'},
-  {ko:'흑연',       en:'Graphite',      sym:'C',    group:'이차전지', risk:'극심', priority:'S',
+   hsName:['니켈광','니켈매트','니켈소결체','니켈괴(정제)','니켈합금괴','니켈웨이스트','니켈분말','니켈판','니켈합금','황산니켈','탄산니켈']},
+  {ko:'흑연',       en:'Graphite',      sym:'C',    group:'이차전지', risk:'극심',
    hs:['250410','250490','380110','380120','380190','680410'],
-   hsName:['천연흑연(분말·박편)','천연흑연(기타)','인조흑연','콜로이달흑연','기타인조흑연','흑연전극'],
-   hint:'배터리 음극재 핵심소재. 중국이 천연흑연 세계 생산 65%, 가공 90%+ 점유'},
-  {ko:'망간',       en:'Manganese',     sym:'Mn',   group:'이차전지', risk:'높음', priority:'A',
+   hsName:['천연흑연(분말·박편)','천연흑연(기타)','인조흑연','콜로이달흑연','기타인조흑연','흑연전극']},
+  {ko:'망간',       en:'Manganese',     sym:'Mn',   group:'이차전지', risk:'높음',
    hs:['260200','282010','282020','282090','720211','720219','850760'],
-   hsName:['망간광','이산화망간','산화망간(기타)','망간화합물','고탄소페로망간','저탄소페로망간','망간전지'],
-   hint:'NCM·LMO 양극재 구성 원소. LMFP 확대로 전략 중요도 상승'},
-  {ko:'바나듐',     en:'Vanadium',      sym:'V',    group:'이차전지', risk:'중간', priority:'B',
+   hsName:['망간광','이산화망간','산화망간(기타)','망간화합물','고탄소페로망간','저탄소페로망간','망간전지']},
+  {ko:'바나듐',     en:'Vanadium',      sym:'V',    group:'이차전지', risk:'중간',
    hs:['261500','282530','720222','720223','810230','810240'],
-   hsName:['바나듐광','오산화바나듐','페로바나듐(V≥80%)','페로바나듐(기타)','바나듐괴','바나듐분말'],
-   hint:'바나듐 레독스 흐름전지(VRFB) ESS 용도 주목. 중국·러시아 집중'},
-  {ko:'인·인산',    en:'Phosphate',     sym:'P',    group:'이차전지', risk:'중간', priority:'A',
+   hsName:['바나듐광','오산화바나듐','페로바나듐(V≥80%)','페로바나듐(기타)','바나듐괴','바나듐분말']},
+  {ko:'인·인산',    en:'Phosphate',     sym:'P',    group:'이차전지', risk:'중간',
    hs:['251010','251020','280920','281000','283522','283523','283529'],
-   hsName:['인산염광(비료용)','인산염광(기타)','오산화인','인산','인산이수소나트륨','인산수소이나트륨','기타인산염'],
-   hint:'LFP 양극재 핵심 원료. 모로코·중국 광산 집중'},
-
-  // ══ 배터리소재 (전구체·양극재) ══
-  {ko:'전구체',     en:'Battery Precursor', sym:'PCAM', group:'배터리소재', risk:'높음', priority:'S',
-   hs:['282590','382499'],
-   hsName:['니켈코발트망간수산화물(NCM·NCA 전구체)','기타화학조제품(전구체 포함)'],
-   hint:'NMC·NCA 배터리 전구체. 중국이 세계 생산의 약 80% 점유'},
-  {ko:'NCM·NCA 양극재', en:'NCM/NCA Cathode', sym:'NCM', group:'배터리소재', risk:'높음', priority:'S',
-   hs:['284190','285390','282590'],
-   hsName:['기타옥소금속산염(리튬니켈·코발트·망간 복합산화물)','기타무기화합물(NCM·NCA 혼합)','기타금속산화물·수산화물(NCM계)'],
-   hint:'삼원계 양극재(LiNiMnCoO₂·LiNiCoAlO₂). 국내 에코프로·포스코케미칼·엘앤에프가 생산, 수입보다 수출이 큰 품목'},
-  {ko:'LFP 양극재',  en:'LFP Cathode',    sym:'LFP',  group:'배터리소재', risk:'높음', priority:'A',
-   hs:['283529','284190'],
-   hsName:['기타인산염(인산철리튬 LFP)','기타옥소금속산(LFP·LMFP 등)'],
-   hint:'인산철리튬(LiFePO₄). 안전성·수명 우위로 ESS·중저가 EV에 급성장'},
-  {ko:'황산염류(전구체원료)', en:'Precursor Sulfate Materials', sym:'MSO4', group:'배터리소재', risk:'높음', priority:'A',
-   hs:['283321','283329'],
-   hsName:['황산니켈(NiSO4)','황산코발트·황산망간(CoSO4·MnSO4)'],
-   hint:'NCM·NCA 전구체 제조 핵심 원료. 황산니켈 국내 생산 부족으로 수입 의존'},
-  {ko:'전해질·전해액',  en:'Battery Electrolyte (LiPF6)', sym:'LiPF6', group:'배터리소재', risk:'높음', priority:'A',
-   hs:['282690','382400'],
-   hsName:['육불화인산리튬(LiPF6 전해질염)','리튬이온 전해액 조제품'],
-   hint:'배터리 이온전도 핵심소재. 중국 전해질염 글로벌 공급 비중 약 70%'},
-  {ko:'분리막',         en:'Battery Separator', sym:'SEP', group:'배터리소재', risk:'중간', priority:'B',
-   hs:['392010','392020'],
-   hsName:['폴리에틸렌계 분리막(PE Separator)','폴리프로필렌계 분리막(PP Separator)'],
-   hint:'배터리 양극·음극 격리용 미세다공 필름. 일본 Asahi·Toray 등 과점'},
+   hsName:['인산염광(비료용)','인산염광(기타)','오산화인','인산','인산이수소나트륨','인산수소이나트륨','기타인산염']},
 
   // ══ 반도체·전자 ══
-  {ko:'갈륨',       en:'Gallium',       sym:'Ga',   group:'반도체·전자', risk:'극심', priority:'S',
+  {ko:'갈륨',       en:'Gallium',       sym:'Ga',   group:'반도체·전자', risk:'극심',
    hs:['280459','285000','854231','381800'],
-   hsName:['갈륨금속','갈륨화합물','갈륨반도체웨이퍼','갈륨비소(GaAs)'],
-   hint:'GaN·GaAs 반도체 필수원소. 2023년 중국 수출 통제 발동'},
-  {ko:'게르마늄',   en:'Germanium',     sym:'Ge',   group:'반도체·전자', risk:'극심', priority:'S',
+   hsName:['갈륨금속','갈륨화합물','갈륨반도체웨이퍼','갈륨비소(GaAs)']},
+  {ko:'게르마늄',   en:'Germanium',     sym:'Ge',   group:'반도체·전자', risk:'극심',
    hs:['804090','285000','280459'],
-   hsName:['게르마늄금속','게르마늄화합물','게르마늄반도체'],
-   hint:'광섬유·야간투시 적외선 광학 핵심. 중국 수출 통제(2023) 직격'},
-  {ko:'인듐',       en:'Indium',        sym:'In',   group:'반도체·전자', risk:'높음', priority:'A',
+   hsName:['게르마늄금속','게르마늄화합물','게르마늄반도체']},
+  {ko:'인듐',       en:'Indium',        sym:'In',   group:'반도체·전자', risk:'높음',
    hs:['804090','283099','381800'],
-   hsName:['인듐금속','산화인듐','인듐주석산화물(ITO)'],
-   hint:'ITO(투명전극) 필수원소. OLED·태양전지 확대로 수요 증가'},
-  {ko:'텅스텐',     en:'Tungsten',      sym:'W',    group:'반도체·전자', risk:'높음', priority:'A',
+   hsName:['인듐금속','산화인듐','인듐주석산화물(ITO)']},
+  {ko:'텅스텐',     en:'Tungsten',      sym:'W',    group:'반도체·전자', risk:'높음',
    hs:['261100','810110','810120','810191','810199','283010','283090'],
-   hsName:['텅스텐광','텅스텐분말','텅스텐괴·봉','텅스텐웨이스트','텅스텐합금','황화텅스텐','텅스텐화합물'],
-   hint:'반도체 배선소재(WF6 기화)·초경공구 핵심. 중국 매장량 60%'},
-  {ko:'탄탈',       en:'Tantalum',      sym:'Ta',   group:'반도체·전자', risk:'높음', priority:'A',
+   hsName:['텅스텐광','텅스텐분말','텅스텐괴·봉','텅스텐웨이스트','텅스텐합금','황화텅스텐','텅스텐화합물']},
+  {ko:'탄탈',       en:'Tantalum',      sym:'Ta',   group:'반도체·전자', risk:'높음',
    hs:['261590','810310','810320','810390','854221'],
-   hsName:['탄탈럼광','탄탈럼분말','탄탈럼괴','탄탈럼합금','탄탈럼커패시터'],
-   hint:'소형 고용량 커패시터 필수. 콩고·르완다 편중, 분쟁광물 이슈'},
-  {ko:'실리콘',     en:'Silicon',       sym:'Si',   group:'반도체·전자', risk:'중간', priority:'A',
+   hsName:['탄탈럼광','탄탈럼분말','탄탈럼괴','탄탈럼합금','탄탈럼커패시터']},
+  {ko:'실리콘',     en:'Silicon',       sym:'Si',   group:'반도체·전자', risk:'중간',
    hs:['280461','280469','280470','720221','854190','381800'],
-   hsName:['실리콘(순도99.99%이상)','실리콘(기타)','이산화실리콘','페로실리콘','태양전지용실리콘','반도체웨이퍼'],
-   hint:'모든 반도체의 기판 소재. SiC 전력반도체 수요 급증'},
-  {ko:'안티몬',     en:'Antimony',      sym:'Sb',   group:'반도체·전자', risk:'높음', priority:'B',
+   hsName:['실리콘(순도99.99%이상)','실리콘(기타)','이산화실리콘','페로실리콘','태양전지용실리콘','반도체웨이퍼']},
+  {ko:'안티몬',     en:'Antimony',      sym:'Sb',   group:'반도체·전자', risk:'높음',
    hs:['261710','283010','283020','810610','810620'],
-   hsName:['안티모니광','삼산화안티모니','황화안티모니','안티모니괴','안티모니합금'],
-   hint:'반도체 도핑·난연제 원료. 중국 매장량 50%+, 2024년 수출 통제'},
-  {ko:'비스무트',   en:'Bismuth',       sym:'Bi',   group:'반도체·전자', risk:'중간', priority:'C',
+   hsName:['안티모니광','삼산화안티모니','황화안티모니','안티모니괴','안티모니합금']},
+  {ko:'비스무트',   en:'Bismuth',       sym:'Bi',   group:'반도체·전자', risk:'중간',
    hs:['804090','283099'],
    hsName:['비스무트금속','비스무트화합물']},
   {ko:'셀레늄',     en:'Selenium',      sym:'Se',   group:'반도체·전자', risk:'중간',
@@ -1984,44 +1731,23 @@ const MINERAL_DB = [
   {ko:'세슘',       en:'Cesium',        sym:'Cs',   group:'반도체·전자', risk:'높음',
    hs:['280590','284390'],
    hsName:['세슘금속','세슘화합물']},
-  {ko:'불화수소(HF)',   en:'Hydrogen Fluoride', sym:'HF',  group:'반도체·전자', risk:'극심', priority:'S',
-   hs:['281111','281119'],
-   hsName:['불화수소(HF 무수)','불화수소산(HF 수용액)'],
-   hint:'반도체 세정·식각 필수소재. 2019년 일본 수출규제 핵심 3대 품목. 고순도(5N↑) 일본 의존'},
-  {ko:'포토레지스트',   en:'Photoresist',      sym:'PR',  group:'반도체·전자', risk:'극심', priority:'S',
-   hs:['370790','370130'],
-   hsName:['감광성 레지스트(반도체·FPD용)','감광성 평판인쇄재료'],
-   hint:'반도체 노광공정 핵심소재. 2019년 일본 수출규제 3대 품목. 일본 JSR·신에쓰·도쿄오카 의존도 90%+'},
-  {ko:'희귀가스(Ne·Kr)', en:'Rare Gases (Ne/Kr)', sym:'Ne/Kr', group:'반도체·전자', risk:'높음', priority:'A',
-   hs:['280421','280429'],
-   hsName:['네온가스(Ne)','크립톤·제논(Kr·Xe)'],
-   hint:'ArF·KrF 엑시머레이저용 필수가스. 우크라이나 분쟁 이전 세계 네온 공급의 70%가 우크라이나산'},
-  {ko:'고순도 불화물',   en:'High-purity Fluorides', sym:'NF3', group:'반도체·전자', risk:'높음', priority:'A',
-   hs:['282619','285190'],
-   hsName:['기타 불화물(NF3·WF6 등)','기타 무기화합물(불화계 가스)'],
-   hint:'반도체 CVD 세정가스(NF3)·텅스텐배선가스(WF6). 중국 NF3 생산 비중 확대 추세'},
 
   // ══ 희토류·자석 ══
-  {ko:'희토류(전체)', en:'REE',          sym:'REE',  group:'희토류·자석', risk:'극심', priority:'S',
+  {ko:'희토류(전체)', en:'REE',          sym:'REE',  group:'희토류·자석', risk:'극심',
    hs:['280530','280610','284610','284690','284699','284800'],
-   hsName:['희토류금속혼합','염화희토류','산화세륨외','산화희토류(기타)','희토류화합물(기타)','세륨화합물'],
-   hint:'EV·풍력·방산 전략소재. 중국이 세계 생산 60%, 정련 85% 지배'},
-  {ko:'네오디뮴',   en:'Neodymium',     sym:'Nd',   group:'희토류·자석', risk:'극심', priority:'S',
+   hsName:['희토류금속혼합','염화희토류','산화세륨외','산화희토류(기타)','희토류화합물(기타)','세륨화합물']},
+  {ko:'네오디뮴',   en:'Neodymium',     sym:'Nd',   group:'희토류·자석', risk:'극심',
    hs:['280530','284611','284690','850511'],
-   hsName:['네오디뮴금속','산화네오디뮴','네오디뮴화합물','NdFeB자석'],
-   hint:'NdFeB 영구자석의 주원료. EV 모터·풍력 발전기 핵심'},
-  {ko:'디스프로슘', en:'Dysprosium',    sym:'Dy',   group:'희토류·자석', risk:'극심', priority:'S',
+   hsName:['네오디뮴금속','산화네오디뮴','네오디뮴화합물','NdFeB자석']},
+  {ko:'디스프로슘', en:'Dysprosium',    sym:'Dy',   group:'희토류·자석', risk:'극심',
    hs:['280530','284619','284690'],
-   hsName:['디스프로슘금속','산화디스프로슘','디스프로슘화합물'],
-   hint:'NdFeB 자석 내열성 향상 첨가제. 중국 독점 공급'},
-  {ko:'프라세오디뮴',en:'Praseodymium', sym:'Pr',   group:'희토류·자석', risk:'극심', priority:'A',
+   hsName:['디스프로슘금속','산화디스프로슘','디스프로슘화합물']},
+  {ko:'프라세오디뮴',en:'Praseodymium', sym:'Pr',   group:'희토류·자석', risk:'극심',
    hs:['280530','284612','284690'],
-   hsName:['프라세오디뮴금속','산화프라세오디뮴','프라세오디뮴화합물'],
-   hint:'Nd 대체·보완재로 NdPr 합금 형태로 자석 제조에 사용'},
-  {ko:'테르븀',     en:'Terbium',       sym:'Tb',   group:'희토류·자석', risk:'극심', priority:'A',
+   hsName:['프라세오디뮴금속','산화프라세오디뮴','프라세오디뮴화합물']},
+  {ko:'테르븀',     en:'Terbium',       sym:'Tb',   group:'희토류·자석', risk:'극심',
    hs:['280530','284619','284690'],
-   hsName:['테르븀금속','산화테르븀','테르븀화합물'],
-   hint:'NdFeB 보자력 강화 첨가제. 희소하며 중국 집중도 극심'},
+   hsName:['테르븀금속','산화테르븀','테르븀화합물']},
   {ko:'란타넘',     en:'Lanthanum',     sym:'La',   group:'희토류·자석', risk:'높음',
    hs:['280530','284613','284690'],
    hsName:['란탄금속','산화란탄','란탄화합물']},
@@ -2058,16 +1784,11 @@ const MINERAL_DB = [
   {ko:'루테튬',     en:'Lutetium',      sym:'Lu',   group:'희토류·자석', risk:'중간',
    hs:['280530','284619'],
    hsName:['루테튬금속','산화루테튬']},
-  {ko:'영구자석(NdFeB)', en:'NdFeB Permanent Magnet', sym:'NdFeB', group:'희토류·자석', risk:'극심', priority:'S',
-   hs:['850511','850519'],
-   hsName:['금속제 영구자석(NdFeB·SmCo)','기타 영구자석'],
-   hint:'EV 구동모터·풍력터빈 핵심 완성부품. 중국이 세계 NdFeB 영구자석 생산의 약 92% 점유'},
 
   // ══ 산업금속 ══
-  {ko:'구리',       en:'Copper',        sym:'Cu',   group:'산업금속', risk:'낮음', priority:'A',
+  {ko:'구리',       en:'Copper',        sym:'Cu',   group:'산업금속', risk:'낮음',
    hs:['260300','740110','740200','740311','740312','740313','740319','740400','740500','740600','740710'],
-   hsName:['구리광','구리매트','미정련구리','정련구리괴','구리합금괴','구리빌릿','기타구리괴','구리웨이스트','구리합금','구리분말','구리봉'],
-   hint:'EV 배선·모터·변압기 핵심금속. 재생에너지 확대로 수요 급증 전망'},
+   hsName:['구리광','구리매트','미정련구리','정련구리괴','구리합금괴','구리빌릿','기타구리괴','구리웨이스트','구리합금','구리분말','구리봉']},
   {ko:'알루미늄',   en:'Aluminum',      sym:'Al',   group:'산업금속', risk:'중간',
    hs:['260600','760110','760120','760200','760300','760410','760421','760429'],
    hsName:['알루미늄광','미정련알루미늄','알루미늄합금','알루미늄웨이스트','알루미늄분말','알루미늄봉','알루미늄형재(중공)','알루미늄형재(기타)']},
@@ -2107,10 +1828,6 @@ const MINERAL_DB = [
   {ko:'로듐',       en:'Rhodium',       sym:'Rh',   group:'산업금속', risk:'높음',
    hs:['711031','711039'],
    hsName:['로듐(미가공)','로듐(반가공)']},
-  {ko:'규소강판(전기강판)', en:'Electrical Steel', sym:'CRNGO', group:'산업금속', risk:'중간', priority:'B',
-   hs:['722511','722519'],
-   hsName:['방향성 전기강판(GOES)','비방향성 전기강판(NOES)'],
-   hint:'EV 구동모터 코어·변압기 핵심소재. 에너지효율 규제 강화로 고급 CRNGO 수요 급증'},
 
   // ══ 화학·기타 ══
   {ko:'플루오라이트',en:'Fluorspar',    sym:'CaF₂', group:'화학·기타', risk:'극심',
@@ -2522,34 +2239,6 @@ const SUPPLY_STAGE_MAP = {
 // 6자리 오버라이드 (4자리 동일 코드에서 단계가 다른 경우)
 const SUPPLY_STAGE_6 = {
   '282520':'정제품','282530':'산화물','283321':'화합물','283329':'화합물',
-  // 배터리소재 — 전구체·양극재
-  '282590':'중간재',  // NCM·NCA 전구체 (혼합 수산화물)
-  '382499':'중간재',  // 기타 화학공업 조제품 (전구체 포함)
-  '285390':'정제품',  // NCM·NCA 양극재 (기타 무기화합물)
-  '282090':'정제품',  // 기타 산화망간계 양극소재
-  '283529':'정제품',  // LFP 양극재 (기타 인산염)
-  '284190':'정제품',  // LFP·LMFP 등 (기타 옥소금속산)
-  // 배터리소재 — 황산염 원료·전해질·분리막
-  '283329':'화합물',  // 황산코발트·황산망간 (전구체 원료)
-  '282690':'화합물',  // 육불화인산리튬 LiPF6 (전해질)
-  '382400':'기타',    // 리튬이온 전해액 조제품
-  '392010':'기타',    // PE 분리막
-  '392020':'기타',    // PP 분리막
-  // 반도체·전자 — 불화수소·포토레지스트·희귀가스·불화물
-  '281111':'화합물',  // 불화수소 (HF 무수)
-  '281119':'화합물',  // 불화수소산
-  '370790':'기타',    // 포토레지스트 (감광성 레지스트)
-  '370130':'기타',    // 감광성 평판인쇄재료
-  '280421':'기타',    // 네온가스
-  '280429':'기타',    // 크립톤·제논
-  '282619':'화합물',  // 고순도 불화물 (NF3·WF6 등)
-  '285190':'화합물',  // 기타 무기 불화계 화합물
-  // 희토류·자석 — 영구자석
-  '850511':'정제품',  // NdFeB·SmCo 금속제 영구자석
-  '850519':'정제품',  // 기타 영구자석
-  // 산업금속 — 규소강판
-  '722511':'합금',    // 방향성 전기강판 (GOES)
-  '722519':'합금',    // 비방향성 전기강판 (NOES)
 };
 function getSupplyStage(hsCd) {
   if(!hsCd) return '기타';
@@ -2681,7 +2370,7 @@ let sortState = {};
       if(!groups[g]) groups[g] = [];
       groups[g].push(m);
     });
-    const groupOrder = ['이차전지','배터리소재','반도체·전자','희토류·자석','산업금속','화학·기타'];
+    const groupOrder = ['이차전지','반도체·전자','희토류·자석','산업금속','화학·기타'];
     const sortedGroups = Object.keys(groups).sort((a,b) => {
       const ia = groupOrder.indexOf(a), ib = groupOrder.indexOf(b);
       return (ia===-1?99:ia) - (ib===-1?99:ib);
@@ -2932,22 +2621,11 @@ const HS_CHIPS_BY_INDUSTRY = {
     {hs6:'260200', hs4:'2602', hs10:'2602000000', label:'망간광'},
     {hs6:'250410', hs4:'2504', hs10:'2504101000', label:'흑연(분말)'},
   ],
-  '배터리소재': [
-    {hs6:'282590', hs4:'2825', hs10:'2825900000', label:'전구체(NCM·NCA)'},
-    {hs6:'285390', hs4:'2853', hs10:'2853900000', label:'NCM·NCA 양극재'},
-    {hs6:'283529', hs4:'2835', hs10:'2835290000', label:'LFP 양극재'},
-    {hs6:'283321', hs4:'2833', hs10:'2833210000', label:'황산니켈(전구체원료)'},
-    {hs6:'282690', hs4:'2826', hs10:'2826900000', label:'전해질 LiPF6'},
-    {hs6:'392010', hs4:'3920', hs10:'3920100000', label:'분리막(PE)'},
-  ],
   '반도체·전자': [
     {hs6:'280459', hs4:'2804', hs10:'2804590000', label:'갈륨'},
     {hs6:'280461', hs4:'2804', hs10:'2804611000', label:'실리콘'},
     {hs6:'811221', hs4:'8112', hs10:'8112210000', label:'게르마늄'},
     {hs6:'261590', hs4:'2615', hs10:'2615900000', label:'니오브·탄탈광'},
-    {hs6:'281111', hs4:'2811', hs10:'2811110000', label:'불화수소(HF)'},
-    {hs6:'370790', hs4:'3707', hs10:'3707900000', label:'포토레지스트'},
-    {hs6:'280421', hs4:'2804', hs10:'2804210000', label:'네온가스'},
   ],
   '희토류·자석': [
     {hs6:'280530', hs4:'2805', hs10:'2805301000', label:'희토류금속'},
@@ -3452,7 +3130,6 @@ function renderMineralResult(data) {
     `${selectedMineral.ko} · ${document.getElementById('m_start').value}~${document.getElementById('m_end').value}`;
   renderMDonutChart(data);
   renderMTrendChart(data);
-  renderMCountryTrend(data);
   renderMSupplyChart(data);
   renderMSupplyDetail(data);
   renderMCountrySummary(data);
@@ -3460,84 +3137,6 @@ function renderMineralResult(data) {
 }
 
 let mTableView = 'year'; // 'year' | 'month'
-let _mCtChart = null;
-let _mCtTopN = 5;
-let _mCtData = null;
-
-/* ── 국가별 비중 변화 추이 (연도별 stacked bar) ── */
-function renderMCountryTrend(data, topN) {
-  _mCtData = data;
-  if (topN !== undefined) _mCtTopN = topN;
-  const box = document.getElementById('m-country-trend-box');
-  const canvas = document.getElementById('m-country-trend-chart');
-  if (!box || !canvas) return;
-
-  // 연도 목록
-  const years = [...new Set(data.map(r => String(r.period).slice(0,4)))].sort();
-  if (years.length < 2) { box.style.display = 'none'; return; }
-  box.style.display = '';
-
-  // 연도×국가 합산
-  const byYearCountry = {};
-  data.forEach(r => {
-    const y = String(r.period).slice(0,4);
-    const c = r.cntyNm || COUNTRY_NAMES[r.cntyCd] || r.cntyCd || '기타';
-    if (!byYearCountry[y]) byYearCountry[y] = {};
-    byYearCountry[y][c] = (byYearCountry[y][c] || 0) + parseFloat(r.impAmt || 0);
-  });
-
-  // TOP N 국가 선정 (전체 기간 합산 기준)
-  const totalByCountry = {};
-  Object.values(byYearCountry).forEach(yMap => {
-    Object.entries(yMap).forEach(([c, v]) => { totalByCountry[c] = (totalByCountry[c] || 0) + v; });
-  });
-  const top = Object.entries(totalByCountry).sort((a,b)=>b[1]-a[1]).slice(0, _mCtTopN).map(e=>e[0]);
-
-  // 비중 계산 (TOP N + 기타)
-  const labels = years;
-  const countries = [...top, '기타'];
-  const PALETTE = ['#2E5B8A','#D4860C','#1A7A5E','#7B1FA2','#C0392B','#2980B9','#E67E22','#16A085'];
-  const datasets = countries.map((c, i) => ({
-    label: c,
-    data: years.map(y => {
-      const yMap = byYearCountry[y] || {};
-      const total = Object.values(yMap).reduce((s,v)=>s+v, 0);
-      if (!total) return 0;
-      const amt = c === '기타'
-        ? Object.entries(yMap).filter(([k]) => !top.includes(k)).reduce((s,[,v])=>s+v, 0)
-        : (yMap[c] || 0);
-      return parseFloat((amt / total * 100).toFixed(1));
-    }),
-    backgroundColor: PALETTE[i % PALETTE.length] + 'CC',
-    borderColor: PALETTE[i % PALETTE.length],
-    borderWidth: 1,
-    borderRadius: 2,
-  }));
-
-  if (_mCtChart) { _mCtChart.destroy(); _mCtChart = null; }
-  _mCtChart = new Chart(canvas, {
-    type: 'bar',
-    data: { labels, datasets },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: {
-        legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 8, boxWidth: 10 } },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y}%` } },
-      },
-      scales: {
-        x: { stacked: true, grid: { display: false }, ticks: { font: { size: 11 } } },
-        y: { stacked: true, min: 0, max: 100, ticks: { callback: v => v+'%', font: { size: 10 } }, grid: { color: '#eee' } },
-      },
-    },
-  });
-}
-
-function switchMCtTopN(n, btn) {
-  _mCtTopN = n;
-  document.querySelectorAll('#m-ct-topn-tabs .chart-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  if (_mCtData) renderMCountryTrend(_mCtData, n);
-}
 
 /* ── 국가별 비중 요약 테이블 ── */
 function renderMCountrySummary(data) {
@@ -3604,13 +3203,10 @@ function renderMDonutChart(data) {
       const c = r.cntyNm || COUNTRY_NAMES[r.cntyCd] || r.cntyCd || '기타';
       byCountry[c] = (byCountry[c]||0) + parseFloat(r.impAmt||r.expAmt||0);
     });
-    const allSorted = Object.entries(byCountry).sort((a,b)=>b[1]-a[1]);
-    const top10 = allSorted.slice(0, 10);
-    const etcAmt = allSorted.slice(10).reduce((s, e) => s + e[1], 0);
-    const finalEntries = etcAmt > 0 ? [...top10, ['기타', etcAmt]] : top10;
-    labels = finalEntries.map(e=>e[0]);
-    values = finalEntries.map(e=>e[1]);
-    colors = [...COUNTRY_COLORS.slice(0, top10.length), '#BDC3C7'];
+    const sorted = Object.entries(byCountry).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    labels = sorted.map(e=>e[0]);
+    values = sorted.map(e=>e[1]);
+    colors = COUNTRY_COLORS;
     const titleEl = document.getElementById('m-donut-title');
     if(titleEl) titleEl.textContent = '국가별 수입 비중';
   }
@@ -4216,13 +3812,10 @@ function renderHCountryChart(data) {
       const c=r.cntyNm||COUNTRY_NAMES[r.cntyCd]||r.cntyCd||'기타';
       byCountry[c]=(byCountry[c]||0)+parseFloat(r.impAmt||r.expAmt||0);
     });
-    const allSorted=Object.entries(byCountry).sort((a,b)=>b[1]-a[1]);
-    const top10=allSorted.slice(0,10);
-    const etcAmt=allSorted.slice(10).reduce((s,e)=>s+e[1],0);
-    const finalEntries=etcAmt>0?[...top10,['기타',etcAmt]]:top10;
-    labels=finalEntries.map(e=>e[0]);
-    values=finalEntries.map(e=>e[1]);
-    colors=[...COUNTRY_COLORS.slice(0,top10.length),'#BDC3C7'];
+    const sorted=Object.entries(byCountry).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    labels=sorted.map(e=>e[0]);
+    values=sorted.map(e=>e[1]);
+    colors=COUNTRY_COLORS;
     const titleEl = document.getElementById('h-donut-title');
     if(titleEl) titleEl.textContent = '국가별 수입 비중';
   }
@@ -4358,13 +3951,11 @@ function renderHTrendChart(data) {
   // year(4자리)별 · hsCd별 집계
   const byYearHs = {};
   const hsSet = new Set();
-  const hsNameMap = {};
   data.forEach(r => {
     const yr = String(r.period || '').slice(0, 4) || '?';
     const hs = r.hsCd || '?';
     if (yr === '?' || hs === '?') return;
     hsSet.add(hs);
-    if (r.hsNm) hsNameMap[hs] = r.hsNm;
     if (!byYearHs[yr]) byYearHs[yr] = {};
     if (!byYearHs[yr][hs]) byYearHs[yr][hs] = { amt: 0, wt: 0 };
     byYearHs[yr][hs].amt += parseFloat(r.impAmt || r.expAmt || 0);
@@ -4387,7 +3978,7 @@ function renderHTrendChart(data) {
   const isMultiHs = hsList.length > 1;
   const datasets = isMultiHs
     ? hsList.map((hs, i) => ({
-        label: hsNameMap[hs] || hs,
+        label: hs,
         data: years.map(yr => byYearHs[yr]?.[hs]?.[key] || 0),
         borderColor: PALETTE_BD[i % PALETTE_BD.length],
         backgroundColor: PALETTE_BG[i % PALETTE_BG.length],
@@ -4807,13 +4398,12 @@ function updateMapColors() {
   });
 }
 
-/* 수입지도 실시간 API 조회 (다년도 + 밸류체인 필터 지원) */
+/* 수입지도 실시간 API 조회 (다년도 지원) */
 async function queryMapData() {
   const mineralSel = document.getElementById('mapMineralSel');
   const mineral    = mineralSel?.value || 'all';
   const startYear  = parseInt(document.getElementById('mapStartYearSel')?.value || String(window._maxYear||2024));
   const endYear    = parseInt(document.getElementById('mapEndYearSel')?.value   || String(window._maxYear||2024));
-  const selectedStage = document.getElementById('mapStageSel')?.value || 'all';
   const sy = Math.min(startYear, endYear);
   const ey = Math.max(startYear, endYear);
   const statusEl   = document.getElementById('mapStatus');
@@ -4839,23 +4429,17 @@ async function queryMapData() {
     if (hdr) hdr.textContent = '핵심광물 수입 국가 TOP 7';
     const sub = document.querySelector('.country-card .country-info-sub');
     if (sub) sub.textContent = '전체 수입액 비중 기준 (정적)';
-    const detailSection = document.getElementById('map-detail-section');
-    if (detailSection) detailSection.style.display = 'none';
     return;
   }
 
   // MINERAL_DB에서 HS 코드 탐색 (복수 HS 코드 지원)
   const mEntry = MINERAL_DB.find(m => m.ko === mineral);
-  const allHsList = mEntry?.hs || [];
-  // 밸류체인 단계 필터 적용
-  const hsList = selectedStage === 'all' ? allHsList :
-    allHsList.filter(hs => getSupplyStage(hs) === selectedStage);
+  const hsList = mEntry?.hs || [];
   if (!hsList.length) { if (statusEl) statusEl.textContent = 'HS코드 없음'; return; }
 
-  const stageLabel = selectedStage === 'all' ? '' : ` [${selectedStage}]`;
   const totalYears = ey - sy + 1;
   const totalQueries = hsList.length * totalYears;
-  if (statusEl) statusEl.textContent = `⏳ ${yearLabel} ${mineral}${stageLabel} 조회 중... (${totalQueries}건)`;
+  if (statusEl) statusEl.textContent = `⏳ ${yearLabel} ${mineral} 조회 중... (${totalQueries}건)`;
 
   try {
     // HS코드 × 연도 조합 전체 병렬 조회 후 합산 (배치 5개씩)
@@ -4866,25 +4450,13 @@ async function queryMapData() {
       }
     }
     const BATCH = 5;
-    const ctry     = {};
-    const hsDetail = {}; // hs → { stage, hsName, totalAmt, countries:{a3:amt} }
+    const ctry  = {};
     let total   = 0;
     let mapFailCount = 0;
     for (let i = 0; i < queries.length; i += BATCH) {
       const batch = queries.slice(i, i + BATCH);
       const results = await Promise.allSettled(batch.map(p => callTradeApi(p)));
-      results.forEach((res, idx) => {
-        const q = batch[idx];
-        const hsCode = q.hsCd;
-        if (!hsDetail[hsCode]) {
-          const hsIdx = allHsList.indexOf(hsCode);
-          hsDetail[hsCode] = {
-            stage: getSupplyStage(hsCode),
-            hsName: mEntry?.hsName?.[hsIdx] || '',
-            totalAmt: 0,
-            countries: {}
-          };
-        }
+      results.forEach(res => {
         if (res.status === 'fulfilled' && res.value) {
           for (const it of res.value) {
             const code = it.cntyCd || it.statCd || '';
@@ -4892,8 +4464,6 @@ async function queryMapData() {
             if (!code || amt <= 0) continue;
             ctry[code] = (ctry[code]||0) + amt;
             total += amt;
-            hsDetail[hsCode].countries[code] = (hsDetail[hsCode].countries[code]||0) + amt;
-            hsDetail[hsCode].totalAmt += amt;
           }
         } else if (res.status === 'rejected') {
           mapFailCount++;
@@ -4951,7 +4521,7 @@ async function queryMapData() {
         </div>`;
       }).join('');
       const hdr = document.querySelector('.country-card .country-info-title');
-      if (hdr) hdr.textContent = `${mineral}${stageLabel} 수입 국가 TOP 7`;
+      if (hdr) hdr.textContent = `${mineral} 수입 국가 TOP 7`;
       const sub = document.querySelector('.country-card .country-info-sub');
       if (sub) sub.textContent = `${yearLabel} 누적 수입액 비중 기준${mapFailCount > 0 ? ` (${mapFailCount}건 조회 실패)` : ''}`;
     }
@@ -4959,14 +4529,8 @@ async function queryMapData() {
     // 하단 국가 상세 카드 동적 업데이트
     updateCountryDetailCards(ctry, total, mineral, yearLabel);
 
-    // 마지막 쿼리 결과 저장 (CSV 다운로드용)
-    _lastMapQuery = { mineral, yearLabel: yearLabel + stageLabel, total, hsDetail };
-
-    // 밸류체인 세부 내역 테이블 렌더
-    renderMapDetailTable(hsDetail, total, mineral, yearLabel + stageLabel);
-
     const failMsg = mapFailCount > 0 ? ` ⚠️ ${mapFailCount}건 실패` : '';
-    if (statusEl) statusEl.textContent = `✅ ${yearLabel} ${mineral}${stageLabel} 업데이트 완료 (${Object.keys(ctry).length}개국)${failMsg}`;
+    if (statusEl) statusEl.textContent = `✅ ${yearLabel} ${mineral} 업데이트 완료 (${Object.keys(ctry).length}개국)${failMsg}`;
   } catch(e) {
     if (statusEl) statusEl.textContent = '❌ 오류: ' + e.message;
   }
@@ -5022,8 +4586,6 @@ const FLOW_SRCS = [
 ];
 let _d3map = null;
 let _mapTimers = [];
-// 마지막 지도 조회 결과 (CSV 다운로드용)
-let _lastMapQuery = null; // { mineral, yearLabel, total, hsDetail }
 
 async function initWorldMap() {
   const container = document.getElementById('worldMapD3');
@@ -5186,210 +4748,9 @@ function selectMapCountry(info) {
   }).join('');
 }
 
-/* 수입국 비중 포함 CSV 다운로드 (지도 조회 결과 기반) */
-function downloadMapDetailCsv() {
-  if (!_lastMapQuery) { alert('먼저 🌍 실시간 조회를 실행해주세요.'); return; }
-  const { mineral, yearLabel, total, hsDetail } = _lastMapQuery;
-
-  const rows = [
-    ['광종', '공급단계', 'HS코드(10자리)', 'HS코드(6자리)', '품목명',
-     '순위', '수입국', '수입액(천$)', 'HS내비중(%)', '전체비중(%)']
-  ];
-
-  // 공급단계 순서로 정렬
-  const byStage = {};
-  Object.entries(hsDetail).forEach(([hs, d]) => {
-    if (d.totalAmt <= 0) return;
-    if (!byStage[d.stage]) byStage[d.stage] = [];
-    byStage[d.stage].push({ hs, ...d });
-  });
-
-  SUPPLY_STAGE_ORDER.forEach(stage => {
-    if (!byStage[stage]) return;
-    byStage[stage]
-      .sort((a, b) => b.totalAmt - a.totalAmt)
-      .forEach(d => {
-        const countriesSorted = Object.entries(d.countries)
-          .sort((a, b) => b[1] - a[1]);
-        // 국가별 행 (TOP 20 + 기타 합산)
-        let rank = 0;
-        let etcAmt = 0;
-        countriesSorted.forEach(([a3, amt], i) => {
-          if (i < 20) {
-            rank++;
-            const name = COUNTRY_NAMES[a3] || a3;
-            const hsPct  = d.totalAmt > 0 ? (amt / d.totalAmt * 100).toFixed(1) : '0.0';
-            const allPct = total > 0       ? (amt / total      * 100).toFixed(2) : '0.00';
-            rows.push([mineral, stage, toHs10(d.hs), d.hs, d.hsName,
-                        rank, name,
-                        Math.round(amt),
-                        hsPct, allPct]);
-          } else {
-            etcAmt += amt;
-          }
-        });
-        if (etcAmt > 0) {
-          const hsPct  = d.totalAmt > 0 ? (etcAmt / d.totalAmt * 100).toFixed(1) : '0.0';
-          const allPct = total > 0       ? (etcAmt / total      * 100).toFixed(2) : '0.00';
-          rows.push([mineral, stage, toHs10(d.hs), d.hs, d.hsName,
-                      '기타합산', `기타 ${countriesSorted.length - 20}개국`,
-                      Math.round(etcAmt), hsPct, allPct]);
-        }
-        // HS 합계 행
-        const totalHsPct = total > 0 ? (d.totalAmt / total * 100).toFixed(2) : '0.00';
-        rows.push([mineral, stage, toHs10(d.hs), d.hs, d.hsName,
-                    '합계', `전체 ${countriesSorted.length}개국`,
-                    Math.round(d.totalAmt), '100.0', totalHsPct]);
-        rows.push([]); // 빈 행 (HS 구분)
-      });
-  });
-
-  const csv  = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `${mineral}_수입국비중_${yearLabel}_${new Date().toISOString().slice(0, 10)}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-
-/* 6자리 HS → 10자리 한국 HSK 표시 변환 (API 쿼리는 6자리 유지, 표시용) */
-function toHs10(code) {
-  return String(code).replace(/\D/g, '').padEnd(10, '0');
-}
-
-/* 밸류체인별 세부 수입 내역 테이블 렌더 */
-function renderMapDetailTable(hsDetail, total, mineral, label) {
-  const section  = document.getElementById('map-detail-section');
-  const tableDiv = document.getElementById('map-detail-table');
-  if (!section || !tableDiv) return;
-
-  const labelEl = document.getElementById('map-detail-label');
-  if (labelEl) labelEl.textContent = `(${mineral} · ${label})`;
-
-  // HS코드를 공급단계별로 그룹화 (데이터 있는 것만)
-  const byStage = {};
-  Object.entries(hsDetail).forEach(([hs, d]) => {
-    if (d.totalAmt <= 0) return;
-    if (!byStage[d.stage]) byStage[d.stage] = [];
-    byStage[d.stage].push({ hs, ...d });
-  });
-
-  const orderedStages = SUPPLY_STAGE_ORDER.filter(s => byStage[s]);
-  if (orderedStages.length === 0) { section.style.display = 'none'; return; }
-
-  let html = `<table style="width:100%;border-collapse:collapse;font-size:12px;">
-    <thead>
-      <tr style="background:var(--parchment);border-bottom:2px solid var(--border);">
-        <th style="padding:7px 10px;text-align:left;white-space:nowrap;color:var(--subtext);font-weight:600;">공급단계</th>
-        <th style="padding:7px 10px;text-align:left;white-space:nowrap;color:var(--subtext);font-weight:600;">HS코드</th>
-        <th style="padding:7px 10px;text-align:left;color:var(--subtext);font-weight:600;">품목명</th>
-        <th style="padding:7px 10px;text-align:right;white-space:nowrap;color:var(--subtext);font-weight:600;">수입액(천$)</th>
-        <th style="padding:7px 10px;text-align:right;white-space:nowrap;color:var(--subtext);font-weight:600;">비중</th>
-        <th style="padding:7px 10px;text-align:left;color:var(--subtext);font-weight:600;">주요 공급국 TOP3</th>
-      </tr>
-    </thead><tbody>`;
-
-  orderedStages.forEach(stage => {
-    const color = SUPPLY_STAGE_COLORS[stage] || '#999';
-    const rows  = byStage[stage].sort((a, b) => b.totalAmt - a.totalAmt);
-    rows.forEach((d, i) => {
-      const pct  = total > 0 ? (d.totalAmt / total * 100).toFixed(1) : '0.0';
-      const top3 = Object.entries(d.countries)
-        .sort((a, b) => b[1] - a[1]).slice(0, 3)
-        .map(([a3, amt]) => {
-          const flag = COUNTRY_FLAGS[a3] || '🌐';
-          const name = COUNTRY_NAMES[a3] || a3;
-          const cpct = d.totalAmt > 0 ? Math.round(amt / d.totalAmt * 100) : 0;
-          return `${flag}${name}(${cpct}%)`;
-        }).join(' · ');
-      const stageTd = i === 0
-        ? `<td rowspan="${rows.length}" style="padding:7px 10px;vertical-align:middle;border-bottom:1px solid var(--border);border-right:1px solid var(--border);">
-            <span style="display:inline-flex;align-items:center;background:${color}22;color:${color};border:1px solid ${color}55;border-radius:4px;padding:2px 8px;font-weight:600;font-size:11px;white-space:nowrap;">${stage}</span>
-           </td>`
-        : '';
-      html += `<tr style="border-bottom:1px solid var(--border);">
-        ${stageTd}
-        <td style="padding:7px 10px;font-family:monospace;white-space:nowrap;">${toHs10(d.hs)}</td>
-        <td style="padding:7px 10px;color:var(--subtext);">${d.hsName}</td>
-        <td style="padding:7px 10px;text-align:right;white-space:nowrap;">${Number(Math.round(d.totalAmt)).toLocaleString()}</td>
-        <td style="padding:7px 10px;text-align:right;white-space:nowrap;font-weight:600;color:${color};">${pct}%</td>
-        <td style="padding:7px 10px;font-size:11px;color:var(--subtext);">${top3 || '—'}</td>
-      </tr>`;
-    });
-  });
-
-  html += '</tbody></table>';
-  tableDiv.innerHTML = html;
-  section.style.display = 'block';
-}
-
-/* KPI 카드 툴팁 토글 */
-function toggleKpiTip(btn) {
-  const tip = btn.parentElement.querySelector('.kpi-tooltip');
-  if (!tip) return;
-  const isVisible = tip.classList.contains('visible');
-  // 다른 열린 툴팁 모두 닫기
-  document.querySelectorAll('.kpi-tooltip.visible').forEach(t => t.classList.remove('visible'));
-  if (!isVisible) {
-    tip.classList.add('visible');
-    // 화면 밖으로 벗어나면 오른쪽 정렬로 보정
-    const rect = tip.getBoundingClientRect();
-    if (rect.right > window.innerWidth - 10) {
-      tip.style.left = 'auto';
-      tip.style.right = '0';
-    }
-  }
-}
-// 툴팁 외부 클릭 시 닫기
-document.addEventListener('click', e => {
-  if (!e.target.closest('.kpi-label')) {
-    document.querySelectorAll('.kpi-tooltip.visible').forEach(t => t.classList.remove('visible'));
-  }
-});
-
-/* HS코드·광종·산업·밸류체인 매핑표 CSV 다운로드 */
-function downloadHsMappingCsv() {
-  const rows = [['광종', '분류', 'HS코드(10자리)', 'HS코드(6자리)', 'HS품목명', '공급단계(밸류체인)']];
-  MINERAL_DB.forEach(m => {
-    (m.hs || []).forEach((hs, i) => {
-      rows.push([m.ko, m.group || '', toHs10(hs), hs, m.hsName?.[i] || '', getSupplyStage(hs)]);
-    });
-  });
-  const csv  = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `핵심광물_HS코드_밸류체인_매핑표_${new Date().toISOString().slice(0, 10)}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-
 function filterByMineral() {
-  const val = document.getElementById('mapMineralSel').value;
-
-  // 밸류체인 단계 select 동적 업데이트
-  const stageSel = document.getElementById('mapStageSel');
-  if (stageSel) {
-    if (val === 'all') {
-      stageSel.innerHTML = '<option value="all">전체 단계</option>';
-    } else {
-      const mEntry = MINERAL_DB.find(m => m.ko === val);
-      const presentStages = new Set((mEntry?.hs || []).map(hs => getSupplyStage(hs)));
-      stageSel.innerHTML = '<option value="all">전체 단계</option>' +
-        SUPPLY_STAGE_ORDER.filter(s => presentStages.has(s))
-          .map(s => `<option value="${s}">${s}</option>`).join('');
-    }
-  }
-
-  // 지도 투명도 필터
   if (!_d3map) return;
+  const val = document.getElementById('mapMineralSel').value;
   _d3map.cg.selectAll('.country-d3').style('opacity', d => {
     if (val === 'all') return 0.85;
     const info = MAP_COUNTRY_DATA[String(+d.id)];
@@ -5398,776 +4759,6 @@ function filterByMineral() {
     return has ? 1 : 0.18;
   });
 }
-
-/* ══════════════════════════════════════════════════════
-   밸류체인 탭 — 산업별 공급망 흐름도 + 실시간 수입데이터
-══════════════════════════════════════════════════════ */
-
-// ── 산업별 밸류체인 정의 (각 노드는 MINERAL_DB의 ko 또는 sym과 매핑) ──
-const INDUSTRY_CHAINS = {
-  battery: {
-    label: '전기차 배터리 (EV Battery)',
-    icon: '🔋',
-    insight: '한국 배터리 산업(LG·삼성SDI·SK온)은 핵심 원료의 70% 이상을 중국과 FEOC 국가에 의존합니다. 특히 흑연(음극재)·전구체·양극재 단계의 중국 공급망 집중이 IRA 요건 충족의 주요 걸림돌입니다.',
-    stages: [
-      { label: '원광·원료', color: '#5D4037', nodes: [
-        { ko: '리튬', role: '양극재 Li 원료', stageNote: '수산화리튬→양극재' },
-        { ko: '코발트', role: 'NCM 양극재 구성', stageNote: 'DRC 광산→중국정련' },
-        { ko: '니켈', role: '고니켈 양극재 원료', stageNote: '인니·필리핀산' },
-        { ko: '망간', role: 'NCM/LMO 구성 원소', stageNote: '중국·남아공산' },
-        { ko: '흑연', role: '음극재 핵심 원료', stageNote: '중국 95%+ 점유' },
-        { ko: '인·인산', role: 'LFP 양극재 원료', stageNote: '모로코·중국산' },
-      ]},
-      { label: '전구체·소재', color: '#2E5B8A', nodes: [
-        { ko: '황산염류(전구체원료)', role: 'NCM 전구체 원료', stageNote: '황산니켈·코발트·망간' },
-        { ko: '전구체', role: 'NCM·NCA 전구체', stageNote: '중국 80% 공급' },
-      ]},
-      { label: '핵심 소재', color: '#1A7A5E', nodes: [
-        { ko: 'NCM·NCA 양극재', role: 'EV 배터리 양극', stageNote: '한국 3사 주생산' },
-        { ko: 'LFP 양극재', role: 'ESS·보급형 EV', stageNote: '중국 CATL 강세' },
-        { ko: '전해질·전해액', role: '이온 전도체', stageNote: 'LiPF6 중국 70%' },
-        { ko: '분리막', role: '안전 격리 필름', stageNote: '일본 Asahi·Toray' },
-      ]},
-      { label: '완성품', color: '#D4860C', nodes: [
-        { ko: null, label: '배터리 셀', icon: '🔋', desc: 'NCM/LFP/NCA 파우치·원통형·각형', hs: ['850760','850780'], expMode: true },
-        { ko: null, label: '배터리 팩', icon: '⚡', desc: 'BMS 포함 EV·ESS용 팩', hs: ['850760'], expMode: true },
-      ]},
-    ],
-    finalProduct: { label: '전기자동차 (EV)', icon: '🚗', desc: 'EV 1대당 배터리 소재 약 120~180kg' },
-  },
-
-  semiconductor: {
-    label: '반도체 (Semiconductor)',
-    icon: '💻',
-    insight: '반도체 제조 공정소재의 한·일 의존도는 공급망 취약성 2순위 이슈입니다. 2019년 일본 수출규제(불화수소·포토레지스트·불화폴리이미드)와 2023년 중국의 갈륨·게르마늄 수출 통제가 대표적 리스크입니다.',
-    stages: [
-      { label: '기초 원소', color: '#5D4037', nodes: [
-        { ko: '실리콘', role: '웨이퍼 기판', stageNote: '고순도 폴리실리콘' },
-        { ko: '갈륨', role: 'GaN/GaAs 화합물', stageNote: '중국 수출 통제(2023)' },
-        { ko: '게르마늄', role: '광섬유·적외선 광학', stageNote: '중국 수출 통제(2023)' },
-        { ko: '인듐', role: 'ITO 투명전극', stageNote: 'OLED·태양전지' },
-        { ko: '텅스텐', role: '배선·플러그 소재', stageNote: 'WF6 기화 CVD' },
-      ]},
-      { label: '공정 소재', color: '#2E5B8A', nodes: [
-        { ko: '불화수소(HF)', role: '식각·세정 공정', stageNote: '日 모리타·스텔라' },
-        { ko: '포토레지스트', role: '노광 패터닝', stageNote: '日 JSR·신에쓰 90%' },
-        { ko: '희귀가스(Ne·Kr)', role: 'ArF·KrF 레이저', stageNote: '우크라이나→러시아' },
-        { ko: '고순도 불화물', role: 'CVD 세정·배선가스', stageNote: 'NF3·WF6' },
-      ]},
-      { label: '중간 제품', color: '#1A7A5E', nodes: [
-        { ko: null, label: '실리콘 웨이퍼', icon: '⬜', desc: '300mm 고순도 Si 기판', hs: ['381800'], expMode: false },
-        { ko: null, label: 'GaN/SiC 웨이퍼', icon: '🟦', desc: '전력반도체용 화합물 기판', hs: ['281221','381800'], expMode: false },
-      ]},
-      { label: '완성품', color: '#D4860C', nodes: [
-        { ko: null, label: '메모리 반도체', icon: '🧠', desc: 'DRAM·NAND Flash', hs: ['854231','854232'], expMode: true },
-        { ko: null, label: '시스템 반도체', icon: '⚙️', desc: 'AP·GPU·파운드리', hs: ['854239','854234'], expMode: true },
-      ]},
-    ],
-    finalProduct: { label: '전자·AI 디바이스', icon: '📱', desc: '스마트폰·서버·자동차 반도체' },
-  },
-
-  motor: {
-    label: 'EV 구동모터 (Drive Motor)',
-    icon: '⚙️',
-    insight: 'EV 구동모터의 핵심은 NdFeB 영구자석입니다. 중국이 세계 NdFeB 생산의 92%를 점유하며, 네오디뮴·디스프로슘 등 희토류 원소의 가공·정련 단계도 중국에 집중돼 있습니다. 규소강판(전기강판)은 한국·일본·중국이 주요 공급처입니다.',
-    stages: [
-      { label: '희토류 원소', color: '#5D4037', nodes: [
-        { ko: '희토류(전체)', role: '희토류 광석·혼합물', stageNote: '중국·미국·호주산' },
-        { ko: '네오디뮴', role: 'NdFeB 주원료', stageNote: '중국 독점 정련' },
-        { ko: '디스프로슘', role: '자석 내열성 향상', stageNote: '중국 독점 공급' },
-        { ko: '프라세오디뮴', role: 'NdPr 합금 원료', stageNote: '네오디뮴 대체' },
-        { ko: '테르븀', role: '보자력 강화 첨가', stageNote: '초희소·中 집중' },
-      ]},
-      { label: '자석·소재', color: '#2E5B8A', nodes: [
-        { ko: '영구자석(NdFeB)', role: 'EV 모터 핵심', stageNote: '中 92% 생산' },
-        { ko: '규소강판(전기강판)', role: '모터 코어 적층', stageNote: '포스코·일본제철' },
-        { ko: '구리', role: '모터 권선 소재', stageNote: '전도성 핵심금속' },
-      ]},
-      { label: '모터 부품', color: '#1A7A5E', nodes: [
-        { ko: null, label: '로터(회전자)', icon: '🔄', desc: 'NdFeB 자석 내장 IPM 로터', hs: ['850300'], expMode: false },
-        { ko: null, label: '스테이터(고정자)', icon: '🔳', desc: '전기강판 코어+구리 권선', hs: ['850300'], expMode: false },
-      ]},
-      { label: '완성품', color: '#D4860C', nodes: [
-        { ko: null, label: 'EV 구동모터', icon: '⚡', desc: '영구자석 동기모터(PMSM)', hs: ['850153','850152'], expMode: true },
-        { ko: null, label: '풍력 발전기', icon: '🌬️', desc: 'NdFeB 직구동 발전기', hs: ['850164','850163'], expMode: true },
-      ]},
-    ],
-    finalProduct: { label: '전기차·풍력발전', icon: '🏭', desc: 'EV 1대당 NdFeB 약 1~3kg' },
-  },
-
-  ess: {
-    label: 'ESS / 에너지저장 (Energy Storage)',
-    icon: '🔌',
-    insight: 'ESS(에너지저장시스템)는 LFP 배터리와 바나듐 레독스 전지(VRFB)가 주류입니다. LFP는 중국이 원료(리튬·인산)부터 셀까지 수직계열화하고 있으며, VRFB는 바나듐 원료의 중국·러시아 집중도가 핵심 리스크입니다.',
-    stages: [
-      { label: '원료', color: '#5D4037', nodes: [
-        { ko: '리튬', role: 'LFP 배터리 리튬 원료', stageNote: '수산화리튬' },
-        { ko: '인·인산', role: 'LFP 양극재 원료', stageNote: '인산철 합성' },
-        { ko: '바나듐', role: 'VRFB 전해액 원료', stageNote: '오산화바나듐' },
-        { ko: '망간', role: 'LMFP 양극재 원료', stageNote: 'Li·Mn 복합 인산염' },
-      ]},
-      { label: '핵심 소재', color: '#2E5B8A', nodes: [
-        { ko: 'LFP 양극재', role: 'LFP·LMFP ESS용', stageNote: '중국 CATL·BYD' },
-        { ko: '흑연', role: 'LFP 음극재', stageNote: '인조흑연 주사용' },
-        { ko: '전해질·전해액', role: '이온 전도체', stageNote: 'LiPF6/LiFSI' },
-        { ko: '분리막', role: '셀 격리 필름', stageNote: 'PE/PP 미세다공막' },
-      ]},
-      { label: '셀·모듈', color: '#1A7A5E', nodes: [
-        { ko: null, label: 'LFP 배터리 셀', icon: '🔋', desc: '각형·파우치형 ESS 셀', hs: ['850760'], expMode: false },
-        { ko: null, label: 'VRFB 전해액', icon: '🧪', desc: '바나듐 황산 전해액 V4+/V5+', hs: ['282530'], expMode: false },
-      ]},
-      { label: '시스템', color: '#D4860C', nodes: [
-        { ko: null, label: 'BESS 시스템', icon: '🏭', desc: '전력망 안정화 대용량 ESS', hs: ['850760'], expMode: true },
-        { ko: null, label: '가정용 ESS', icon: '🏠', desc: '태양광 연계 소형 ESS', hs: ['850760'], expMode: true },
-      ]},
-    ],
-    finalProduct: { label: '재생에너지 저장·그리드', icon: '⚡', desc: '태양광·풍력 연계 전력 저장' },
-  },
-};
-
-let _vcActiveIndustry  = null;
-let _vcActiveNodeKey   = null;
-let _vcDetailChart     = null;
-let _vcDetailTrendData   = null;
-let _vcDetailCountryData = null;
-let _vcDetailChartMode   = 'country';
-
-function vcInit() {
-  // 연도 select 채우기
-  const sel = document.getElementById('vc_year');
-  if (sel && !sel.options.length) {
-    const curYear = new Date().getFullYear();
-    for (let y = curYear; y >= 2018; y--) {
-      const o = document.createElement('option');
-      o.value = y; o.textContent = y + '년';
-      if (y === curYear - 1) o.selected = true;
-      sel.appendChild(o);
-    }
-  }
-
-  // 산업 버튼 생성
-  const tabsEl = document.getElementById('vcIndustryTabs');
-  if (tabsEl && !tabsEl.children.length) {
-    Object.entries(INDUSTRY_CHAINS).forEach(([id, chain]) => {
-      const btn = document.createElement('button');
-      btn.className = 'vc-ind-btn';
-      btn.innerHTML = `${chain.icon} ${chain.label}`;
-      btn.onclick = () => vcSelectIndustry(id);
-      tabsEl.appendChild(btn);
-    });
-  }
-}
-
-function vcSelectIndustry(id) {
-  _vcActiveIndustry = id;
-  _vcActiveNodeKey  = null;
-
-  // 버튼 active 상태
-  document.querySelectorAll('.vc-ind-btn').forEach((b, i) => {
-    b.classList.toggle('active', Object.keys(INDUSTRY_CHAINS)[i] === id);
-  });
-
-  const chain = INDUSTRY_CHAINS[id];
-  document.getElementById('vcFlowTitle').textContent = chain.icon + ' ' + chain.label + ' — 공급망 흐름';
-  document.getElementById('vcFlowTag').textContent = chain.stages.length + ' 단계 / ' + chain.stages.reduce((n, s) => n + s.nodes.length, 0) + '개 품목';
-
-  // 인사이트 박스
-  const ib = document.getElementById('vcInsightBox');
-  ib.style.display = '';
-  ib.innerHTML = `<b style="color:var(--navy);">📌 공급망 리스크 요약</b><br>${chain.insight}`;
-
-  // 상세 패널 초기화
-  document.getElementById('vcDetailContent').innerHTML =
-    '<div class="vc-detail-empty">← 노드를 클릭하면<br>실시간 수입 데이터가 표시됩니다</div>';
-
-  renderVcFlow(id);
-}
-
-function renderVcFlow(id) {
-  const chain = INDUSTRY_CHAINS[id];
-  const year  = document.getElementById('vc_year')?.value || (new Date().getFullYear() - 1);
-  const container = document.getElementById('vcFlowContainer');
-  container.innerHTML = '';
-
-  const flowEl = document.createElement('div');
-  flowEl.className = 'vc-flow';
-
-  chain.stages.forEach((stage, si) => {
-    // 화살표 (첫 단계 앞은 없음)
-    if (si > 0) {
-      const arr = document.createElement('div');
-      arr.className = 'vc-arrow';
-      arr.innerHTML = '›';
-      flowEl.appendChild(arr);
-    }
-
-    const wrap = document.createElement('div');
-    wrap.className = 'vc-stage-wrap';
-
-    const stageEl = document.createElement('div');
-    stageEl.className = 'vc-stage';
-
-    // 단계 헤더
-    const hdr = document.createElement('div');
-    hdr.className = 'vc-stage-header';
-    hdr.style.background = stage.color;
-    hdr.textContent = stage.label;
-    stageEl.appendChild(hdr);
-
-    // 노드 영역
-    const body = document.createElement('div');
-    body.className = 'vc-stage-body';
-
-    stage.nodes.forEach(node => {
-      const card = document.createElement('div');
-      card.className = 'vc-node';
-
-      if (node.ko) {
-        // MINERAL_DB 연동 노드
-        const mEntry = MINERAL_DB.find(m => m.ko === node.ko);
-        const risk   = mEntry?.risk || '중간';
-        const sym    = mEntry?.sym  || '';
-        const prio   = mEntry?.priority;
-
-        const top = document.createElement('div');
-        top.className = 'vc-node-top';
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'vc-node-name';
-        nameSpan.textContent = node.ko;
-        const symSpan = document.createElement('span');
-        symSpan.className = 'vc-node-sym';
-        symSpan.textContent = sym;
-        top.appendChild(nameSpan);
-        top.appendChild(symSpan);
-        card.appendChild(top);
-
-        if (prio) {
-          const pb = document.createElement('span');
-          pb.className = `priority-badge ${prio.toLowerCase()}`;
-          pb.textContent = prio;
-          card.appendChild(pb);
-        }
-
-        const riskBadge = document.createElement('span');
-        riskBadge.className = `vc-node-risk ${risk}`;
-        riskBadge.textContent = '위험 ' + risk;
-        card.appendChild(riskBadge);
-
-        const roleDiv = document.createElement('div');
-        roleDiv.style.cssText = 'font-size:10px;color:var(--subtext);margin-top:3px;';
-        roleDiv.textContent = node.role || '';
-        card.appendChild(roleDiv);
-
-        // 수입액 표시 영역 (비동기 로딩)
-        const amtDiv = document.createElement('div');
-        amtDiv.className = 'vc-node-amt loading';
-        amtDiv.textContent = '로딩 중…';
-        card.appendChild(amtDiv);
-
-        const nodeKey = node.ko;
-        card.onclick = () => vcNodeClick(nodeKey, id);
-        card.dataset.nodeKey = nodeKey;
-
-        // 비동기 수입액 조회
-        if (mEntry) fetchVcNodeAmt(mEntry, year, amtDiv);
-
-      } else if (node.hs && node.hs.length) {
-        // 완성품/중간제품 노드 (HS 있음 → 클릭 가능)
-        const isExp = node.expMode === true;
-        card.style.cssText = `background:var(--navy);border-color:${isExp ? '#1ABC9C' : 'rgba(255,255,255,.2)'};cursor:pointer;`;
-        const productAmtDiv = document.createElement('div');
-        productAmtDiv.className = 'vc-node-amt loading';
-        productAmtDiv.textContent = '로딩 중…';
-        card.innerHTML = `
-          <div style="text-align:center;padding:4px 0 2px;">
-            <div style="font-size:18px;">${node.icon || ''}</div>
-            <div style="font-size:11px;font-weight:700;color:#F4C430;margin-top:3px;">${node.label}</div>
-            <div style="font-size:9px;color:rgba(255,255,255,.45);margin-top:2px;">${node.desc || ''}</div>
-            <div style="font-size:9px;font-weight:700;color:${isExp ? '#1ABC9C' : 'rgba(255,255,255,.4)'};margin-top:3px;">${isExp ? '▲ 수출' : '수입'}</div>
-          </div>`;
-        card.appendChild(productAmtDiv);
-        const pLabel = node.label;
-        const pHs = node.hs;
-        card.onclick = () => vcProductClick(pLabel, pHs, isExp, node.icon || '');
-        fetchVcProductAmt(node.hs, year, isExp, productAmtDiv);
-      } else {
-        // 완성품 노드 (HS 없음 → 표시 전용)
-        card.style.cssText = 'background:var(--navy);border-color:var(--amber);cursor:default;';
-        card.innerHTML = `
-          <div style="text-align:center;padding:4px 0;">
-            <div style="font-size:20px;">${node.icon || ''}</div>
-            <div style="font-size:12px;font-weight:700;color:#F4C430;margin-top:4px;">${node.label}</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.5);margin-top:3px;">${node.desc || ''}</div>
-          </div>`;
-      }
-
-      body.appendChild(card);
-    });
-
-    stageEl.appendChild(body);
-    wrap.appendChild(stageEl);
-    flowEl.appendChild(wrap);
-  });
-
-  // 최종 제품
-  const arrFinal = document.createElement('div');
-  arrFinal.className = 'vc-arrow';
-  arrFinal.innerHTML = '›';
-  flowEl.appendChild(arrFinal);
-
-  const finalEl = document.createElement('div');
-  finalEl.className = 'vc-final';
-  finalEl.innerHTML = `
-    <div class="vc-final-icon">${chain.finalProduct.icon}</div>
-    <div class="vc-final-name">${chain.finalProduct.label}</div>
-    <div class="vc-final-desc">${chain.finalProduct.desc}</div>`;
-  flowEl.appendChild(finalEl);
-
-  container.appendChild(flowEl);
-}
-
-async function fetchVcNodeAmt(mEntry, year, amtDiv) {
-  try {
-    const hsCodes = mEntry.hs || [];
-    if (!hsCodes.length) { amtDiv.className = 'vc-node-amt error'; amtDiv.textContent = 'HS 없음'; return; }
-
-    let totalAmt = 0;
-    const results = await Promise.all(
-      hsCodes.slice(0, 3).map(hs =>
-        callTradeApi({ hsCd: hs, period: year }).catch(() => [])
-      )
-    );
-    results.forEach(rows => {
-      rows.forEach(r => { totalAmt += Number(r.impAmt || 0); });
-    });
-
-    if (totalAmt > 0) {
-      const fmt = totalAmt >= 1e9 ? `$${(totalAmt / 1e9).toFixed(1)}B`
-                : totalAmt >= 1e6 ? `$${(totalAmt / 1e6).toFixed(0)}M`
-                : `$${(totalAmt / 1e3).toFixed(0)}K`;
-      amtDiv.className = 'vc-node-amt';
-      amtDiv.textContent = `${year}년 ${fmt}`;
-    } else {
-      amtDiv.className = 'vc-node-amt error';
-      amtDiv.textContent = `${year}년 데이터 없음`;
-    }
-  } catch {
-    amtDiv.className = 'vc-node-amt error';
-    amtDiv.textContent = '조회 오류';
-  }
-}
-
-function vcNodeClick(nodeKey, industryId) {
-  // active-node 스타일
-  document.querySelectorAll('.vc-node').forEach(c => c.classList.remove('active-node'));
-  document.querySelector(`.vc-node[data-node-key="${nodeKey}"]`)?.classList.add('active-node');
-  _vcActiveNodeKey = nodeKey;
-
-  const mEntry = MINERAL_DB.find(m => m.ko === nodeKey);
-  if (!mEntry) return;
-
-  const year = document.getElementById('vc_year')?.value || (new Date().getFullYear() - 1);
-  const panel = document.getElementById('vcDetailContent');
-
-  const priorityLabels = { S: '전략필수', A: '중요', B: '모니터링', C: '일반' };
-  const pBadge = mEntry.priority
-    ? `<span class="priority-badge ${mEntry.priority.toLowerCase()}">${mEntry.priority}</span> <span style="font-size:11px;">${priorityLabels[mEntry.priority] || ''}</span>`
-    : '';
-
-  panel.innerHTML = `
-    <div class="vc-detail-title">${mEntry.ko} <span style="font-size:13px;color:var(--subtext);font-family:'JetBrains Mono',monospace;">${mEntry.sym}</span> ${pBadge}</div>
-    <div style="display:flex;gap:6px;margin:6px 0 10px;">
-      <span class="vc-node-risk ${mEntry.risk}" style="font-size:10px;">위험 ${mEntry.risk}</span>
-      <span style="font-size:10px;color:var(--subtext);">${mEntry.group}</span>
-    </div>
-    ${mEntry.hint ? `<div class="vc-detail-hint">${mEntry.hint}</div>` : ''}
-    <div class="vc-year-select">
-      <label>조회 연도</label>
-      <select id="vcDetailYear" onchange="vcNodeClick('${nodeKey}','${industryId}')">
-        ${Array.from({length: new Date().getFullYear() - 2017}, (_, i) => new Date().getFullYear() - 1 - i)
-            .map(y => `<option value="${y}"${y == year ? ' selected' : ''}>${y}년</option>`).join('')}
-      </select>
-    </div>
-    <div class="vc-detail-stats" id="vcDetailStats">
-      <div class="vc-detail-stat"><div class="vc-detail-stat-label">수입액</div><div class="vc-detail-stat-val" id="vcd-amt">조회중…</div></div>
-    </div>
-    <div id="vcd-rank-list" style="margin:8px 0 10px;">
-      <div style="font-size:11px;color:var(--muted);">국가별 비중 로딩 중…</div>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
-      <div style="font-size:10px;font-weight:700;color:var(--subtext);letter-spacing:.8px;text-transform:uppercase;" id="vcd-chart-label">국가별 비중</div>
-      <div class="chart-tab-group" style="margin:0;">
-        <button class="chart-tab active" id="vcd-tab-country" onclick="vcDetailSwitchChart('country')">국가비중</button>
-        <button class="chart-tab" id="vcd-tab-trend" onclick="vcDetailSwitchChart('trend')">수입추이</button>
-      </div>
-    </div>
-    <div style="height:150px;"><canvas id="vcDetailChartCanvas"></canvas></div>
-    <div style="margin-top:8px;font-size:10px;color:var(--muted);">HS코드: ${mEntry.hs.map(h => h + '____').join(', ')}</div>`;
-
-  fetchVcDetailData(mEntry, year);
-}
-
-const _VCD_CNAMES = {
-  CHN:'중국',USA:'미국',JPN:'일본',AUS:'호주',IDN:'인도네시아',PHL:'필리핀',
-  CHL:'칠레',ARG:'아르헨티나',CAN:'캐나다',ZAF:'남아공',FIN:'핀란드',COD:'콩고DRC',
-  BEL:'벨기에',NOR:'노르웨이',KAZ:'카자흐스탄',RUS:'러시아',DEU:'독일',GBR:'영국',
-  TWN:'대만',MYS:'말레이시아',SGP:'싱가포르',IND:'인도',VNM:'베트남',MNG:'몽골',
-  ZMB:'잠비아',PNG:'파푸아뉴기니',NAM:'나미비아',MOZ:'모잠비크',MDG:'마다가스카르',
-};
-
-async function fetchVcDetailData(mEntry, year) {
-  try {
-    const curYear = new Date().getFullYear();
-    const years = Array.from({length: 5}, (_, i) => curYear - 1 - i).reverse();
-    const hsList = mEntry.hs.slice(0, 4);
-
-    const yearAmts = {};
-    const countryByYear = {};
-
-    await Promise.all(years.map(async y => {
-      let amt = 0;
-      countryByYear[y] = {};
-      await Promise.all(hsList.map(async hs => {
-        try {
-          const rows = await callTradeApi({ hsCd: hs, period: y });
-          rows.forEach(r => {
-            const a = Number(r.impAmt || 0);
-            amt += a;
-            if (r.cntyCd && a > 0) {
-              countryByYear[y][r.cntyCd] = (countryByYear[y][r.cntyCd] || 0) + a;
-            }
-          });
-        } catch {}
-      }));
-      yearAmts[y] = amt;
-    }));
-
-    // 수입액 표시
-    const selAmt = yearAmts[year] || 0;
-    const amtEl = document.getElementById('vcd-amt');
-    if (amtEl) amtEl.textContent = selAmt > 0
-      ? (selAmt >= 1e9 ? `$${(selAmt/1e9).toFixed(2)}B` : selAmt >= 1e6 ? `$${(selAmt/1e6).toFixed(0)}M` : `$${(selAmt/1e3).toFixed(0)}K`)
-      : '데이터 없음';
-
-    // 선택 연도 국가 비중
-    const selCountries = countryByYear[year] || {};
-    const selTotal = Object.values(selCountries).reduce((s, v) => s + v, 0);
-    const sortedCntry = Object.entries(selCountries).sort((a, b) => b[1] - a[1]);
-
-    const rankEl = document.getElementById('vcd-rank-list');
-    if (rankEl) {
-      if (selTotal > 0) {
-        const RANK_COLORS = ['#D4860C','#2E5B8A','#1A7A5E','#7B1FA2','#C0392B'];
-        const RANK_MEDALS = ['🥇','🥈','🥉'];
-        rankEl.innerHTML = sortedCntry.slice(0, 5).map(([code, amt], i) => {
-          const name = _VCD_CNAMES[code] || code;
-          const pct  = (amt / selTotal * 100).toFixed(1);
-          const medal = RANK_MEDALS[i] || `${i+1}.`;
-          return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
-            <span style="font-size:13px;line-height:1;">${medal}</span>
-            <span style="font-size:11px;font-weight:600;min-width:52px;">${name}</span>
-            <div style="flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden;">
-              <div style="height:100%;width:${pct}%;background:${RANK_COLORS[i]};border-radius:4px;"></div>
-            </div>
-            <span style="font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--navy);min-width:40px;text-align:right;">${pct}%</span>
-          </div>`;
-        }).join('');
-      } else {
-        rankEl.innerHTML = '<div style="font-size:11px;color:var(--muted);">국가 데이터 없음</div>';
-      }
-    }
-
-    _vcDetailTrendData   = { years, yearAmts, year, countryByYear };
-    _vcDetailCountryData = { sortedCntry, selTotal };
-    renderVcDetailChart(_vcDetailChartMode);
-
-  } catch (e) {
-    console.error('vcDetailData error', e);
-  }
-}
-
-function renderVcDetailChart(mode) {
-  const canvas = document.getElementById('vcDetailChartCanvas');
-  if (!canvas) return;
-  if (_vcDetailChart) { _vcDetailChart.destroy(); _vcDetailChart = null; }
-  _vcDetailChartMode = mode;
-  document.getElementById('vcd-tab-country')?.classList.toggle('active', mode === 'country');
-  document.getElementById('vcd-tab-trend')?.classList.toggle('active', mode === 'trend');
-
-  if (mode === 'country' && _vcDetailCountryData?.selTotal > 0) {
-    const { sortedCntry, selTotal } = _vcDetailCountryData;
-    const PALETTE = ['#D4860C','#2E5B8A','#1A7A5E','#7B1FA2','#C0392B','#bbb'];
-    const top = sortedCntry.slice(0, 5);
-    const othersAmt = sortedCntry.slice(5).reduce((s, [,v]) => s + v, 0);
-    const labels = [...top.map(([c]) => _VCD_CNAMES[c] || c), ...(othersAmt > 0 ? ['기타'] : [])];
-    const vals   = [...top.map(([,v]) => +(v / selTotal * 100).toFixed(1)), ...(othersAmt > 0 ? [+(othersAmt / selTotal * 100).toFixed(1)] : [])];
-    const colors = PALETTE.slice(0, labels.length);
-    _vcDetailChart = new Chart(canvas, {
-      type: 'doughnut',
-      data: { labels, datasets: [{ data: vals, backgroundColor: colors, borderWidth: 1, borderColor: '#fff' }] },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'right', labels: { font: { size: 10 }, padding: 5, boxWidth: 10 } },
-          tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed.toFixed(1)}%` } },
-        },
-      },
-    });
-  } else if (mode === 'trend' && _vcDetailTrendData) {
-    const { years, yearAmts, year, countryByYear } = _vcDetailTrendData;
-    const labels = years.map(String);
-    const PALETTE = ['#2E5B8A','#C0392B','#D4860C','#1A7A5E','#7B1FA2','#BDC3C7'];
-
-    // 전체 기간 국가 합산 → top4 추출
-    const totalByCountry = {};
-    Object.values(countryByYear || {}).forEach(yMap => {
-      Object.entries(yMap).forEach(([c,v]) => { totalByCountry[c] = (totalByCountry[c]||0) + v; });
-    });
-    const top4 = Object.entries(totalByCountry).sort((a,b)=>b[1]-a[1]).slice(0,4).map(e=>e[0]);
-
-    const datasets = [
-      ...top4.map((code, i) => ({
-        label: _VCD_CNAMES[code] || code,
-        data: labels.map(y => {
-          const yMap = (countryByYear||{})[+y] || {};
-          return +((yMap[code]||0) / 1e6).toFixed(2);
-        }),
-        backgroundColor: labels.map(l => PALETTE[i] + (l==year?'CC':'77')),
-        borderColor: PALETTE[i],
-        borderWidth: 0, stack: 'a',
-      })),
-      {
-        label: '기타',
-        data: labels.map(y => {
-          const yMap = (countryByYear||{})[+y] || {};
-          const top4Sum = top4.reduce((s,c)=>s+(yMap[c]||0), 0);
-          const total = Object.values(yMap).reduce((s,v)=>s+v, 0);
-          return +((total - top4Sum) / 1e6).toFixed(2);
-        }),
-        backgroundColor: labels.map(l => PALETTE[5] + (l==year?'CC':'77')),
-        borderColor: PALETTE[5], borderWidth: 0, stack: 'a',
-      },
-    ];
-
-    _vcDetailChart = new Chart(canvas, {
-      type: 'bar',
-      data: { labels, datasets },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom', labels: { font: { size: 9 }, padding: 5, boxWidth: 8 } },
-          tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: $${ctx.parsed.y.toFixed(1)}M` } },
-        },
-        scales: {
-          x: { stacked: true, ticks: { font: { size: 10 } }, grid: { display: false } },
-          y: { stacked: true, ticks: { font: { size: 9 }, callback: v => `$${v}M` }, grid: { color: 'rgba(0,0,0,.05)' } },
-        },
-      },
-    });
-  }
-}
-
-function vcDetailSwitchChart(mode) { renderVcDetailChart(mode); }
-
-/* ── 완성품 노드: 수출입 금액 미리보기 ── */
-async function fetchVcProductAmt(hsList, year, isExp, amtDiv) {
-  try {
-    let total = 0;
-    const results = await Promise.all(
-      hsList.slice(0, 3).map(hs => callTradeApi({ hsCd: hs, period: year }).catch(() => []))
-    );
-    results.forEach(rows => rows.forEach(r => { total += Number(isExp ? r.expAmt : r.impAmt || 0); }));
-    if (total > 0) {
-      const fmt = total >= 1e9 ? `$${(total/1e9).toFixed(1)}B` : total >= 1e6 ? `$${(total/1e6).toFixed(0)}M` : `$${(total/1e3).toFixed(0)}K`;
-      amtDiv.className = 'vc-node-amt';
-      amtDiv.textContent = `${year}년 ${fmt}`;
-    } else {
-      amtDiv.className = 'vc-node-amt error';
-      amtDiv.textContent = `${year}년 데이터 없음`;
-    }
-  } catch { amtDiv.className = 'vc-node-amt error'; amtDiv.textContent = '조회 오류'; }
-}
-
-/* ── 완성품 노드 클릭: 수출입 상세 패널 ── */
-function vcProductClick(label, hsList, isExp, icon) {
-  const hsArr = Array.isArray(hsList) ? hsList : String(hsList).split(',');
-  const year = document.getElementById('vc_year')?.value || (new Date().getFullYear() - 1);
-  const panel = document.getElementById('vcDetailContent');
-  const tradeLabel = isExp ? '수출액' : '수입액';
-  const tradeColor = isExp ? '#1ABC9C' : '#D4860C';
-  const hsJoined = hsArr.join(',');
-  panel.innerHTML = `
-    <div class="vc-detail-title">${icon} ${label}</div>
-    <div style="font-size:11px;color:${tradeColor};font-weight:700;margin:4px 0 8px;">▲ 한국 ${tradeLabel} 기준</div>
-    <div class="vc-year-select">
-      <label>조회 연도</label>
-      <select id="vcProductYear" onchange="vcProductClick('${label}','${hsJoined}',${isExp},'${icon}')">
-        ${Array.from({length: new Date().getFullYear() - 2017}, (_, i) => new Date().getFullYear() - 1 - i)
-            .map(y => `<option value="${y}"${y == year ? ' selected' : ''}>${y}년</option>`).join('')}
-      </select>
-    </div>
-    <div class="vc-detail-stats" id="vcProdStats">
-      <div class="vc-detail-stat"><div class="vc-detail-stat-label">${tradeLabel}</div><div class="vc-detail-stat-val" id="vcp-amt">조회중…</div></div>
-    </div>
-    <div id="vcp-rank-list" style="margin:8px 0 10px;">
-      <div style="font-size:11px;color:var(--muted);">국가별 비중 로딩 중…</div>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
-      <div style="font-size:10px;font-weight:700;color:var(--subtext);letter-spacing:.8px;text-transform:uppercase;">${isExp ? '수출 대상국' : '수입국'} 비중</div>
-      <div class="chart-tab-group" style="margin:0;">
-        <button class="chart-tab active" id="vcp-tab-country" onclick="vcProductSwitchChart('country')">국가비중</button>
-        <button class="chart-tab" id="vcp-tab-trend" onclick="vcProductSwitchChart('trend')">추이</button>
-      </div>
-    </div>
-    <div style="height:150px;"><canvas id="vcProductChartCanvas"></canvas></div>
-    <div style="margin-top:8px;font-size:10px;color:var(--muted);">HS코드: ${hsArr.join(', ')}</div>`;
-
-  fetchVcProductData(hsArr, year, isExp);
-}
-
-let _vcProdChart = null;
-let _vcProdTrendData = null;
-let _vcProdCountryData = null;
-let _vcProdChartMode = 'country';
-let _vcProdIsExp = false;
-
-async function fetchVcProductData(hsList, year, isExp) {
-  try {
-    _vcProdIsExp = isExp;
-    const curYear = new Date().getFullYear();
-    const years = Array.from({length: 5}, (_, i) => curYear - 1 - i).reverse();
-    const yearAmts = {};
-    const countryByYear = {};
-
-    await Promise.all(years.map(async y => {
-      let amt = 0;
-      countryByYear[y] = {};
-      await Promise.all(hsList.slice(0,4).map(async hs => {
-        try {
-          const rows = await callTradeApi({ hsCd: hs, period: y });
-          rows.forEach(r => {
-            const a = Number(isExp ? r.expAmt : r.impAmt || 0);
-            amt += a;
-            if (r.cntyCd && a > 0) countryByYear[y][r.cntyCd] = (countryByYear[y][r.cntyCd] || 0) + a;
-          });
-        } catch {}
-      }));
-      yearAmts[y] = amt;
-    }));
-
-    const selAmt = yearAmts[year] || 0;
-    const amtEl = document.getElementById('vcp-amt');
-    if (amtEl) amtEl.textContent = selAmt > 0
-      ? (selAmt >= 1e9 ? `$${(selAmt/1e9).toFixed(2)}B` : selAmt >= 1e6 ? `$${(selAmt/1e6).toFixed(0)}M` : `$${(selAmt/1e3).toFixed(0)}K`)
-      : '데이터 없음';
-
-    const selCountries = countryByYear[year] || {};
-    const selTotal = Object.values(selCountries).reduce((s,v) => s+v, 0);
-    const sortedCntry = Object.entries(selCountries).sort((a,b) => b[1]-a[1]);
-
-    const rankEl = document.getElementById('vcp-rank-list');
-    if (rankEl) {
-      if (selTotal > 0) {
-        const RANK_COLORS = ['#1ABC9C','#2E5B8A','#D4860C','#7B1FA2','#C0392B'];
-        const MEDALS = ['🥇','🥈','🥉'];
-        rankEl.innerHTML = sortedCntry.slice(0,5).map(([code,amt],i) => {
-          const name = _VCD_CNAMES[code] || code;
-          const pct = (amt / selTotal * 100).toFixed(1);
-          return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">
-            <span style="font-size:13px;line-height:1;">${MEDALS[i]||`${i+1}.`}</span>
-            <span style="font-size:11px;font-weight:600;min-width:52px;">${name}</span>
-            <div style="flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden;">
-              <div style="height:100%;width:${pct}%;background:${RANK_COLORS[i]};border-radius:4px;"></div>
-            </div>
-            <span style="font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--navy);min-width:40px;text-align:right;">${pct}%</span>
-          </div>`;
-        }).join('');
-      } else {
-        rankEl.innerHTML = '<div style="font-size:11px;color:var(--muted);">국가 데이터 없음</div>';
-      }
-    }
-    _vcProdTrendData = { years, yearAmts, year, countryByYear };
-    _vcProdCountryData = { sortedCntry, selTotal };
-    renderVcProductChart(_vcProdChartMode);
-  } catch(e) { console.error('vcProductData error', e); }
-}
-
-function renderVcProductChart(mode) {
-  const canvas = document.getElementById('vcProductChartCanvas');
-  if (!canvas) return;
-  if (_vcProdChart) { _vcProdChart.destroy(); _vcProdChart = null; }
-  _vcProdChartMode = mode;
-  document.getElementById('vcp-tab-country')?.classList.toggle('active', mode === 'country');
-  document.getElementById('vcp-tab-trend')?.classList.toggle('active', mode === 'trend');
-  const ACCENT = _vcProdIsExp ? '#1ABC9C' : '#D4860C';
-
-  if (mode === 'country' && _vcProdCountryData?.selTotal > 0) {
-    const { sortedCntry, selTotal } = _vcProdCountryData;
-    const PALETTE = ['#1ABC9C','#2E5B8A','#D4860C','#7B1FA2','#C0392B','#bbb'];
-    const top = sortedCntry.slice(0,5);
-    const othersAmt = sortedCntry.slice(5).reduce((s,[,v])=>s+v,0);
-    const labels = [...top.map(([c])=>_VCD_CNAMES[c]||c), ...(othersAmt>0?['기타']:[])];
-    const vals   = [...top.map(([,v])=>+(v/selTotal*100).toFixed(1)), ...(othersAmt>0?[+(othersAmt/selTotal*100).toFixed(1)]:[])];
-    _vcProdChart = new Chart(canvas, {
-      type: 'doughnut',
-      data: { labels, datasets: [{ data: vals, backgroundColor: PALETTE.slice(0,labels.length), borderWidth:1, borderColor:'#fff' }] },
-      options: { responsive:true, maintainAspectRatio:false,
-        plugins: { legend:{position:'right',labels:{font:{size:10},padding:5,boxWidth:10}},
-          tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed.toFixed(1)}%`}} } },
-    });
-  } else if (mode === 'trend' && _vcProdTrendData) {
-    const { years, yearAmts, year, countryByYear } = _vcProdTrendData;
-    const labels = years.map(String);
-    const PALETTE = [ACCENT,'#2E5B8A','#D4860C','#1A7A5E','#7B1FA2','#BDC3C7'];
-    const totalByCountry = {};
-    Object.values(countryByYear||{}).forEach(yMap => {
-      Object.entries(yMap).forEach(([c,v])=>{ totalByCountry[c]=(totalByCountry[c]||0)+v; });
-    });
-    const top4 = Object.entries(totalByCountry).sort((a,b)=>b[1]-a[1]).slice(0,4).map(e=>e[0]);
-    const datasets = [
-      ...top4.map((code,i) => ({
-        label: _VCD_CNAMES[code]||code,
-        data: labels.map(y => +((((countryByYear||{})[+y]||{})[code]||0)/1e6).toFixed(2)),
-        backgroundColor: labels.map(l=>PALETTE[i]+(l==year?'CC':'77')),
-        borderColor: PALETTE[i], borderWidth:0, stack:'a',
-      })),
-      { label:'기타',
-        data: labels.map(y => {
-          const yMap=(countryByYear||{})[+y]||{};
-          const top4Sum=top4.reduce((s,c)=>s+(yMap[c]||0),0);
-          const total=Object.values(yMap).reduce((s,v)=>s+v,0);
-          return +((total-top4Sum)/1e6).toFixed(2);
-        }),
-        backgroundColor: labels.map(l=>PALETTE[5]+(l==year?'CC':'77')),
-        borderColor:PALETTE[5], borderWidth:0, stack:'a',
-      },
-    ];
-    _vcProdChart = new Chart(canvas, {
-      type: 'bar',
-      data: { labels, datasets },
-      options: { responsive:true, maintainAspectRatio:false,
-        plugins:{legend:{position:'bottom',labels:{font:{size:9},padding:5,boxWidth:8}},
-          tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: $${ctx.parsed.y.toFixed(1)}M`}}},
-        scales:{x:{stacked:true,ticks:{font:{size:10}},grid:{display:false}},
-          y:{stacked:true,ticks:{font:{size:9},callback:v=>`$${v}M`},grid:{color:'rgba(0,0,0,.05)'}}} },
-    });
-  }
-}
-function vcProductSwitchChart(mode) { renderVcProductChart(mode); }
-
-// switchTab에 밸류체인 탭 초기화 추가
-(function patchSwitchTab() {
-  const orig = window.switchTab;
-  window.switchTab = function(idx) {
-    orig(idx);
-    if (idx === 4) vcInit();
-  };
-})();
-
-// 연도 변경 시 플로우 재렌더
-document.getElementById('vc_year')?.addEventListener?.('change', () => {
-  if (_vcActiveIndustry) renderVcFlow(_vcActiveIndustry);
-});
 
 </script>
 </body>
