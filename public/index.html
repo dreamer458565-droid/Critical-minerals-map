@@ -179,10 +179,8 @@ header::after{content:'';position:absolute;top:0;right:0;bottom:0;width:40%;back
 .hs-risk.risk-cr{background:#FCEAE8;color:#C0392B;}.hs-risk.risk-hi{background:#FFF3E0;color:#D4860C;}
 .hs-risk.risk-md{background:#EBF5FB;color:#2980B9;}.hs-risk.risk-lo{background:#EAFAF1;color:#1A7A5E;}
 /* 카드 수입 1위국 표시 */
-.vc-node-country{font-size:9px;color:var(--subtext);margin-top:3px;line-height:1.4;min-height:14px;}
-.vc-node-country b{font-weight:700;color:var(--navy);}
-.vc-product-country{font-size:9px;color:rgba(255,255,255,.5);margin-top:2px;text-align:center;min-height:13px;}
-.vc-product-country b{color:rgba(255,255,255,.8);}
+.vc-node-country{display:none;}
+.vc-product-country{display:none;}
 /* HS 매핑 모달 오버레이 */
 #hsMappingModal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(5,15,35,.65);backdrop-filter:blur(3px);align-items:flex-start;justify-content:center;padding:32px 20px;overflow-y:auto;}
 #hsMappingModal.open{display:flex;}
@@ -6095,17 +6093,11 @@ async function fetchVcNodeAmt(mEntry, year, amtDiv, countryDiv) {
                 : totalAmt >= 1e6 ? `$${(totalAmt / 1e6).toFixed(0)}M`
                 : `$${(totalAmt / 1e3).toFixed(0)}K`;
       amtDiv.className = 'vc-node-amt';
-      amtDiv.textContent = `수입 ${fmt}`;
-      if (countryDiv) {
-        const top = Object.entries(countryTotals).sort((a,b) => b[1].amt - a[1].amt)[0];
-        if (top) {
-          const [topCode, { name: topName, amt: topAmt }] = top;
-          const pct = Math.round(topAmt / totalAmt * 100);
-          const flag = FLAG_MAP[topCode] || '';
-          countryDiv.className = 'vc-node-country';
-          countryDiv.innerHTML = `${flag} ${topName} <b>${pct}%</b>`;
-        }
-      }
+      const _topN = Object.entries(countryTotals).sort((a,b) => b[1].amt - a[1].amt)[0];
+      const _ctryHtml = _topN
+        ? ` <span style="font-size:9px;color:var(--subtext);font-weight:400;font-family:'Noto Sans KR',sans-serif;">${FLAG_MAP[_topN[0]]||''} ${_topN[1].name} <b style="color:var(--navy);">${Math.round(_topN[1].amt/totalAmt*100)}%</b></span>`
+        : '';
+      amtDiv.innerHTML = `수입 ${fmt}${_ctryHtml}`;
     } else {
       amtDiv.className = 'vc-node-amt error';
       amtDiv.textContent = '';
@@ -6352,17 +6344,11 @@ async function fetchVcProductAmt(hsList, year, isExp, amtDiv, countryDiv) {
       const fmt = total >= 1e9 ? `$${(total/1e9).toFixed(1)}B` : total >= 1e6 ? `$${(total/1e6).toFixed(0)}M` : `$${(total/1e3).toFixed(0)}K`;
       amtDiv.className = 'vc-node-amt';
       amtDiv.style.color = '#F4C430';
-      amtDiv.textContent = `${isExp ? '수출' : '수입'} ${fmt}`;
-      if (countryDiv) {
-        const top = Object.entries(countryTotals).sort((a,b) => b[1].amt - a[1].amt)[0];
-        if (top) {
-          const [topCode, { name: topName, amt: topAmt }] = top;
-          const pct = Math.round(topAmt / total * 100);
-          const flag = FLAG_MAP[topCode] || '';
-          countryDiv.className = 'vc-product-country';
-          countryDiv.innerHTML = `${flag} ${topName} <b>${pct}%</b>`;
-        }
-      }
+      const _topP = Object.entries(countryTotals).sort((a,b) => b[1].amt - a[1].amt)[0];
+      const _pctHtml = _topP
+        ? ` <span style="font-size:9px;color:rgba(255,255,255,.5);font-weight:400;font-family:'Noto Sans KR',sans-serif;">${FLAG_MAP[_topP[0]]||''} ${_topP[1].name} <b style="color:rgba(255,255,255,.8);">${Math.round(_topP[1].amt/total*100)}%</b></span>`
+        : '';
+      amtDiv.innerHTML = `${isExp ? '수출' : '수입'} ${fmt}${_pctHtml}`;
     } else {
       amtDiv.className = 'vc-node-amt error';
       amtDiv.style.color = 'rgba(255,255,255,0.35)';
