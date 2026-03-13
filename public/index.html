@@ -1470,8 +1470,12 @@ table.result tbody td.center{text-align:center;}
               <select class="cond-select" style="width:88px;font-size:12px" id="mapStartYearSel"></select>
               <span style="font-size:12px;color:var(--sub);">~</span>
               <select class="cond-select" style="width:88px;font-size:12px" id="mapEndYearSel"></select>
+              <select class="cond-select" style="width:108px;font-size:12px" id="mapStageSel">
+                <option value="all">전체 단계</option>
+              </select>
               <button class="btn-query" style="padding:6px 14px;font-size:12px;" onclick="queryMapData()">🌍 실시간 조회</button>
               <span id="mapStatus" style="font-size:11px;color:var(--sub);"></span>
+              <button onclick="downloadHsMappingCsv()" style="padding:4px 10px;font-size:11px;background:var(--parchment);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--text);" title="HS코드·광종·산업·밸류체인 매핑표 CSV 다운로드">📥 매핑표</button>
             </div>
           </div>
           <!-- D3 세계 지도 컨테이너 -->
@@ -1526,6 +1530,14 @@ table.result tbody td.center{text-align:center;}
             <div class="cdetail-mineral-row"><span>탄탈</span><span class="cdetail-pct" style="color:#D4860C">40.2%</span></div>
             <div class="cdetail-bar"><div class="cdetail-bar-fill" style="width:40.2%;background:#D4860C;height:5px;border-radius:3px"></div></div>
           </div>
+        </div>
+        <!-- 밸류체인 세부 수입 내역 -->
+        <div id="map-detail-section" style="display:none;margin-top:20px;">
+          <div style="font-weight:600;font-size:14px;margin-bottom:10px;color:var(--text);display:flex;align-items:center;gap:8px;">
+            <span>밸류체인별 세부 수입 내역</span>
+            <span id="map-detail-label" style="font-weight:400;font-size:12px;color:var(--subtext)"></span>
+          </div>
+          <div id="map-detail-table" style="overflow-x:auto;"></div>
         </div>
       </div>
 
@@ -4398,12 +4410,13 @@ function updateMapColors() {
   });
 }
 
-/* 수입지도 실시간 API 조회 (다년도 지원) */
+/* 수입지도 실시간 API 조회 (다년도 + 밸류체인 필터 지원) */
 async function queryMapData() {
   const mineralSel = document.getElementById('mapMineralSel');
   const mineral    = mineralSel?.value || 'all';
   const startYear  = parseInt(document.getElementById('mapStartYearSel')?.value || String(window._maxYear||2024));
   const endYear    = parseInt(document.getElementById('mapEndYearSel')?.value   || String(window._maxYear||2024));
+  const selectedStage = document.getElementById('mapStageSel')?.value || 'all';
   const sy = Math.min(startYear, endYear);
   const ey = Math.max(startYear, endYear);
   const statusEl   = document.getElementById('mapStatus');
@@ -4429,17 +4442,23 @@ async function queryMapData() {
     if (hdr) hdr.textContent = '핵심광물 수입 국가 TOP 7';
     const sub = document.querySelector('.country-card .country-info-sub');
     if (sub) sub.textContent = '전체 수입액 비중 기준 (정적)';
+    const detailSection = document.getElementById('map-detail-section');
+    if (detailSection) detailSection.style.display = 'none';
     return;
   }
 
   // MINERAL_DB에서 HS 코드 탐색 (복수 HS 코드 지원)
   const mEntry = MINERAL_DB.find(m => m.ko === mineral);
-  const hsList = mEntry?.hs || [];
+  const allHsList = mEntry?.hs || [];
+  // 밸류체인 단계 필터 적용
+  const hsList = selectedStage === 'all' ? allHsList :
+    allHsList.filter(hs => getSupplyStage(hs) === selectedStage);
   if (!hsList.length) { if (statusEl) statusEl.textContent = 'HS코드 없음'; return; }
 
+  const stageLabel = selectedStage === 'all' ? '' : ` [${selectedStage}]`;
   const totalYears = ey - sy + 1;
   const totalQueries = hsList.length * totalYears;
-  if (statusEl) statusEl.textContent = `⏳ ${yearLabel} ${mineral} 조회 중... (${totalQueries}건)`;
+  if (statusEl) statusEl.textContent = `⏳ ${yearLabel} ${mineral}${stageLabel} 조회 중... (${totalQueries}건)`;
 
   try {
     // HS코드 × 연도 조합 전체 병렬 조회 후 합산 (배치 5개씩)
@@ -4450,13 +4469,25 @@ async function queryMapData() {
       }
     }
     const BATCH = 5;
-    const ctry  = {};
+    const ctry     = {};
+    const hsDetail = {}; // hs → { stage, hsName, totalAmt, countries:{a3:amt} }
     let total   = 0;
     let mapFailCount = 0;
     for (let i = 0; i < queries.length; i += BATCH) {
       const batch = queries.slice(i, i + BATCH);
       const results = await Promise.allSettled(batch.map(p => callTradeApi(p)));
-      results.forEach(res => {
+      results.forEach((res, idx) => {
+        const q = batch[idx];
+        const hsCode = q.hsCd;
+        if (!hsDetail[hsCode]) {
+          const hsIdx = allHsList.indexOf(hsCode);
+          hsDetail[hsCode] = {
+            stage: getSupplyStage(hsCode),
+            hsName: mEntry?.hsName?.[hsIdx] || '',
+            totalAmt: 0,
+            countries: {}
+          };
+        }
         if (res.status === 'fulfilled' && res.value) {
           for (const it of res.value) {
             const code = it.cntyCd || it.statCd || '';
@@ -4464,6 +4495,8 @@ async function queryMapData() {
             if (!code || amt <= 0) continue;
             ctry[code] = (ctry[code]||0) + amt;
             total += amt;
+            hsDetail[hsCode].countries[code] = (hsDetail[hsCode].countries[code]||0) + amt;
+            hsDetail[hsCode].totalAmt += amt;
           }
         } else if (res.status === 'rejected') {
           mapFailCount++;
@@ -4521,7 +4554,7 @@ async function queryMapData() {
         </div>`;
       }).join('');
       const hdr = document.querySelector('.country-card .country-info-title');
-      if (hdr) hdr.textContent = `${mineral} 수입 국가 TOP 7`;
+      if (hdr) hdr.textContent = `${mineral}${stageLabel} 수입 국가 TOP 7`;
       const sub = document.querySelector('.country-card .country-info-sub');
       if (sub) sub.textContent = `${yearLabel} 누적 수입액 비중 기준${mapFailCount > 0 ? ` (${mapFailCount}건 조회 실패)` : ''}`;
     }
@@ -4529,8 +4562,11 @@ async function queryMapData() {
     // 하단 국가 상세 카드 동적 업데이트
     updateCountryDetailCards(ctry, total, mineral, yearLabel);
 
+    // 밸류체인 세부 내역 테이블 렌더
+    renderMapDetailTable(hsDetail, total, mineral, yearLabel + stageLabel);
+
     const failMsg = mapFailCount > 0 ? ` ⚠️ ${mapFailCount}건 실패` : '';
-    if (statusEl) statusEl.textContent = `✅ ${yearLabel} ${mineral} 업데이트 완료 (${Object.keys(ctry).length}개국)${failMsg}`;
+    if (statusEl) statusEl.textContent = `✅ ${yearLabel} ${mineral}${stageLabel} 업데이트 완료 (${Object.keys(ctry).length}개국)${failMsg}`;
   } catch(e) {
     if (statusEl) statusEl.textContent = '❌ 오류: ' + e.message;
   }
@@ -4748,9 +4784,111 @@ function selectMapCountry(info) {
   }).join('');
 }
 
+/* 밸류체인별 세부 수입 내역 테이블 렌더 */
+function renderMapDetailTable(hsDetail, total, mineral, label) {
+  const section  = document.getElementById('map-detail-section');
+  const tableDiv = document.getElementById('map-detail-table');
+  if (!section || !tableDiv) return;
+
+  const labelEl = document.getElementById('map-detail-label');
+  if (labelEl) labelEl.textContent = `(${mineral} · ${label})`;
+
+  // HS코드를 공급단계별로 그룹화 (데이터 있는 것만)
+  const byStage = {};
+  Object.entries(hsDetail).forEach(([hs, d]) => {
+    if (d.totalAmt <= 0) return;
+    if (!byStage[d.stage]) byStage[d.stage] = [];
+    byStage[d.stage].push({ hs, ...d });
+  });
+
+  const orderedStages = SUPPLY_STAGE_ORDER.filter(s => byStage[s]);
+  if (orderedStages.length === 0) { section.style.display = 'none'; return; }
+
+  let html = `<table style="width:100%;border-collapse:collapse;font-size:12px;">
+    <thead>
+      <tr style="background:var(--parchment);border-bottom:2px solid var(--border);">
+        <th style="padding:7px 10px;text-align:left;white-space:nowrap;color:var(--subtext);font-weight:600;">공급단계</th>
+        <th style="padding:7px 10px;text-align:left;white-space:nowrap;color:var(--subtext);font-weight:600;">HS코드</th>
+        <th style="padding:7px 10px;text-align:left;color:var(--subtext);font-weight:600;">품목명</th>
+        <th style="padding:7px 10px;text-align:right;white-space:nowrap;color:var(--subtext);font-weight:600;">수입액(천$)</th>
+        <th style="padding:7px 10px;text-align:right;white-space:nowrap;color:var(--subtext);font-weight:600;">비중</th>
+        <th style="padding:7px 10px;text-align:left;color:var(--subtext);font-weight:600;">주요 공급국 TOP3</th>
+      </tr>
+    </thead><tbody>`;
+
+  orderedStages.forEach(stage => {
+    const color = SUPPLY_STAGE_COLORS[stage] || '#999';
+    const rows  = byStage[stage].sort((a, b) => b.totalAmt - a.totalAmt);
+    rows.forEach((d, i) => {
+      const pct  = total > 0 ? (d.totalAmt / total * 100).toFixed(1) : '0.0';
+      const top3 = Object.entries(d.countries)
+        .sort((a, b) => b[1] - a[1]).slice(0, 3)
+        .map(([a3, amt]) => {
+          const flag = COUNTRY_FLAGS[a3] || '🌐';
+          const name = COUNTRY_NAMES[a3] || a3;
+          const cpct = d.totalAmt > 0 ? Math.round(amt / d.totalAmt * 100) : 0;
+          return `${flag}${name}(${cpct}%)`;
+        }).join(' · ');
+      const stageTd = i === 0
+        ? `<td rowspan="${rows.length}" style="padding:7px 10px;vertical-align:middle;border-bottom:1px solid var(--border);border-right:1px solid var(--border);">
+            <span style="display:inline-flex;align-items:center;background:${color}22;color:${color};border:1px solid ${color}55;border-radius:4px;padding:2px 8px;font-weight:600;font-size:11px;white-space:nowrap;">${stage}</span>
+           </td>`
+        : '';
+      html += `<tr style="border-bottom:1px solid var(--border);">
+        ${stageTd}
+        <td style="padding:7px 10px;font-family:monospace;white-space:nowrap;">${d.hs}</td>
+        <td style="padding:7px 10px;color:var(--subtext);">${d.hsName}</td>
+        <td style="padding:7px 10px;text-align:right;white-space:nowrap;">${Number(Math.round(d.totalAmt)).toLocaleString()}</td>
+        <td style="padding:7px 10px;text-align:right;white-space:nowrap;font-weight:600;color:${color};">${pct}%</td>
+        <td style="padding:7px 10px;font-size:11px;color:var(--subtext);">${top3 || '—'}</td>
+      </tr>`;
+    });
+  });
+
+  html += '</tbody></table>';
+  tableDiv.innerHTML = html;
+  section.style.display = 'block';
+}
+
+/* HS코드·광종·산업·밸류체인 매핑표 CSV 다운로드 */
+function downloadHsMappingCsv() {
+  const rows = [['광종', '분류', 'HS코드', 'HS품목명', '공급단계(밸류체인)']];
+  MINERAL_DB.forEach(m => {
+    (m.hs || []).forEach((hs, i) => {
+      rows.push([m.ko, m.group || '', hs, m.hsName?.[i] || '', getSupplyStage(hs)]);
+    });
+  });
+  const csv  = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `핵심광물_HS코드_밸류체인_매핑표_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 function filterByMineral() {
-  if (!_d3map) return;
   const val = document.getElementById('mapMineralSel').value;
+
+  // 밸류체인 단계 select 동적 업데이트
+  const stageSel = document.getElementById('mapStageSel');
+  if (stageSel) {
+    if (val === 'all') {
+      stageSel.innerHTML = '<option value="all">전체 단계</option>';
+    } else {
+      const mEntry = MINERAL_DB.find(m => m.ko === val);
+      const presentStages = new Set((mEntry?.hs || []).map(hs => getSupplyStage(hs)));
+      stageSel.innerHTML = '<option value="all">전체 단계</option>' +
+        SUPPLY_STAGE_ORDER.filter(s => presentStages.has(s))
+          .map(s => `<option value="${s}">${s}</option>`).join('');
+    }
+  }
+
+  // 지도 투명도 필터
+  if (!_d3map) return;
   _d3map.cg.selectAll('.country-d3').style('opacity', d => {
     if (val === 'all') return 0.85;
     const info = MAP_COUNTRY_DATA[String(+d.id)];
