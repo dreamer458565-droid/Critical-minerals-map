@@ -178,6 +178,11 @@ header::after{content:'';position:absolute;top:0;right:0;bottom:0;width:40%;back
 .hs-risk{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600;}
 .hs-risk.risk-cr{background:#FCEAE8;color:#C0392B;}.hs-risk.risk-hi{background:#FFF3E0;color:#D4860C;}
 .hs-risk.risk-md{background:#EBF5FB;color:#2980B9;}.hs-risk.risk-lo{background:#EAFAF1;color:#1A7A5E;}
+/* 카드 수입 1위국 표시 */
+.vc-node-country{font-size:9px;color:var(--subtext);margin-top:3px;line-height:1.4;min-height:14px;}
+.vc-node-country b{font-weight:700;color:var(--navy);}
+.vc-product-country{font-size:9px;color:rgba(255,255,255,.5);margin-top:2px;text-align:center;min-height:13px;}
+.vc-product-country b{color:rgba(255,255,255,.8);}
 /* HS 매핑 모달 오버레이 */
 #hsMappingModal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(5,15,35,.65);backdrop-filter:blur(3px);align-items:flex-start;justify-content:center;padding:32px 20px;overflow-y:auto;}
 #hsMappingModal.open{display:flex;}
@@ -3278,6 +3283,20 @@ const COUNTRY_NAMES = {
   MYS:'말레이시아', TWN:'대만',  KOR:'한국',  ARG:'아르헨티나', BOL:'볼리비아',
   AUT:'오스트리아', SWE:'스웨덴', PRK:'북한', MNG:'몽골', CZE:'체코',
   BGR:'불가리아', UKR:'우크라이나', PNG:'파푸아뉴기니', NAM:'나미비아',
+  GIN:'기니', MOZ:'모잠비크', MDG:'마다가스카르', TZA:'탄자니아', ZWE:'짐바브웨',
+  PER2:'페루', ITA:'이탈리아', ESP:'스페인', THA:'태국', VNM:'베트남', GNQ:'적도기니',
+};
+const FLAG_MAP = {
+  CHN:'🇨🇳', JPN:'🇯🇵', AUS:'🇦🇺', CHL:'🇨🇱', USA:'🇺🇸',
+  FIN:'🇫🇮', COD:'🇨🇩', PHL:'🇵🇭', ZAF:'🇿🇦', IDN:'🇮🇩',
+  RUS:'🇷🇺', BRA:'🇧🇷', CAN:'🇨🇦', KAZ:'🇰🇿', ZMB:'🇿🇲',
+  GBR:'🇬🇧', DEU:'🇩🇪', NOR:'🇳🇴', FRA:'🇫🇷', EST:'🇪🇪',
+  BEL:'🇧🇪', NLD:'🇳🇱', MEX:'🇲🇽', PER:'🇵🇪', IND:'🇮🇳',
+  MYS:'🇲🇾', TWN:'🇹🇼', KOR:'🇰🇷', ARG:'🇦🇷', BOL:'🇧🇴',
+  AUT:'🇦🇹', SWE:'🇸🇪', MNG:'🇲🇳', CZE:'🇨🇿', BGR:'🇧🇬',
+  UKR:'🇺🇦', PNG:'🇵🇬', NAM:'🇳🇦', GIN:'🇬🇳', MOZ:'🇲🇿',
+  MDG:'🇲🇬', TZA:'🇹🇿', ZWE:'🇿🇼', ITA:'🇮🇹', ESP:'🇪🇸',
+  THA:'🇹🇭', VNM:'🇻🇳', GNQ:'🇬🇶',
 };
 
 // 현황 개요 — MINERAL_DB 기반 조회 (한국33/미국60 라디오 선택)
@@ -5975,12 +5994,17 @@ function renderVcFlow(id) {
         amtDiv.textContent = '로딩 중…';
         card.appendChild(amtDiv);
 
+        // 수입 1위국 표시 영역
+        const countryDiv = document.createElement('div');
+        countryDiv.className = 'vc-node-country';
+        card.appendChild(countryDiv);
+
         const nodeKey = node.ko;
         card.onclick = () => vcNodeClick(nodeKey, id);
         card.dataset.nodeKey = nodeKey;
 
         // 비동기 수입액 조회
-        if (mEntry) fetchVcNodeAmt(mEntry, year, amtDiv);
+        if (mEntry) fetchVcNodeAmt(mEntry, year, amtDiv, countryDiv);
 
       } else if (node.hs && node.hs.length) {
         // 완성품/중간제품 노드 (HS 있음 → 클릭 가능)
@@ -5998,10 +6022,13 @@ function renderVcFlow(id) {
             <div style="font-size:9px;font-weight:700;color:${isExp ? '#1ABC9C' : 'rgba(255,255,255,.4)'};margin-top:3px;">${isExp ? '▲ 수출' : '수입'}</div>
           </div>`;
         card.appendChild(productAmtDiv);
+        const productCountryDiv = document.createElement('div');
+        productCountryDiv.className = 'vc-product-country';
+        card.appendChild(productCountryDiv);
         const pLabel = node.label;
         const pHs = resolveHs(node, year);
         card.onclick = () => vcProductClick(pLabel, pHs, isExp, node.icon || '');
-        fetchVcProductAmt(pHs, year, isExp, productAmtDiv);
+        fetchVcProductAmt(pHs, year, isExp, productAmtDiv, productCountryDiv);
       } else {
         // 완성품 노드 (HS 없음 → 표시 전용)
         card.style.cssText = 'background:var(--navy);border-color:var(--amber);cursor:default;';
@@ -6038,19 +6065,29 @@ function renderVcFlow(id) {
   container.appendChild(flowEl);
 }
 
-async function fetchVcNodeAmt(mEntry, year, amtDiv) {
+async function fetchVcNodeAmt(mEntry, year, amtDiv, countryDiv) {
   try {
     const hsCodes = mEntry.hs || [];
     if (!hsCodes.length) { amtDiv.className = 'vc-node-amt error'; amtDiv.textContent = 'HS 없음'; return; }
 
     let totalAmt = 0;
+    const countryTotals = {};
     const results = await Promise.all(
       hsCodes.slice(0, 3).map(hs =>
         callTradeApi({ hsCd: hs, period: year }).catch(() => [])
       )
     );
     results.forEach(rows => {
-      rows.forEach(r => { totalAmt += Number(r.impAmt || 0); });
+      rows.forEach(r => {
+        const amt = Number(r.impAmt || 0);
+        totalAmt += amt;
+        const code = r.cntyCd || '';
+        if (code && code !== '-' && amt > 0) {
+          const name = r.cntyNm || COUNTRY_NAMES[code] || code;
+          if (!countryTotals[code]) countryTotals[code] = { name, amt: 0 };
+          countryTotals[code].amt += amt;
+        }
+      });
     });
 
     if (totalAmt > 0) {
@@ -6059,6 +6096,16 @@ async function fetchVcNodeAmt(mEntry, year, amtDiv) {
                 : `$${(totalAmt / 1e3).toFixed(0)}K`;
       amtDiv.className = 'vc-node-amt';
       amtDiv.textContent = `수입 ${fmt}`;
+      if (countryDiv) {
+        const top = Object.entries(countryTotals).sort((a,b) => b[1].amt - a[1].amt)[0];
+        if (top) {
+          const [topCode, { name: topName, amt: topAmt }] = top;
+          const pct = Math.round(topAmt / totalAmt * 100);
+          const flag = FLAG_MAP[topCode] || '';
+          countryDiv.className = 'vc-node-country';
+          countryDiv.innerHTML = `${flag} ${topName} <b>${pct}%</b>`;
+        }
+      }
     } else {
       amtDiv.className = 'vc-node-amt error';
       amtDiv.textContent = '';
@@ -6282,20 +6329,40 @@ function renderVcDetailChart(mode) {
 function vcDetailSwitchChart(mode) { renderVcDetailChart(mode); }
 
 /* ── 완성품 노드: 수출입 금액 미리보기 ── */
-async function fetchVcProductAmt(hsList, year, isExp, amtDiv) {
+async function fetchVcProductAmt(hsList, year, isExp, amtDiv, countryDiv) {
   try {
     let total = 0;
     const dir = isExp ? 'EXP' : 'IMP';
     const amtKey = isExp ? 'expAmt' : 'impAmt';
+    const countryTotals = {};
     const results = await Promise.all(
       hsList.slice(0, 3).map(hs => callTradeApi({ hsCd: hs, period: year, impExpDivCd: dir }).catch(() => []))
     );
-    results.forEach(rows => rows.forEach(r => { total += Number(r[amtKey] || 0); }));
+    results.forEach(rows => rows.forEach(r => {
+      const amt = Number(r[amtKey] || 0);
+      total += amt;
+      const code = r.cntyCd || '';
+      if (code && code !== '-' && amt > 0) {
+        const name = r.cntyNm || COUNTRY_NAMES[code] || code;
+        if (!countryTotals[code]) countryTotals[code] = { name, amt: 0 };
+        countryTotals[code].amt += amt;
+      }
+    }));
     if (total > 0) {
       const fmt = total >= 1e9 ? `$${(total/1e9).toFixed(1)}B` : total >= 1e6 ? `$${(total/1e6).toFixed(0)}M` : `$${(total/1e3).toFixed(0)}K`;
       amtDiv.className = 'vc-node-amt';
       amtDiv.style.color = '#F4C430';
       amtDiv.textContent = `${isExp ? '수출' : '수입'} ${fmt}`;
+      if (countryDiv) {
+        const top = Object.entries(countryTotals).sort((a,b) => b[1].amt - a[1].amt)[0];
+        if (top) {
+          const [topCode, { name: topName, amt: topAmt }] = top;
+          const pct = Math.round(topAmt / total * 100);
+          const flag = FLAG_MAP[topCode] || '';
+          countryDiv.className = 'vc-product-country';
+          countryDiv.innerHTML = `${flag} ${topName} <b>${pct}%</b>`;
+        }
+      }
     } else {
       amtDiv.className = 'vc-node-amt error';
       amtDiv.style.color = 'rgba(255,255,255,0.35)';
