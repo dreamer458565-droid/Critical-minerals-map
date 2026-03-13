@@ -1936,8 +1936,8 @@ const MINERAL_DB = [
 
   // ══ 반도체·전자 ══
   {ko:'갈륨',       en:'Gallium',       sym:'Ga',   group:'반도체·전자', risk:'극심', priority:'S',
-   hs:['280459','285000','854231','381800'],
-   hsName:['갈륨금속','갈륨화합물','갈륨반도체웨이퍼','갈륨비소(GaAs)'],
+   hs:['280459','285000','381800'],
+   hsName:['갈륨금속','갈륨화합물','GaAs·GaN 도핑 웨이퍼(3818)'],
    hint:'GaN·GaAs 반도체 필수원소. 2023년 중국 수출 통제 발동'},
   {ko:'게르마늄',   en:'Germanium',     sym:'Ge',   group:'반도체·전자', risk:'극심', priority:'S',
    hs:['804090','285000','280459'],
@@ -5433,7 +5433,7 @@ const INDUSTRY_CHAINS = {
         { ko: null, label: '배터리 팩', icon: '⚡', desc: 'BMS 포함 EV·ESS용 팩', hs: ['850760'], expMode: true },
       ]},
       { label: '완성차', color: '#6A1B9A', nodes: [
-        { ko: null, label: '전기차 (EV)', icon: '🚗', desc: 'Hyundai Ioniq·Kia EV 시리즈', hs: ['870380'], expMode: true },
+        { ko: null, label: '전기차 (EV)', icon: '🚗', desc: 'Hyundai Ioniq·Kia EV 시리즈', hs: ['870370','870360'], expMode: true },
         { ko: null, label: 'PHEV·HEV', icon: '🔌', desc: '플러그인·하이브리드 차량', hs: ['870340','870350'], expMode: true },
       ]},
     ],
@@ -5463,11 +5463,15 @@ const INDUSTRY_CHAINS = {
         { ko: null, label: 'GaN/SiC 웨이퍼', icon: '🟦', desc: '전력반도체용 화합물 기판', hs: ['284920','381800'], expMode: false },
       ]},
       { label: '완성품', color: '#D4860C', nodes: [
-        { ko: null, label: '메모리 반도체', icon: '🧠', desc: 'DRAM·NAND Flash', hs: ['854231','854232'], expMode: true },
-        { ko: null, label: '시스템 반도체', icon: '⚙️', desc: 'AP·GPU·파운드리', hs: ['854239','854234'], expMode: true },
+        { ko: null, label: '메모리 반도체', icon: '🧠', desc: 'DRAM·NAND Flash', hs: ['854232'], expMode: true },
+        { ko: null, label: '시스템 반도체', icon: '⚙️', desc: 'AP·GPU·파운드리', hs: ['854231','854239'], expMode: true },
+      ]},
+      { label: '최종 기기', color: '#1565C0', nodes: [
+        { ko: null, label: '스마트폰', icon: '📱', desc: '갤럭시 시리즈 / 삼성·LG 전자', hs: ['851712'], expMode: true },
+        { ko: null, label: '서버·데이터센터', icon: '🖥️', desc: 'AI 서버·HPC 솔루션', hs: ['847180'], expMode: true },
       ]},
     ],
-    finalProduct: { label: '전자·AI 디바이스', icon: '📱', desc: '스마트폰·서버·자동차 반도체' },
+    finalProduct: { label: '글로벌 테크 수요', icon: '🌐', desc: 'AI·모바일·클라우드 인프라' },
   },
 
   motor: {
@@ -5988,11 +5992,11 @@ async function fetchVcProductAmt(hsList, year, isExp, amtDiv) {
       const fmt = total >= 1e9 ? `$${(total/1e9).toFixed(1)}B` : total >= 1e6 ? `$${(total/1e6).toFixed(0)}M` : `$${(total/1e3).toFixed(0)}K`;
       amtDiv.className = 'vc-node-amt';
       amtDiv.style.color = '#F4C430';
-      amtDiv.textContent = `${year}년 ${fmt}`;
+      amtDiv.textContent = `${isExp ? '수출' : '수입'} ${fmt}`;
     } else {
       amtDiv.className = 'vc-node-amt error';
       amtDiv.style.color = 'rgba(255,255,255,0.35)';
-      amtDiv.textContent = `${year}년 -`;
+      amtDiv.textContent = '-';
     }
   } catch { amtDiv.className = 'vc-node-amt error'; amtDiv.style.color = 'rgba(255,255,255,0.35)'; amtDiv.textContent = '-'; }
 }
