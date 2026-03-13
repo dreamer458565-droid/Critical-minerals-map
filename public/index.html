@@ -1366,6 +1366,18 @@ table.result tbody td.center{text-align:center;}
       </div>
     </div>
 
+    <!-- 연도별 수입 추이 차트 -->
+    <div class="chart-box" id="h-trend-box" style="margin-bottom:20px;">
+      <div class="chart-box-header">
+        <div class="chart-box-title">연도별 수입 추이</div>
+        <div class="chart-tab-group">
+          <button class="chart-tab active" onclick="switchHTrend('bar',this)">금액</button>
+          <button class="chart-tab" onclick="switchHTrend('weight',this)">중량</button>
+        </div>
+      </div>
+      <div class="chart-body" style="min-height:220px;"><canvas id="h-trend-chart" style="max-height:260px"></canvas></div>
+    </div>
+
     <!-- 국가별 비중 요약 -->
     <div class="result-table-wrap" id="h-country-summary" style="margin-bottom:0;">
       <div class="table-header">
@@ -2288,7 +2300,8 @@ const CONTINENT_COLORS = {
 let apiKey = 'PROXY';
 let selectedMineral = null;
 let mChartDonut = null, mChartTrend = null, mChartSupply = null;
-let hChartCountry = null, hChartSub = null;
+let hChartCountry = null, hChartSub = null, hChartTrend = null;
+let hTrendType = 'bar'; // 'bar'=금액, 'weight'=중량
 let mResultData = [], hResultData = [];
 let _abortMineral = null, _abortOverview = null;
 let mViewMode = 'both';  // 'both' | 'chart' | 'table'
@@ -3770,6 +3783,7 @@ function renderHsResult(data, hsCd) {
 
   renderHCountryChart(data);
   renderHSubChart(data, hsCd);
+  renderHTrendChart(data);
   renderHCountrySummary(data);
   renderHTable(data);
 }
@@ -3915,6 +3929,109 @@ function renderHSubChart(data, hsCd) {
         y:{grid:{display:false},ticks:{font:{size:10,family:'JetBrains Mono'}}}
       }
     }
+  });
+}
+
+/* ── HS 연도별 수입 추이 차트 ── */
+function switchHTrend(type, el) {
+  hTrendType = type;
+  document.querySelectorAll('#h-trend-box .chart-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  if (hResultData.length) renderHTrendChart(hResultData);
+}
+
+function renderHTrendChart(data) {
+  const PALETTE_BG = [
+    'rgba(212,134,12,.8)','rgba(41,128,185,.75)','rgba(39,174,96,.75)',
+    'rgba(192,57,43,.8)','rgba(155,89,182,.75)','rgba(26,188,156,.75)',
+    'rgba(52,73,94,.75)','rgba(243,156,18,.75)',
+  ];
+  const PALETTE_BD = ['#D4860C','#2980B9','#27AE60','#C0392B','#9B59B6','#1ABC9C','#34495E','#F39C12'];
+
+  // year(4자리)별 · hsCd별 집계
+  const byYearHs = {};
+  const hsSet = new Set();
+  data.forEach(r => {
+    const yr = String(r.period || '').slice(0, 4) || '?';
+    const hs = r.hsCd || '?';
+    if (yr === '?' || hs === '?') return;
+    hsSet.add(hs);
+    if (!byYearHs[yr]) byYearHs[yr] = {};
+    if (!byYearHs[yr][hs]) byYearHs[yr][hs] = { amt: 0, wt: 0 };
+    byYearHs[yr][hs].amt += parseFloat(r.impAmt || r.expAmt || 0);
+    byYearHs[yr][hs].wt  += parseFloat(r.impWgt || r.expWgt || 0);
+  });
+
+  const years  = Object.keys(byYearHs).sort();
+  const hsList = [...hsSet].sort();
+  const key    = hTrendType === 'weight' ? 'wt' : 'amt';
+  const unit   = hTrendType === 'weight' ? '톤' : '천$';
+
+  if (hChartTrend) { hChartTrend.destroy(); hChartTrend = null; }
+  const el = document.getElementById('h-trend-chart');
+  if (!el) return;
+  if (years.length === 0) {
+    el.parentElement.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:13px;">데이터 없음</div>';
+    return;
+  }
+
+  const isMultiHs = hsList.length > 1;
+  const datasets = isMultiHs
+    ? hsList.map((hs, i) => ({
+        label: hs,
+        data: years.map(yr => byYearHs[yr]?.[hs]?.[key] || 0),
+        borderColor: PALETTE_BD[i % PALETTE_BD.length],
+        backgroundColor: PALETTE_BG[i % PALETTE_BG.length],
+        borderWidth: 2, fill: false, tension: 0.35,
+        pointRadius: 4, pointHoverRadius: 6,
+      }))
+    : [{
+        label: hTrendType === 'weight' ? '수입중량 (톤)' : '수입액 (천$)',
+        data: years.map(yr => {
+          let tot = 0;
+          Object.values(byYearHs[yr] || {}).forEach(v => tot += v[key]);
+          return tot;
+        }),
+        backgroundColor: 'rgba(212,134,12,.75)',
+        borderColor: '#D4860C', borderWidth: 1.5, borderRadius: 3,
+      }];
+
+  hChartTrend = new Chart(el.getContext('2d'), {
+    type: isMultiHs ? 'line' : 'bar',
+    data: { labels: years, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 600, easing: 'easeOutQuart', delay: ctx => ctx.dataIndex * 50 },
+      plugins: {
+        legend: {
+          display: isMultiHs, position: 'top',
+          labels: { font: { size: 10, family: 'JetBrains Mono' }, boxWidth: 12 },
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15,28,51,.92)',
+          titleFont: { family: 'Noto Sans KR', size: 12, weight: 'bold' },
+          bodyFont: { family: 'Noto Sans KR', size: 11 },
+          padding: 10, cornerRadius: 4,
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: ${Number(ctx.raw).toLocaleString()} ${unit}`,
+            afterLabel: ctx => {
+              if (ctx.dataIndex === 0) return '';
+              const prev = ctx.dataset.data[ctx.dataIndex - 1];
+              if (!prev) return '';
+              const pct = ((ctx.raw - prev) / prev * 100).toFixed(1);
+              return `전년 대비: ${pct > 0 ? '+' : ''}${pct}%`;
+            },
+          },
+        },
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+        y: {
+          grid: { color: 'rgba(0,0,0,.05)' },
+          ticks: { font: { size: 10 }, callback: v => Number(v).toLocaleString() },
+        },
+      },
+    },
   });
 }
 
