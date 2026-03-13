@@ -5609,20 +5609,17 @@ function renderVcFlow(id) {
 
 async function fetchVcNodeAmt(mEntry, year, amtDiv) {
   try {
-    // 첫 번째 HS코드로 대표 조회 (전체 HS 합산)
     const hsCodes = mEntry.hs || [];
     if (!hsCodes.length) { amtDiv.className = 'vc-node-amt error'; amtDiv.textContent = 'HS 없음'; return; }
 
     let totalAmt = 0;
-    const fetches = hsCodes.slice(0, 3).map(hs =>
-      fetch(`/api/trade?hsCd=${hs}0000&period=${year}&periodType=year&tradeType=import`)
-        .then(r => r.ok ? r.json() : null)
-        .catch(() => null)
+    const results = await Promise.all(
+      hsCodes.slice(0, 3).map(hs =>
+        callTradeApi({ hsCd: hs, period: year }).catch(() => [])
+      )
     );
-    const results = await Promise.all(fetches);
-    results.forEach(res => {
-      if (!res?.data) return;
-      (res.data || []).forEach(r => { totalAmt += Number(r.statsDolAmt || r.expDolAmt || 0); });
+    results.forEach(rows => {
+      rows.forEach(r => { totalAmt += Number(r.impAmt || 0); });
     });
 
     if (totalAmt > 0) {
@@ -5697,11 +5694,9 @@ async function fetchVcDetailData(mEntry, year) {
       let amt = 0;
       await Promise.all(hsList.map(async hs => {
         try {
-          const res = await fetch(`/api/trade?hsCd=${hs}0000&period=${y}&periodType=year&tradeType=import`);
-          if (!res.ok) return;
-          const json = await res.json();
-          (json.data || []).forEach(r => {
-            const a = Number(r.statsDolAmt || r.expDolAmt || 0);
+          const rows = await callTradeApi({ hsCd: hs, period: y });
+          rows.forEach(r => {
+            const a = Number(r.impAmt || 0);
             amt += a;
             if (r.cntyCd && a > 0) {
               countryMap[r.cntyCd] = (countryMap[r.cntyCd] || 0) + a;
