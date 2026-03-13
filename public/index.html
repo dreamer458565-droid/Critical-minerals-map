@@ -5678,6 +5678,7 @@ function renderVcFlow(id) {
         const productAmtDiv = document.createElement('div');
         productAmtDiv.className = 'vc-node-amt loading';
         productAmtDiv.textContent = '로딩 중…';
+        productAmtDiv.style.cssText = 'text-align:center;color:#F4C430;font-size:11px;font-weight:600;font-family:"JetBrains Mono",monospace;margin-top:4px;';
         card.innerHTML = `
           <div style="text-align:center;padding:4px 0 2px;">
             <div style="font-size:18px;">${node.icon || ''}</div>
@@ -5980,12 +5981,14 @@ async function fetchVcProductAmt(hsList, year, isExp, amtDiv) {
     if (total > 0) {
       const fmt = total >= 1e9 ? `$${(total/1e9).toFixed(1)}B` : total >= 1e6 ? `$${(total/1e6).toFixed(0)}M` : `$${(total/1e3).toFixed(0)}K`;
       amtDiv.className = 'vc-node-amt';
+      amtDiv.style.color = '#F4C430';
       amtDiv.textContent = `${year}년 ${fmt}`;
     } else {
       amtDiv.className = 'vc-node-amt error';
-      amtDiv.textContent = `${year}년 데이터 없음`;
+      amtDiv.style.color = 'rgba(255,255,255,0.35)';
+      amtDiv.textContent = `${year}년 -`;
     }
-  } catch { amtDiv.className = 'vc-node-amt error'; amtDiv.textContent = '조회 오류'; }
+  } catch { amtDiv.className = 'vc-node-amt error'; amtDiv.style.color = 'rgba(255,255,255,0.35)'; amtDiv.textContent = '-'; }
 }
 
 /* ── 완성품 노드 클릭: 수출입 상세 패널 ── */
