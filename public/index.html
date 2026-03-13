@@ -1535,9 +1535,10 @@ table.result tbody td.center{text-align:center;}
         </div>
         <!-- 밸류체인 세부 수입 내역 -->
         <div id="map-detail-section" style="display:none;margin-top:20px;">
-          <div style="font-weight:600;font-size:14px;margin-bottom:10px;color:var(--text);display:flex;align-items:center;gap:8px;">
+          <div style="font-weight:600;font-size:14px;margin-bottom:10px;color:var(--text);display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <span>밸류체인별 세부 수입 내역</span>
             <span id="map-detail-label" style="font-weight:400;font-size:12px;color:var(--subtext)"></span>
+            <button onclick="downloadMapDetailCsv()" style="margin-left:auto;padding:4px 12px;font-size:11px;background:var(--parchment);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--text);font-family:'Noto Sans KR',sans-serif;" title="현재 조회 결과를 HS코드별 수입국 비중 포함 CSV로 다운로드">📥 수입국 비중 CSV</button>
           </div>
           <div id="map-detail-table" style="overflow-x:auto;"></div>
         </div>
@@ -4564,6 +4565,9 @@ async function queryMapData() {
     // 하단 국가 상세 카드 동적 업데이트
     updateCountryDetailCards(ctry, total, mineral, yearLabel);
 
+    // 마지막 쿼리 결과 저장 (CSV 다운로드용)
+    _lastMapQuery = { mineral, yearLabel: yearLabel + stageLabel, total, hsDetail };
+
     // 밸류체인 세부 내역 테이블 렌더
     renderMapDetailTable(hsDetail, total, mineral, yearLabel + stageLabel);
 
@@ -4624,6 +4628,8 @@ const FLOW_SRCS = [
 ];
 let _d3map = null;
 let _mapTimers = [];
+// 마지막 지도 조회 결과 (CSV 다운로드용)
+let _lastMapQuery = null; // { mineral, yearLabel, total, hsDetail }
 
 async function initWorldMap() {
   const container = document.getElementById('worldMapD3');
@@ -4784,6 +4790,76 @@ function selectMapCountry(info) {
         <div style="height:100%;width:${mn.pct}%;background:${c};border-radius:3px;transition:width .5s ease"></div>
       </div></div>`;
   }).join('');
+}
+
+/* 수입국 비중 포함 CSV 다운로드 (지도 조회 결과 기반) */
+function downloadMapDetailCsv() {
+  if (!_lastMapQuery) { alert('먼저 🌍 실시간 조회를 실행해주세요.'); return; }
+  const { mineral, yearLabel, total, hsDetail } = _lastMapQuery;
+
+  const rows = [
+    ['광종', '공급단계', 'HS코드(10자리)', 'HS코드(6자리)', '품목명',
+     '순위', '수입국', '수입액(천$)', 'HS내비중(%)', '전체비중(%)']
+  ];
+
+  // 공급단계 순서로 정렬
+  const byStage = {};
+  Object.entries(hsDetail).forEach(([hs, d]) => {
+    if (d.totalAmt <= 0) return;
+    if (!byStage[d.stage]) byStage[d.stage] = [];
+    byStage[d.stage].push({ hs, ...d });
+  });
+
+  SUPPLY_STAGE_ORDER.forEach(stage => {
+    if (!byStage[stage]) return;
+    byStage[stage]
+      .sort((a, b) => b.totalAmt - a.totalAmt)
+      .forEach(d => {
+        const countriesSorted = Object.entries(d.countries)
+          .sort((a, b) => b[1] - a[1]);
+        // 국가별 행 (TOP 20 + 기타 합산)
+        let rank = 0;
+        let etcAmt = 0;
+        countriesSorted.forEach(([a3, amt], i) => {
+          if (i < 20) {
+            rank++;
+            const name = COUNTRY_NAMES[a3] || a3;
+            const hsPct  = d.totalAmt > 0 ? (amt / d.totalAmt * 100).toFixed(1) : '0.0';
+            const allPct = total > 0       ? (amt / total      * 100).toFixed(2) : '0.00';
+            rows.push([mineral, stage, toHs10(d.hs), d.hs, d.hsName,
+                        rank, name,
+                        Math.round(amt),
+                        hsPct, allPct]);
+          } else {
+            etcAmt += amt;
+          }
+        });
+        if (etcAmt > 0) {
+          const hsPct  = d.totalAmt > 0 ? (etcAmt / d.totalAmt * 100).toFixed(1) : '0.0';
+          const allPct = total > 0       ? (etcAmt / total      * 100).toFixed(2) : '0.00';
+          rows.push([mineral, stage, toHs10(d.hs), d.hs, d.hsName,
+                      '기타합산', `기타 ${countriesSorted.length - 20}개국`,
+                      Math.round(etcAmt), hsPct, allPct]);
+        }
+        // HS 합계 행
+        const totalHsPct = total > 0 ? (d.totalAmt / total * 100).toFixed(2) : '0.00';
+        rows.push([mineral, stage, toHs10(d.hs), d.hs, d.hsName,
+                    '합계', `전체 ${countriesSorted.length}개국`,
+                    Math.round(d.totalAmt), '100.0', totalHsPct]);
+        rows.push([]); // 빈 행 (HS 구분)
+      });
+  });
+
+  const csv  = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `${mineral}_수입국비중_${yearLabel}_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 /* 6자리 HS → 10자리 한국 HSK 표시 변환 (API 쿼리는 6자리 유지, 표시용) */
