@@ -3966,11 +3966,13 @@ function renderHTrendChart(data) {
   // year(4자리)별 · hsCd별 집계
   const byYearHs = {};
   const hsSet = new Set();
+  const hsNameMap = {};
   data.forEach(r => {
     const yr = String(r.period || '').slice(0, 4) || '?';
     const hs = r.hsCd || '?';
     if (yr === '?' || hs === '?') return;
     hsSet.add(hs);
+    if (r.hsNm) hsNameMap[hs] = r.hsNm;
     if (!byYearHs[yr]) byYearHs[yr] = {};
     if (!byYearHs[yr][hs]) byYearHs[yr][hs] = { amt: 0, wt: 0 };
     byYearHs[yr][hs].amt += parseFloat(r.impAmt || r.expAmt || 0);
@@ -3993,7 +3995,7 @@ function renderHTrendChart(data) {
   const isMultiHs = hsList.length > 1;
   const datasets = isMultiHs
     ? hsList.map((hs, i) => ({
-        label: hs,
+        label: hsNameMap[hs] || hs,
         data: years.map(yr => byYearHs[yr]?.[hs]?.[key] || 0),
         borderColor: PALETTE_BD[i % PALETTE_BD.length],
         backgroundColor: PALETTE_BG[i % PALETTE_BG.length],
