@@ -2,6 +2,42 @@
 // Vercel 서버리스 함수 — 공공데이터포털 관세청 품목별 국가별 수출입실적 API 프록시
 // 브라우저 CORS 문제를 서버사이드에서 해결, XML → JSON 변환, 국가별 합산
 
+// ─── Rate Limiting (메모리 기반, 서버리스 인스턴스 단위) ──────────────────────
+// Vercel Serverless는 인스턴스가 여러 개 뜰 수 있으므로 완전한 전역 제한은 아니지만
+// 단일 인스턴스 내 과도한 연속 호출을 막는 1차 방어선으로 충분히 유효
+const _rateStore = new Map(); // ip → { count, windowStart }
+const RATE_LIMIT  = 60;       // 윈도우당 최대 요청 수
+const RATE_WINDOW = 60_000;   // 1분 (ms)
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const entry = _rateStore.get(ip);
+  if (!entry || now - entry.windowStart > RATE_WINDOW) {
+    _rateStore.set(ip, { count: 1, windowStart: now });
+    return true;
+  }
+  entry.count += 1;
+  if (entry.count > RATE_LIMIT) return false;
+  return true;
+}
+
+// ─── 허용 오리진 (Referer/Origin 검증) ───────────────────────────────────────
+// Vercel 배포 도메인 또는 로컬 개발 환경만 허용
+const ALLOWED_ORIGINS = [
+  /\.vercel\.app$/,
+  /^https?:\/\/localhost(:\d+)?$/,
+  /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
+];
+
+function isAllowedOrigin(req) {
+  const origin  = req.headers['origin']  || '';
+  const referer = req.headers['referer'] || '';
+  const check   = origin || referer;
+  // origin/referer 헤더가 아예 없으면 서버 간 호출로 간주 → 허용
+  if (!check) return true;
+  return ALLOWED_ORIGINS.some(re => re.test(check));
+}
+
 // ISO 3166-1 alpha-2 → alpha-3 변환 (프론트엔드 GEO 테이블이 alpha-3 사용)
 const A2_TO_A3 = {
   AU:'AUS',CL:'CHL',CN:'CHN',US:'USA',CA:'CAN',BR:'BRA',ZA:'ZAF',
@@ -31,12 +67,34 @@ const A2_TO_A3 = {
 };
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // ─── CORS: 허용 오리진만 반사 ──────────────────────────────────────────────
+  const origin = req.headers['origin'] || '';
+  if (origin && ALLOWED_ORIGINS.some(re => re.test(origin))) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+
+  // ─── 오리진 검증 ────────────────────────────────────────────────────────────
+  if (!isAllowedOrigin(req)) {
+    return res.status(403).json({ error: 'FORBIDDEN', message: '허용되지 않은 출처입니다.' });
+  }
+
+  // ─── Rate Limiting ──────────────────────────────────────────────────────────
+  const clientIp =
+    (req.headers['x-forwarded-for'] || '').split(',')[0].trim() ||
+    req.socket?.remoteAddress || 'unknown';
+  if (!checkRateLimit(clientIp)) {
+    res.setHeader('Retry-After', '60');
+    return res.status(429).json({
+      error: 'TOO_MANY_REQUESTS',
+      message: '요청이 너무 많습니다. 1분 후 다시 시도하세요.',
+    });
   }
 
   // ─── 파라미터 수신 (프론트엔드 명칭 + 레거시 명칭 모두 허용) ─────────────

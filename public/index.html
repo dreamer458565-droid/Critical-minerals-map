@@ -1228,6 +1228,9 @@ table.result tbody td.center{text-align:center;}
     </div>
   </div>
 
+  <!-- 배치 에러 경고 배너 -->
+  <div id="m-warn-banner" style="display:none;background:#FFF3CD;border:1px solid #F4C430;border-radius:4px;padding:9px 16px;margin-bottom:12px;font-size:12px;color:#856404;"></div>
+
   <!-- 상태 박스 (초기/로딩/에러) -->
   <div class="state-box" id="m-state-box">
     <div class="state-icon">⛏️</div>
@@ -1408,6 +1411,9 @@ table.result tbody td.center{text-align:center;}
     </div>
   </div>
 
+  <!-- 배치 에러 경고 배너 -->
+  <div id="h-warn-banner" style="display:none;background:#FFF3CD;border:1px solid #F4C430;border-radius:4px;padding:9px 16px;margin-bottom:12px;font-size:12px;color:#856404;"></div>
+
   <!-- 상태 박스 -->
   <div class="state-box" id="h-state-box">
     <div class="state-icon">🔢</div>
@@ -1449,7 +1455,9 @@ table.result tbody td.center{text-align:center;}
                 <option value="all">전체 광물 (정적)</option>
                 <!-- JS로 MINERAL_DB 기반 동적 생성 -->
               </select>
-              <select class="cond-select" style="width:100px;font-size:12px" id="mapYearSel"></select>
+              <select class="cond-select" style="width:88px;font-size:12px" id="mapStartYearSel"></select>
+              <span style="font-size:12px;color:var(--sub);">~</span>
+              <select class="cond-select" style="width:88px;font-size:12px" id="mapEndYearSel"></select>
               <button class="btn-query" style="padding:6px 14px;font-size:12px;" onclick="queryMapData()">🌍 실시간 조회</button>
               <span id="mapStatus" style="font-size:11px;color:var(--sub);"></span>
             </div>
@@ -2334,7 +2342,10 @@ let sortState = {};
   fillSelect('h_start',    years, y=>`${y}년`, String(maxYear));
   fillSelect('h_end',      years, y=>`${y}년`, String(maxYear));
   fillSelect('ov_year',    years, y=>`${y}년`, String(maxYear));
-  fillSelect('mapYearSel', years, y=>`${y}년`, String(maxYear));
+  // 수입지도: 시작/종료 연도 (기본: 최근 3년)
+  const mapDefaultStart = String(Math.max(minYear, maxYear - 2));
+  fillSelect('mapStartYearSel', years, y=>`${y}년`, mapDefaultStart);
+  fillSelect('mapEndYearSel',   years, y=>`${y}년`, String(maxYear));
 
   // 수입지도 광물 셀렉트: MINERAL_DB 기반 동적 생성 (그룹별)
   (function populateMapMineralSel() {
@@ -3030,15 +3041,31 @@ async function queryMineral() {
     // 배치 병렬 호출 (5개씩)
     const allData = [];
     const BATCH = 5;
+    let failCount = 0;
     for(let i=0; i<queries.length; i+=BATCH) {
       if(_signal.aborted) return;
       const batch = queries.slice(i, i+BATCH);
-      const results = await Promise.all(
-        batch.map(q => callTradeApi(q.p, {detail:true}).catch(()=>[]))
+      const results = await Promise.allSettled(
+        batch.map(q => callTradeApi(q.p, {detail:true}))
       );
-      results.forEach((rows, idx) => {
-        if(rows) rows.forEach(r => allData.push({...r, _hsCode:batch[idx].origHs, _mineral:selectedMineral.ko}));
+      results.forEach((res, idx) => {
+        if(res.status === 'fulfilled' && res.value) {
+          res.value.forEach(r => allData.push({...r, _hsCode:batch[idx].origHs, _mineral:selectedMineral.ko}));
+        } else if(res.status === 'rejected') {
+          failCount++;
+          console.warn('배치 조회 실패:', batch[idx].p, res.reason);
+        }
       });
+    }
+    if(failCount > 0) {
+      const warnEl = document.getElementById('m-warn-banner');
+      if(warnEl) {
+        warnEl.textContent = `⚠️ ${failCount}건 조회 실패 — 일부 기간/HS코드 데이터가 누락될 수 있습니다.`;
+        warnEl.style.display = 'block';
+      }
+    } else {
+      const warnEl = document.getElementById('m-warn-banner');
+      if(warnEl) warnEl.style.display = 'none';
     }
     // ── 필터: 해당 광종의 HS 코드에 해당하는 행만 유지 ──
     const mineralHsCodes = selectedMineral.hs;
@@ -3683,14 +3710,30 @@ async function queryHs() {
     }
     const BATCH = 5;
     let allData = [];
+    let hFailCount = 0;
     for(let i=0; i<queries.length; i+=BATCH) {
       const batch = queries.slice(i, i+BATCH);
-      const results = await Promise.all(
-        batch.map(p => callTradeApi(p, {detail:true}).catch(()=>[]))
+      const results = await Promise.allSettled(
+        batch.map(p => callTradeApi(p, {detail:true}))
       );
-      for(const rows of results) {
-        if(rows) allData = allData.concat(rows);
+      for(const res of results) {
+        if(res.status === 'fulfilled' && res.value) {
+          allData = allData.concat(res.value);
+        } else if(res.status === 'rejected') {
+          hFailCount++;
+          console.warn('HS코드 배치 조회 실패:', res.reason);
+        }
       }
+    }
+    if(hFailCount > 0) {
+      const warnEl = document.getElementById('h-warn-banner');
+      if(warnEl) {
+        warnEl.textContent = `⚠️ ${hFailCount}건 조회 실패 — 일부 기간 데이터가 누락될 수 있습니다.`;
+        warnEl.style.display = 'block';
+      }
+    } else {
+      const warnEl = document.getElementById('h-warn-banner');
+      if(warnEl) warnEl.style.display = 'none';
     }
     hResultData = allData;
     renderHsResult(hResultData, truncHs);
@@ -4238,12 +4281,16 @@ function updateMapColors() {
   });
 }
 
-/* 수입지도 실시간 API 조회 */
+/* 수입지도 실시간 API 조회 (다년도 지원) */
 async function queryMapData() {
   const mineralSel = document.getElementById('mapMineralSel');
   const mineral    = mineralSel?.value || 'all';
-  const year       = document.getElementById('mapYearSel')?.value || String(window._maxYear||2024);
+  const startYear  = parseInt(document.getElementById('mapStartYearSel')?.value || String(window._maxYear||2024));
+  const endYear    = parseInt(document.getElementById('mapEndYearSel')?.value   || String(window._maxYear||2024));
+  const sy = Math.min(startYear, endYear);
+  const ey = Math.max(startYear, endYear);
   const statusEl   = document.getElementById('mapStatus');
+  const yearLabel  = sy === ey ? `${sy}년` : `${sy}~${ey}년`;
 
   if (mineral === 'all') {
     // 정적 데이터로 복원
@@ -4251,7 +4298,6 @@ async function queryMapData() {
     Object.values(MAP_COUNTRY_DATA).forEach(v => delete v._hidden);
     updateMapColors();
     if (statusEl) statusEl.textContent = '정적 데이터 표시 중';
-    // TOP7 정적 복원 (국가별 수입액 비중)
     const staticTop = Object.entries(MAP_COUNTRY_DATA_STATIC)
       .filter(([k])=>k!=='410')
       .sort((a,b)=>(b[1].pct||0)-(a[1].pct||0)).slice(0,7);
@@ -4274,23 +4320,38 @@ async function queryMapData() {
   const hsList = mEntry?.hs || [];
   if (!hsList.length) { if (statusEl) statusEl.textContent = 'HS코드 없음'; return; }
 
-  if (statusEl) statusEl.textContent = `⏳ ${year}년 ${mineral} 조회 중... (HS ${hsList.length}건)`;
+  const totalYears = ey - sy + 1;
+  const totalQueries = hsList.length * totalYears;
+  if (statusEl) statusEl.textContent = `⏳ ${yearLabel} ${mineral} 조회 중... (${totalQueries}건)`;
 
   try {
-    // 모든 HS 코드를 병렬 조회 후 합산
-    const allResults = await Promise.all(
-      hsList.map(hs => callTradeApi({ hsCd: hs, strtYr: year, endYr: year, impExpDivCd: 'IMP' }).catch(()=>[]))
-    );
+    // HS코드 × 연도 조합 전체 병렬 조회 후 합산 (배치 5개씩)
+    const queries = [];
+    for (const hs of hsList) {
+      for (let y = sy; y <= ey; y++) {
+        queries.push({ hsCd: hs, strtYr: String(y), endYr: String(y), impExpDivCd: 'IMP' });
+      }
+    }
+    const BATCH = 5;
     const ctry  = {};
     let total   = 0;
-    for (const items of allResults) {
-      for (const it of items) {
-        const code = it.cntyCd || it.statCd || '';
-        const amt  = parseFloat(it.impAmt || it.impDlr || '0');
-        if (!code || amt <= 0) continue;
-        ctry[code] = (ctry[code]||0) + amt;
-        total += amt;
-      }
+    let mapFailCount = 0;
+    for (let i = 0; i < queries.length; i += BATCH) {
+      const batch = queries.slice(i, i + BATCH);
+      const results = await Promise.allSettled(batch.map(p => callTradeApi(p)));
+      results.forEach(res => {
+        if (res.status === 'fulfilled' && res.value) {
+          for (const it of res.value) {
+            const code = it.cntyCd || it.statCd || '';
+            const amt  = parseFloat(it.impAmt || it.impDlr || '0');
+            if (!code || amt <= 0) continue;
+            ctry[code] = (ctry[code]||0) + amt;
+            total += amt;
+          }
+        } else if (res.status === 'rejected') {
+          mapFailCount++;
+        }
+      });
     }
     if (total === 0) { if (statusEl) statusEl.textContent = '⚠️ 데이터 없음'; return; }
 
@@ -4321,7 +4382,7 @@ async function queryMapData() {
 
     updateMapColors();
 
-    // 지도 우측 패널 TOP 7 업데이트 (국가별 수입액 비중)
+    // 지도 우측 패널 TOP 7 업데이트
     const top7 = Object.entries(ctry)
       .sort((a,b)=>b[1]-a[1]).slice(0,7)
       .map(([a3, amt]) => ({
@@ -4345,13 +4406,14 @@ async function queryMapData() {
       const hdr = document.querySelector('.country-card .country-info-title');
       if (hdr) hdr.textContent = `${mineral} 수입 국가 TOP 7`;
       const sub = document.querySelector('.country-card .country-info-sub');
-      if (sub) sub.textContent = `${year}년 수입액 비중 기준`;
+      if (sub) sub.textContent = `${yearLabel} 누적 수입액 비중 기준${mapFailCount > 0 ? ` (${mapFailCount}건 조회 실패)` : ''}`;
     }
 
     // 하단 국가 상세 카드 동적 업데이트
-    updateCountryDetailCards(ctry, total, mineral, year);
+    updateCountryDetailCards(ctry, total, mineral, yearLabel);
 
-    if (statusEl) statusEl.textContent = `✅ ${year}년 ${mineral} 업데이트 완료 (${Object.keys(ctry).length}개국)`;
+    const failMsg = mapFailCount > 0 ? ` ⚠️ ${mapFailCount}건 실패` : '';
+    if (statusEl) statusEl.textContent = `✅ ${yearLabel} ${mineral} 업데이트 완료 (${Object.keys(ctry).length}개국)${failMsg}`;
   } catch(e) {
     if (statusEl) statusEl.textContent = '❌ 오류: ' + e.message;
   }
