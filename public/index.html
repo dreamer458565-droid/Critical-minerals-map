@@ -170,7 +170,7 @@ header::after{content:'';position:absolute;top:0;right:0;bottom:0;width:40%;back
 .data-table tbody td:first-child{font-weight:600;}
 .data-table tbody td.num{text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;}
 .data-table tbody td.center{text-align:center;}
-/* ── HS 매핑 시트 (page5) ── */
+/* ── HS 매핑 모달 ── */
 .hs-badge{display:inline-block;background:#EEF4FF;color:var(--navy);font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 7px;border-radius:4px;border:1px solid #C5D8F0;margin:1px 2px;white-space:nowrap;}
 .hs-badge.leg{background:#FFF8EC;color:#B7560C;border-color:#F0C070;}
 .dir-exp{display:inline-block;background:#E8F8F0;color:#1A7A5E;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700;}
@@ -178,6 +178,13 @@ header::after{content:'';position:absolute;top:0;right:0;bottom:0;width:40%;back
 .hs-risk{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:600;}
 .hs-risk.risk-cr{background:#FCEAE8;color:#C0392B;}.hs-risk.risk-hi{background:#FFF3E0;color:#D4860C;}
 .hs-risk.risk-md{background:#EBF5FB;color:#2980B9;}.hs-risk.risk-lo{background:#EAFAF1;color:#1A7A5E;}
+/* HS 매핑 모달 오버레이 */
+#hsMappingModal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(5,15,35,.65);backdrop-filter:blur(3px);align-items:flex-start;justify-content:center;padding:32px 20px;overflow-y:auto;}
+#hsMappingModal.open{display:flex;}
+#hsMappingModalInner{background:var(--white,#fff);border-radius:12px;width:100%;max-width:1200px;box-shadow:0 24px 64px rgba(0,0,0,.35);overflow:hidden;}
+#hsMappingModalInner .modal-header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--border);background:var(--panel,#F4F7FC);}
+#hsMappingModalInner .modal-body{padding:24px;max-height:80vh;overflow-y:auto;}
+.hs-modal-btn{display:inline-flex;align-items:center;gap:5px;background:rgba(212,134,12,.18);border:1px solid rgba(212,134,12,.55);color:#F4C430;font-size:11px;font-weight:600;letter-spacing:.5px;padding:5px 14px;border-radius:3px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
 .pct-badge{display:inline-block;padding:2px 7px;border-radius:3px;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;}
 .pct-badge.critical{background:var(--danger-l);color:var(--danger);}
 .pct-badge.warning{background:var(--amber-l);color:var(--amber);}
@@ -963,6 +970,7 @@ table.result tbody td.center{text-align:center;}
       <div><strong>출처</strong>&nbsp; 관세청 무역통계</div>
       <div style="margin-top:10px;">
         <button onclick="downloadHsMappingCsv()" style="background:rgba(212,134,12,.18);border:1px solid rgba(212,134,12,.55);color:#F4C430;font-size:11px;font-weight:600;letter-spacing:.5px;padding:5px 14px;border-radius:3px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;" title="광종·HS코드·밸류체인 전체 매핑표 다운로드">📥 HS 매핑표 CSV</button>
+        <button onclick="openHsModal()" class="hs-modal-btn" title="HS코드 매핑 전체 조회">📋 HS매핑 조회</button>
       </div>
     </div>
   </div>
@@ -984,7 +992,6 @@ table.result tbody td.center{text-align:center;}
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page2" onclick="switchTab(2)">🔢&ensp;HS코드별 조회</button>
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page3" onclick="switchTab(3)">🗺️&ensp;수입지도</button>
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page4" onclick="switchTab(4)">🔗&ensp;밸류체인</button>
-    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page5" onclick="switchTab(5)">📋&ensp;HS매핑</button>
   </div>
 </div>
 
@@ -1800,87 +1807,90 @@ table.result tbody td.center{text-align:center;}
 </div>
 </div>
 
-<!-- page5: HS코드 매핑 레퍼런스 -->
-<div class="page" id="page5" role="tabpanel" aria-labelledby="tab5">
-<div class="main">
-  <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-    <div>
-      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--subtext);text-transform:uppercase;margin-bottom:6px;">데이터 정합성 참조</div>
-      <div style="font-size:22px;font-weight:700;color:var(--navy);">HS코드 매핑 레퍼런스 <span style="font-size:14px;color:var(--subtext);font-weight:400;">밸류체인 + 광물 DB 전체</span></div>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-      <input type="text" id="hsMappingSearch" placeholder="🔍 HS코드·품목명 검색..." style="font-size:12px;padding:7px 12px;border:1px solid var(--border);border-radius:6px;width:220px;">
-      <select id="hsMappingCat" style="font-size:12px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--white);">
-        <option value="all">전체 보기</option>
-        <option value="vc">밸류체인만</option>
-        <option value="mineral">광물 DB만</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- 밸류체인 HS 매핑 -->
-  <div id="vcMappingSection" style="margin-bottom:40px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+<!-- HS코드 매핑 모달 -->
+<div id="hsMappingModal" onclick="if(event.target===this)closeHsModal()">
+  <div id="hsMappingModalInner">
+    <div class="modal-header">
       <div>
-        <span style="font-size:14px;font-weight:700;color:var(--navy);">🔗 밸류체인 HS 코드 매핑</span>
-        <span id="vcMappingCount" style="font-size:11px;color:var(--subtext);margin-left:8px;"></span>
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--subtext);text-transform:uppercase;margin-bottom:4px;">데이터 정합성 참조</div>
+        <div style="font-size:18px;font-weight:700;color:var(--navy);">📋 HS코드 매핑 레퍼런스 <span style="font-size:13px;color:var(--subtext);font-weight:400;">밸류체인 + 광물 DB 전체</span></div>
       </div>
-      <button onclick="downloadMappingCsv('vc')" style="font-size:11px;padding:5px 12px;border:1px solid var(--border);border-radius:5px;background:var(--white);cursor:pointer;color:var(--navy);">⬇ CSV 다운로드</button>
-    </div>
-    <div style="overflow-x:auto;">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th style="text-align:left">산업</th>
-            <th style="text-align:left">단계</th>
-            <th style="text-align:left">품목·소재</th>
-            <th>HS 코드 (HS 2022)</th>
-            <th>HS 2017 이전 (레거시)</th>
-            <th>방향</th>
-            <th style="text-align:left">비고</th>
-          </tr>
-        </thead>
-        <tbody id="vcMappingTbody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- 광물 DB HS 매핑 -->
-  <div id="mineralMappingSection">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <div>
-        <span style="font-size:14px;font-weight:700;color:var(--navy);">⛏️ 광물 DB HS 코드 매핑</span>
-        <span id="mineralMappingCount" style="font-size:11px;color:var(--subtext);margin-left:8px;"></span>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input type="text" id="hsMappingSearch" placeholder="🔍 HS코드·품목명 검색..." style="font-size:12px;padding:7px 12px;border:1px solid var(--border);border-radius:6px;width:200px;">
+        <select id="hsMappingCat" style="font-size:12px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--white);">
+          <option value="all">전체 보기</option>
+          <option value="vc">밸류체인만</option>
+          <option value="mineral">광물 DB만</option>
+        </select>
+        <button onclick="closeHsModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--subtext);line-height:1;padding:4px 8px;" title="닫기">✕</button>
       </div>
-      <button onclick="downloadMappingCsv('mineral')" style="font-size:11px;padding:5px 12px;border:1px solid var(--border);border-radius:5px;background:var(--white);cursor:pointer;color:var(--navy);">⬇ CSV 다운로드</button>
     </div>
-    <div style="overflow-x:auto;">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th style="text-align:left">광종 (한·영)</th>
-            <th>분류</th>
-            <th>우선도</th>
-            <th>위험도</th>
-            <th>HS 코드</th>
-            <th style="text-align:left">품목명 (관세청 HS 기술서)</th>
-          </tr>
-        </thead>
-        <tbody id="mineralMappingTbody"></tbody>
-      </table>
-    </div>
-  </div>
+    <div class="modal-body">
 
-  <!-- HS 버전 안내 박스 -->
-  <div style="background:#FFF8EC;border:1px solid #F0C070;border-radius:8px;padding:16px 20px;margin-top:24px;font-size:12px;color:var(--text);line-height:1.9;">
-    <b style="color:#B7560C;">📋 HS 코드 버전 안내</b><br>
-    WCO(세계관세기구)는 매 5년 HS 코드를 개정합니다. 본 시스템은 <b>HS 2022</b>(2022년 1월 시행)를 기준으로 하며, 개정 전 코드(HS 2017)는 레거시로 별도 관리합니다.<br>
-    주요 변경: <span class="hs-badge">851713·851714</span> 스마트폰 (← <span class="hs-badge leg">851712</span>)&ensp;·&ensp;
-    <span class="hs-badge">870360·870370</span> BEV (← <span class="hs-badge leg">870390</span>)&ensp;·&ensp;
-    <span class="hs-badge">870340·870350</span> PHEV/HEV (HS 2022 신설)&ensp;·&ensp;
-    <span class="hs-badge">852412</span> OLED 패널 (HS 2022 신설)
+      <!-- 밸류체인 HS 매핑 -->
+      <div id="vcMappingSection" style="margin-bottom:40px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div>
+            <span style="font-size:14px;font-weight:700;color:var(--navy);">🔗 밸류체인 HS 코드 매핑</span>
+            <span id="vcMappingCount" style="font-size:11px;color:var(--subtext);margin-left:8px;"></span>
+          </div>
+          <button onclick="downloadMappingCsv('vc')" style="font-size:11px;padding:5px 12px;border:1px solid var(--border);border-radius:5px;background:var(--white);cursor:pointer;color:var(--navy);">⬇ CSV 다운로드</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="text-align:left">산업</th>
+                <th style="text-align:left">단계</th>
+                <th style="text-align:left">품목·소재</th>
+                <th>HS 코드 (HS 2022)</th>
+                <th>HS 2017 이전 (레거시)</th>
+                <th>방향</th>
+                <th style="text-align:left">비고</th>
+              </tr>
+            </thead>
+            <tbody id="vcMappingTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 광물 DB HS 매핑 -->
+      <div id="mineralMappingSection">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div>
+            <span style="font-size:14px;font-weight:700;color:var(--navy);">⛏️ 광물 DB HS 코드 매핑</span>
+            <span id="mineralMappingCount" style="font-size:11px;color:var(--subtext);margin-left:8px;"></span>
+          </div>
+          <button onclick="downloadMappingCsv('mineral')" style="font-size:11px;padding:5px 12px;border:1px solid var(--border);border-radius:5px;background:var(--white);cursor:pointer;color:var(--navy);">⬇ CSV 다운로드</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="text-align:left">광종 (한·영)</th>
+                <th>분류</th>
+                <th>우선도</th>
+                <th>위험도</th>
+                <th>HS 코드</th>
+                <th style="text-align:left">품목명 (관세청 HS 기술서)</th>
+              </tr>
+            </thead>
+            <tbody id="mineralMappingTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- HS 버전 안내 박스 -->
+      <div style="background:#FFF8EC;border:1px solid #F0C070;border-radius:8px;padding:16px 20px;margin-top:24px;font-size:12px;color:var(--text);line-height:1.9;">
+        <b style="color:#B7560C;">📋 HS 코드 버전 안내</b><br>
+        WCO(세계관세기구)는 매 5년 HS 코드를 개정합니다. 본 시스템은 <b>HS 2022</b>(2022년 1월 시행)를 기준으로 하며, 개정 전 코드(HS 2017)는 레거시로 별도 관리합니다.<br>
+        주요 변경: <span class="hs-badge">851713·851714</span> 스마트폰 (← <span class="hs-badge leg">851712</span>)&ensp;·&ensp;
+        <span class="hs-badge">870360·870370</span> BEV (← <span class="hs-badge leg">870390</span>)&ensp;·&ensp;
+        <span class="hs-badge">870340·870350</span> PHEV/HEV (HS 2022 신설)&ensp;·&ensp;
+        <span class="hs-badge">852412</span> OLED 패널 (HS 2022 신설)
+      </div>
+    </div>
   </div>
-</div>
 </div>
 
 <!-- FOOTER -->
@@ -1893,7 +1903,18 @@ table.result tbody td.center{text-align:center;}
 </footer>
 
 <script>
-// ══════════════ HS코드 매핑 시트 (page5) ══════════════
+// ══════════════ HS코드 매핑 모달 ══════════════
+function openHsModal() {
+  if(!window._hsMappingBuilt){ window._hsMappingBuilt=true; buildHsMappingPage(); }
+  document.getElementById('hsMappingModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeHsModal() {
+  document.getElementById('hsMappingModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeHsModal(); });
+
 function buildHsMappingPage() {
   buildVcMapping();
   buildMineralMapping();
@@ -2033,7 +2054,6 @@ function switchTab(idx){
   });
   document.querySelectorAll('.page').forEach((p,i)=>p.classList.toggle('active',i===idx));
   if(idx===3 && !window._mapInitDone){ window._mapInitDone=true; initWorldMap(); }
-  if(idx===5 && !window._hsMappingBuilt){ window._hsMappingBuilt=true; buildHsMappingPage(); }
   // 현황 컨트롤바: 현황 개요 탭에서만 표시
   const bar = document.getElementById('ovControlBar');
   if(bar) bar.style.display = idx===0 ? '' : 'none';
