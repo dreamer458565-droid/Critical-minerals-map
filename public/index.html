@@ -5754,8 +5754,7 @@ const INDUSTRY_CHAINS = {
         { ko: '구리', role: '모터 권선 소재', stageNote: '전도성 핵심금속' },
       ]},
       { label: '모터 부품', color: '#1A7A5E', nodes: [
-        { ko: null, label: '로터(회전자)', icon: '🔄', desc: 'NdFeB 자석 내장 IPM 로터', hs: ['850300'], expMode: false },
-        { ko: null, label: '스테이터(고정자)', icon: '🔳', desc: '전기강판 코어+구리 권선', hs: ['850300'], expMode: false },
+        { ko: null, label: '로터·스테이터', icon: '🔄', desc: 'NdFeB 로터+전기강판 스테이터 부품 합산 (HS 850300)', hs: ['850300'], expMode: false },
       ]},
       { label: '완성품', color: '#D4860C', nodes: [
         { ko: null, label: 'EV 구동모터', icon: '⚡', desc: '영구자석 동기모터(PMSM)', hs: ['850153','850152'], expMode: true },
@@ -5787,8 +5786,7 @@ const INDUSTRY_CHAINS = {
         { ko: null, label: 'VRFB 전해액', icon: '🧪', desc: '바나듐 황산 전해액 V4+/V5+', hs: ['282530'], expMode: false },
       ]},
       { label: '시스템', color: '#D4860C', nodes: [
-        { ko: null, label: 'BESS 시스템', icon: '🏭', desc: '전력망 안정화 대용량 ESS', hs: ['850760'], expMode: true },
-        { ko: null, label: '가정용 ESS', icon: '🏠', desc: '태양광 연계 소형 ESS', hs: ['850760'], expMode: true },
+        { ko: null, label: 'ESS 시스템 (수출)', icon: '🏭', desc: 'BESS·가정용 Li-ion 에너지저장 시스템 합산 (HS 850760)', hs: ['850760'], expMode: true },
       ]},
     ],
     finalProduct: { label: '재생에너지 저장·그리드', icon: '⚡', desc: '태양광·풍력 연계 전력 저장' },
@@ -5810,9 +5808,8 @@ const INDUSTRY_CHAINS = {
         { ko: null, label: '선박 엔진', icon: '⚙️', desc: 'MAN·WinGD 대형 2행정 저속 디젤', hs: ['840820'], expMode: false },
       ]},
       { label: '완성 선박', color: '#D4860C', nodes: [
-        { ko: null, label: 'LNG 운반선', icon: '🚢', desc: 'GTT 멤브레인 LNG 카고·극저온 단열', hs: ['890120'], expMode: true },
+        { ko: null, label: '탱커 (LNG·원유)', icon: '🚢', desc: 'LNG 운반선·VLCC 원유운반선 합산 (HS 890120)', hs: ['890120'], expMode: true },
         { ko: null, label: '컨테이너·벌크선', icon: '🛳️', desc: '초대형 컨테이너·건화물 선박', hs: ['890190'], expMode: true },
-        { ko: null, label: '유조선 (VLCC)', icon: '⛽', desc: '초대형 원유 운반선·아프라막스', hs: ['890120'], expMode: true },
       ]},
     ],
     finalProduct: { label: '글로벌 해운 시장', icon: '🌊', desc: '유럽·중동·아시아 선주사 수주' },
