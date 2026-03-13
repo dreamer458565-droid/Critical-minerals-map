@@ -816,18 +816,18 @@ table.result tbody td.center{text-align:center;}
 .vc-ind-btn.active{background:var(--navy);border-color:var(--amber);color:#F4C430;}
 
 /* 플로우 컨테이너 */
-.vc-flow{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:12px;}
-.vc-stage-wrap{display:flex;align-items:center;flex-shrink:0;}
-.vc-stage{min-width:180px;max-width:220px;display:flex;flex-direction:column;gap:0;}
+.vc-flow{display:flex;align-items:flex-start;gap:0;padding-bottom:4px;}
+.vc-stage-wrap{display:flex;align-items:flex-start;flex-shrink:0;}
+.vc-stage{min-width:148px;max-width:175px;display:flex;flex-direction:column;gap:0;}
 .vc-stage-header{text-align:center;padding:8px 12px;border-radius:6px 6px 0 0;font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.9);}
 .vc-stage-body{display:flex;flex-direction:column;gap:6px;padding:10px 8px;background:rgba(0,0,0,.03);border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;flex:1;}
 
 /* 노드 카드 */
-.vc-node{background:var(--white);border:1px solid var(--border);border-radius:5px;padding:9px 11px;cursor:pointer;transition:all .18s;position:relative;}
+.vc-node{background:var(--white);border:1px solid var(--border);border-radius:5px;padding:7px 9px;cursor:pointer;transition:all .18s;position:relative;}
 .vc-node:hover{border-color:var(--amber);box-shadow:0 2px 10px rgba(212,134,12,.2);transform:translateY(-1px);}
 .vc-node.active-node{border-color:var(--navy);background:#EBF5FB;box-shadow:0 2px 12px rgba(46,91,138,.25);}
 .vc-node-top{display:flex;justify-content:space-between;align-items:flex-start;gap:4px;}
-.vc-node-name{font-size:12px;font-weight:700;color:var(--navy);line-height:1.3;}
+.vc-node-name{font-size:11px;font-weight:700;color:var(--navy);line-height:1.3;}
 .vc-node-sym{font-size:10px;font-weight:700;color:var(--subtext);font-family:'JetBrains Mono',monospace;flex-shrink:0;}
 .vc-node-risk{display:inline-block;font-size:8.5px;font-weight:700;padding:1px 5px;border-radius:2px;margin-top:3px;letter-spacing:.3px;}
 .vc-node-risk.극심{background:#FCEAE8;color:#C0392B;}
@@ -840,14 +840,14 @@ table.result tbody td.center{text-align:center;}
 .vc-node-country{font-size:10px;color:var(--subtext);margin-top:2px;}
 
 /* 최종제품 노드 */
-.vc-final{min-width:180px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#0F1C33,#2E5B8A);border-radius:8px;padding:20px 18px;text-align:center;}
-.vc-final-icon{font-size:36px;margin-bottom:8px;}
-.vc-final-name{font-size:14px;font-weight:700;color:#F4C430;line-height:1.3;}
+.vc-final{min-width:148px;max-width:175px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#0F1C33,#2E5B8A);border-radius:8px;padding:14px 12px;text-align:center;}
+.vc-final-icon{font-size:28px;margin-bottom:6px;}
+.vc-final-name{font-size:12px;font-weight:700;color:#F4C430;line-height:1.3;}
 .vc-final-desc{font-size:11px;color:rgba(255,255,255,.55);margin-top:4px;}
 .vc-final-value{margin-top:10px;font-size:12px;font-weight:600;color:rgba(255,255,255,.8);font-family:'JetBrains Mono',monospace;}
 
 /* 화살표 */
-.vc-arrow{display:flex;align-items:center;padding:0 6px;flex-shrink:0;color:var(--border);font-size:20px;user-select:none;}
+.vc-arrow{display:flex;align-items:center;padding:0 3px;flex-shrink:0;color:var(--border);font-size:16px;user-select:none;}
 
 /* 우측 상세 패널 */
 .vc-detail-panel{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:20px;min-height:200px;}
@@ -1788,12 +1788,12 @@ table.result tbody td.center{text-align:center;}
   <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;">
     <div>
       <!-- 플로우 다이어그램 -->
-      <div class="panel" style="overflow:visible;">
+      <div class="panel">
         <div class="panel-header">
           <div class="panel-title" id="vcFlowTitle">산업 선택 후 공급망이 표시됩니다</div>
           <div class="panel-tag" id="vcFlowTag">데이터: 관세청</div>
         </div>
-        <div class="panel-body" style="padding:16px;overflow-x:auto;overflow-y:hidden;">
+        <div class="panel-body" style="padding:12px 14px;">
           <div id="vcFlowContainer" style="min-height:180px;min-width:max-content;"></div>
         </div>
       </div>
