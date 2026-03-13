@@ -1685,8 +1685,8 @@ function switchTab(idx){
 }
 
 // ── 광종 분류탭 동적 생성 (USGS 2025 60종 기준) ──────────────
-const MCAT_GROUPS = ['이차전지','반도체·전자','희토류·자석','산업금속','화학·기타'];
-const MCAT_ICONS  = ['⚡','💻','🧲','🏗','⚗'];
+const MCAT_GROUPS = ['이차전지','배터리소재','반도체·전자','희토류·자석','산업금속','화학·기타'];
+const MCAT_ICONS  = ['⚡','🔋','💻','🧲','🏗','⚗'];
 
 function buildMcatChips() {
   const tabsEl  = document.getElementById('mcatTabs');
@@ -1767,6 +1767,20 @@ const MINERAL_DB = [
   {ko:'인·인산',    en:'Phosphate',     sym:'P',    group:'이차전지', risk:'중간',
    hs:['251010','251020','280920','281000','283522','283523','283529'],
    hsName:['인산염광(비료용)','인산염광(기타)','오산화인','인산','인산이수소나트륨','인산수소이나트륨','기타인산염']},
+
+  // ══ 배터리소재 (전구체·양극재) ══
+  {ko:'전구체',     en:'Battery Precursor', sym:'PCAM', group:'배터리소재', risk:'높음',
+   hs:['282590','382499'],
+   hsName:['니켈코발트망간수산화물(NCM·NCA 전구체)','기타화학조제품(전구체 포함)'],
+   hint:'NMC·NCA 배터리 전구체. 중국이 세계 생산의 약 80% 점유'},
+  {ko:'NCM·NCA 양극재', en:'NCM/NCA Cathode', sym:'NCM', group:'배터리소재', risk:'높음',
+   hs:['285390','282090'],
+   hsName:['기타무기화합물(NCM·NCA 양극재)','기타산화망간계(양극소재)'],
+   hint:'삼원계 양극재(LiNiMnCoO₂·LiNiCoAlO₂). 고에너지밀도 EV 배터리 핵심'},
+  {ko:'LFP 양극재',  en:'LFP Cathode',    sym:'LFP',  group:'배터리소재', risk:'높음',
+   hs:['283529','284190'],
+   hsName:['기타인산염(인산철리튬 LFP)','기타옥소금속산(LFP·LMFP 등)'],
+   hint:'인산철리튬(LiFePO₄). 안전성·수명 우위로 ESS·중저가 EV에 급성장'},
 
   // ══ 반도체·전자 ══
   {ko:'갈륨',       en:'Gallium',       sym:'Ga',   group:'반도체·전자', risk:'극심',
@@ -2319,6 +2333,13 @@ const SUPPLY_STAGE_MAP = {
 // 6자리 오버라이드 (4자리 동일 코드에서 단계가 다른 경우)
 const SUPPLY_STAGE_6 = {
   '282520':'정제품','282530':'산화물','283321':'화합물','283329':'화합물',
+  // 배터리소재 — 전구체·양극재
+  '282590':'중간재',  // NCM·NCA 전구체 (혼합 수산화물)
+  '382499':'중간재',  // 기타 화학공업 조제품 (전구체 포함)
+  '285390':'정제품',  // NCM·NCA 양극재 (기타 무기화합물)
+  '282090':'정제품',  // 기타 산화망간계 양극소재
+  '283529':'정제품',  // LFP 양극재 (기타 인산염)
+  '284190':'정제품',  // LFP·LMFP 등 (기타 옥소금속산)
 };
 function getSupplyStage(hsCd) {
   if(!hsCd) return '기타';
@@ -2450,7 +2471,7 @@ let sortState = {};
       if(!groups[g]) groups[g] = [];
       groups[g].push(m);
     });
-    const groupOrder = ['이차전지','반도체·전자','희토류·자석','산업금속','화학·기타'];
+    const groupOrder = ['이차전지','배터리소재','반도체·전자','희토류·자석','산업금속','화학·기타'];
     const sortedGroups = Object.keys(groups).sort((a,b) => {
       const ia = groupOrder.indexOf(a), ib = groupOrder.indexOf(b);
       return (ia===-1?99:ia) - (ib===-1?99:ib);
@@ -2700,6 +2721,11 @@ const HS_CHIPS_BY_INDUSTRY = {
     {hs6:'750210', hs4:'7502', hs10:'7502100000', label:'니켈(미가공)'},
     {hs6:'260200', hs4:'2602', hs10:'2602000000', label:'망간광'},
     {hs6:'250410', hs4:'2504', hs10:'2504101000', label:'흑연(분말)'},
+  ],
+  '배터리소재': [
+    {hs6:'282590', hs4:'2825', hs10:'2825900000', label:'전구체(NCM·NCA)'},
+    {hs6:'285390', hs4:'2853', hs10:'2853900000', label:'NCM·NCA 양극재'},
+    {hs6:'283529', hs4:'2835', hs10:'2835290000', label:'LFP 양극재'},
   ],
   '반도체·전자': [
     {hs6:'280459', hs4:'2804', hs10:'2804590000', label:'갈륨'},
