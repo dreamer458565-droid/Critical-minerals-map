@@ -6319,6 +6319,47 @@ const INDUSTRY_CHAINS = {
     ],
     finalProduct: { label: '글로벌 디스플레이 시장', icon: '🌐', desc: '애플·삼성·LG·소니 완성품 수요' },
   },
+
+  steel: {
+    label: '철강 (Steel)',
+    icon: '🏭',
+    insight: '한국 철강산업은 POSCO·현대제철을 중심으로 연간 약 7,000만 톤 생산 규모입니다. 철광석은 100% 수입 의존(호주 60%·브라질 20%), 스테인리스강 원료인 니켈과 크롬도 대부분 해외 조달합니다. 바나듐·니오븀 등 합금원소는 고강도강·고장력강 품질을 결정하는 핵심 투입재로, 중국과 브라질 집중도가 높습니다.',
+    stages: [
+      { label: '기초 원소', color: '#5D4037', nodes: [
+        { ko: '철광석', role: '고로 원료', stageNote: '호주·브라질 80%+ 공급' },
+        { ko: '니켈',   role: '스테인리스강 합금', stageNote: 'STS 304: Ni 8%, 316: Ni 10%' },
+        { ko: '크롬',   role: '스테인리스강 내식성', stageNote: 'STS는 Cr 10.5% 이상' },
+        { ko: '망간',   role: '고강도강 탈황·합금', stageNote: '탈산제 + HSLA강 강도 향상' },
+        { ko: '바나듐', role: '고강도강(HSS) 경화', stageNote: 'Rebar용 V 첨가 세계 1위: 중국' },
+        { ko: '니오븀', role: 'HSLA강 미세합금', stageNote: '브라질 CBMM 80%+ 독점' },
+        { ko: '몰리브덴', role: '합금강 내열·내식성', stageNote: '파이프라인·공구강' },
+      ]},
+      { label: '중간재 (페로합금)', color: '#37474F', nodes: [
+        { ko: null, label: '선철 (Pig Iron)', icon: '🔥', desc: '고로(용광로) 환원 생산, 탄소 3~4%', hs: ['720110','720120'], expMode: false },
+        { ko: null, label: '페로니켈', icon: '🪨', desc: '스테인리스 원료 Ni 15~40%', hs: ['720260'], expMode: false },
+        { ko: null, label: '페로크롬', icon: '🪨', desc: '스테인리스 Cr 소스, 남아공 생산', hs: ['720241','720249'], expMode: false },
+        { ko: null, label: '페로망간', icon: '🪨', desc: '고탄소·저탄소 페로망간', hs: ['720211','720219'], expMode: false },
+        { ko: null, label: '페로바나듐·페로니오브', icon: '🪨', desc: 'HSLA·HSS 미세합금 첨가제', hs: ['720292','720293'], expMode: false },
+      ]},
+      { label: '반제품·중간재', color: '#455A64', nodes: [
+        { ko: null, label: '철강 슬래브·빌릿', icon: '🔩', desc: '연속주조 반제품, 열연·형강 원소재', hs: ['720711','720719'], expMode: false },
+        { ko: null, label: '철강 스크랩', icon: '♻️', desc: '전기로 원료, 한국 수입 의존', hs: ['720410','720421','720429'], expMode: false },
+      ]},
+      { label: '완성 강재', color: '#1565C0', nodes: [
+        { ko: null, label: '후판 (Heavy Plate)', icon: '📦', desc: '두께 6~150mm 고강도 구조강판. 조선(LNG·컨테이너선 선체), 해양플랫폼, 교량, 압력용기 등에 사용. 인장강도 400~700MPa급. POSCO·현대제철이 주요 생산자. 조선업 발주 사이클에 수요 연동.', hs: ['720851','720852'], expMode: true },
+        { ko: null, label: '열연강판 (HR Coil)', icon: '🌀', desc: '슬래브를 900~1200℃에서 압연한 코일재. 표면 스케일 있음. 두께 2~25mm. 건설 구조재·파이프·자동차 섀시·컨테이너 원소재. 냉연·아연도금의 소재로도 활용. 가격 기준재(벤치마크).', hs: ['720825','720826'], expMode: true },
+        { ko: null, label: '냉연강판 (CR Coil)', icon: '🌀', desc: '열연재를 상온에서 재압연 — 표면 미려·치수 정밀. 두께 0.3~3mm. 자동차 내외판·가전 외장·IT기기 케이스. 아연도금(GI·GA·EG)·전기강판의 소재. 가공성·용접성 우수.', hs: ['720916','720917'], expMode: true },
+        { ko: null, label: '스테인리스강', icon: '✨', desc: 'Cr 10.5%↑ 첨가로 부동태 피막 형성 → 내식성·내열성. STS304(Cr18·Ni8): 주방·식품. STS316(+Mo2%): 화학·의료기기·해양. STS430(페라이트, Ni無): 가전·자동차. 핵심원소: Ni·Cr·Mo 전량 수입.', hs: ['722011','722012'], expMode: true },
+        { ko: null, label: '전기강판 (GOES·NOES)', icon: '⚡', desc: 'Si 1~4.5% 첨가로 전기저항↑ → 철손 감소. GOES(방향성): 변압기 코어 — 결정 방향 정렬로 자화 용이. NOES(무방향성): 모터·발전기 코어 — EV·풍력 핵심. 포스코·JFE·Nippon Steel 3사가 세계 GOES 과점.', hs: ['722511','722519'], expMode: true },
+      ]},
+      { label: '수요 산업', color: '#6A1B9A', nodes: [
+        { ko: null, label: '조선·해양', icon: '🚢', desc: 'LNG선·컨테이너선 후판 수요', hs: ['890120','890190'], expMode: true },
+        { ko: null, label: '자동차', icon: '🚗', desc: '고장력강 차체·스테인리스 배기계', hs: ['870321','870322'], expMode: true },
+        { ko: null, label: '에너지 인프라', icon: '⚡', desc: '풍력타워·송전탑·파이프라인', hs: ['730511','730519'], expMode: true },
+      ]},
+    ],
+    finalProduct: { label: '글로벌 철강 시장', icon: '🌍', desc: '한국 철강 수출 연 2,000만 톤+ — 조선·자동차·에너지 수요 견인' },
+  },
 };
 
 let _vcActiveIndustry  = null;
