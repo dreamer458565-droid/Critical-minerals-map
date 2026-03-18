@@ -954,6 +954,31 @@ table.result tbody td.center{text-align:center;}
   body{background:#fff;font-size:12px;}
 }
 
+/* ── 글로벌 공급 탭 ── */
+.gs-mineral-item{padding:9px 14px;cursor:pointer;font-size:12px;color:var(--text);border-bottom:1px solid rgba(0,0,0,.05);display:flex;align-items:center;gap:6px;transition:background .15s;}
+.gs-mineral-item:hover{background:var(--cream);}
+.gs-mineral-item.active{background:var(--amber);color:#fff;font-weight:700;}
+.gs-mineral-item .gs-crit{font-size:10px;color:var(--gold);margin-left:auto;}
+.gs-mineral-item.active .gs-crit{color:#fff;}
+.gs-sub-btn{padding:8px 18px;font-size:12px;font-weight:600;background:var(--white);color:var(--subtext);border:none;cursor:pointer;transition:background .15s,color .15s;}
+.gs-sub-btn.active{background:var(--navy);color:#fff;}
+.gs-dl-btn{padding:7px 14px;font-size:11px;font-weight:700;border:none;border-radius:4px;cursor:pointer;transition:opacity .15s;}
+.gs-dl-btn.primary{background:var(--amber);color:#fff;}
+.gs-dl-btn.secondary{background:var(--white);color:var(--navy);border:1px solid var(--border);}
+.gs-dl-btn:hover{opacity:.85;}
+.gs-chart-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:14px;}
+.gs-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+.gs-bar-label{width:140px;font-size:11px;color:var(--text);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;}
+.gs-bar-track{flex:1;background:rgba(0,0,0,.06);border-radius:3px;height:18px;position:relative;overflow:hidden;cursor:pointer;}
+.gs-bar-fill{height:100%;border-radius:3px;transition:width .4s;}
+.gs-bar-pct{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:700;color:var(--navy);}
+.gs-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:20px;}
+.gs-table th{background:var(--navy);color:#fff;padding:8px 10px;text-align:left;font-size:11px;font-weight:700;}
+.gs-table td{padding:7px 10px;border-bottom:1px solid var(--border);}
+.gs-table tfoot td{background:var(--cream);font-weight:700;border-top:2px solid var(--amber);}
+.gs-table .num{text-align:right;}
+.gs-dl-bar{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+
 </style>
 </head>
 <body>
@@ -995,6 +1020,7 @@ table.result tbody td.center{text-align:center;}
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page2" onclick="switchTab(2)">🔢&ensp;HS코드별 조회</button>
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page3" onclick="switchTab(3)">🗺️&ensp;수입지도</button>
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page4" onclick="switchTab(4)">🔗&ensp;밸류체인</button>
+    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page5" onclick="switchTab(5)">🌍&ensp;글로벌 공급</button>
   </div>
 </div>
 
@@ -1807,6 +1833,61 @@ table.result tbody td.center{text-align:center;}
       </div>
     </div>
   </div>
+</div>
+</div>
+
+<!-- PAGE 6: 글로벌 공급 -->
+<div class="page" id="page5" role="tabpanel" aria-labelledby="tab5">
+<div class="main">
+  <div style="margin-bottom:20px;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--subtext);text-transform:uppercase;margin-bottom:6px;">USGS Mineral Commodity Summaries 2026</div>
+    <div style="font-size:22px;font-weight:700;color:var(--navy);">글로벌 공급 현황 <span style="font-size:14px;color:var(--subtext);font-weight:400;">국가별 매장량 · 생산량</span></div>
+  </div>
+  <div style="display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start;">
+    <!-- 좌측: 광종 목록 -->
+    <div class="panel" style="position:sticky;top:80px;max-height:calc(100vh - 120px);display:flex;flex-direction:column;">
+      <div class="panel-header">
+        <div class="panel-title">광종 선택</div>
+        <div class="panel-tag" id="gsCountTag">0종</div>
+      </div>
+      <div style="padding:10px 12px;border-bottom:1px solid var(--border);">
+        <input id="gsMineralSearch" type="text" placeholder="광종 검색..." oninput="gsFilterList()"
+          style="width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid var(--border);border-radius:4px;font-size:12px;background:var(--white);color:var(--text);">
+      </div>
+      <div id="gsMineralList" style="overflow-y:auto;flex:1;"></div>
+    </div>
+    <!-- 우측: 상세 패널 -->
+    <div>
+      <!-- 서브탭 + 연도 선택 -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+        <div style="display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+          <button id="gsTabResv" class="gs-sub-btn active" onclick="gsSetTab('reserves')">📦 매장량</button>
+          <button id="gsTabProd" class="gs-sub-btn" onclick="gsSetTab('production')">⚙️ 생산량</button>
+        </div>
+        <div id="gsYearWrap" style="display:none;align-items:center;gap:6px;">
+          <span style="font-size:11px;color:var(--subtext);">기준연도</span>
+          <select id="gsYear" onchange="gsRender()" style="font-size:12px;border:1px solid var(--border);border-radius:4px;padding:4px 8px;background:var(--white);">
+            <option value="2025">2025e</option>
+            <option value="2024">2024</option>
+          </select>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px;">
+          <button class="gs-dl-btn primary" onclick="gsDownloadExcel(false)">⬇ 현재 광종 Excel</button>
+          <button class="gs-dl-btn secondary" onclick="gsDownloadExcel(true)">📋 전체 다운로드</button>
+        </div>
+      </div>
+      <!-- 차트 + 테이블 -->
+      <div class="panel">
+        <div class="panel-body" style="padding:16px 18px;">
+          <div id="gsContent">
+            <div style="padding:40px;text-align:center;color:var(--subtext);font-size:13px;">← 좌측에서 광종을 선택하세요</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 툴팁 -->
+  <div id="gsTooltip" style="position:fixed;display:none;background:rgba(15,25,50,.92);color:#fff;padding:8px 12px;border-radius:6px;font-size:12px;pointer-events:none;z-index:9999;line-height:1.6;"></div>
 </div>
 </div>
 
