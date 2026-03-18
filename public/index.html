@@ -993,8 +993,8 @@ table.result tbody td.center{text-align:center;}
     </div>
     <div class="header-meta">
       <div><strong>기준연도</strong>&nbsp; <span id="refYear">2024</span></div>
-      <div><strong>대상광물</strong>&nbsp; 61종</div>
-      <div><strong>HS 코드</strong>&nbsp; 530개 항목</div>
+      <div><strong>대상광물</strong>&nbsp; <span id="headerMineralCount">74종</span></div>
+      <div><strong>HS 코드</strong>&nbsp; <span id="headerHsCount">215개</span> 항목</div>
       <div><strong>출처</strong>&nbsp; 관세청 무역통계</div>
       <div style="margin-top:10px;">
         <button onclick="downloadHsMappingCsv()" style="background:rgba(212,134,12,.18);border:1px solid rgba(212,134,12,.55);color:#F4C430;font-size:11px;font-weight:600;letter-spacing:.5px;padding:5px 14px;border-radius:3px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;" title="광종·HS코드·밸류체인 전체 매핑표 다운로드">📥 HS 매핑표 CSV</button>
@@ -1425,7 +1425,7 @@ table.result tbody td.center{text-align:center;}
   <div class="state-box" id="m-state-box">
     <div class="state-icon">⛏️</div>
     <div class="state-text">광종을 선택하고 조회 버튼을 눌러주세요</div>
-    <div class="state-sub">61종 핵심광물에 대해 관세청 무역통계를<br>실시간으로 조회합니다</div>
+    <div class="state-sub">74종 핵심광물에 대해 관세청 무역통계를<br>실시간으로 조회합니다</div>
   </div>
 
   </div><!-- /result-area -->
@@ -4904,7 +4904,7 @@ function resetMineralForm() {
   document.getElementById('mineralResult').classList.remove('visible');
   document.getElementById('m-state-box').innerHTML=`<div class="state-icon">⛏️</div>
     <div class="state-text">광종을 선택하고 조회 버튼을 눌러주세요</div>
-    <div class="state-sub">61종 핵심광물에 대해 관세청 무역통계를<br>실시간으로 조회합니다</div>`;
+    <div class="state-sub">${MINERAL_DB.length}종 핵심광물에 대해 관세청 무역통계를<br>실시간으로 조회합니다</div>`;
   document.getElementById('m-state-box').style.display='flex';
 }
 
