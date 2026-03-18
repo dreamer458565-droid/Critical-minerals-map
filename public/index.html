@@ -7325,28 +7325,28 @@ function gsSelectMineral(mineral) {
   document.querySelectorAll('.gs-mineral-item').forEach(el => {
     el.classList.toggle('active', el.dataset.mineral === mineral);
   });
-  document.getElementById('gsMineralLabel').textContent = mineral;
   const hasResv = !!((USGS_SUPPLY_DATA.reserves)||{})[mineral];
   const hasProd = !!((USGS_SUPPLY_DATA.production)||{})[mineral];
   if (_gsSubtab === 'reserves' && !hasResv && hasProd) _gsSubtab = 'production';
   if (_gsSubtab === 'production' && !hasProd && hasResv) _gsSubtab = 'reserves';
-  document.getElementById('gsSubtabResv').classList.toggle('active', _gsSubtab==='reserves');
-  document.getElementById('gsSubtabProd').classList.toggle('active', _gsSubtab==='production');
+  document.getElementById('gsTabResv').classList.toggle('active', _gsSubtab==='reserves');
+  document.getElementById('gsTabProd').classList.toggle('active', _gsSubtab==='production');
   gsRender();
 }
 
 function gsSwitchSubtab(tab) {
   _gsSubtab = tab;
-  document.getElementById('gsSubtabResv').classList.toggle('active', tab==='reserves');
-  document.getElementById('gsSubtabProd').classList.toggle('active', tab==='production');
-  const yearSel = document.getElementById('gsYearSelect');
-  yearSel.style.display = tab === 'production' ? '' : 'none';
+  document.getElementById('gsTabResv').classList.toggle('active', tab==='reserves');
+  document.getElementById('gsTabProd').classList.toggle('active', tab==='production');
+  document.getElementById('gsYearWrap').style.display = tab === 'production' ? 'flex' : 'none';
   gsRender();
 }
+function gsSetTab(tab) { gsSwitchSubtab(tab); }
 
 function gsRender() {
-  const yearSel = document.getElementById('gsYearSelect');
-  yearSel.style.display = _gsSubtab === 'production' ? '' : 'none';
+  const yearWrap = document.getElementById('gsYearWrap');
+  const yearSel = document.getElementById('gsYear');
+  if (yearWrap) yearWrap.style.display = _gsSubtab === 'production' ? 'flex' : 'none';
   const content = document.getElementById('gsContent');
   if (!_gsMineral) { content.innerHTML = '<div class="gs-empty">\u2190 \uc88c\uce21\uc5d0\uc11c \uad11\uc885\uc744 \uc120\ud0dd\ud558\uc138\uc694</div>'; return; }
   const dataset = _gsSubtab === 'reserves'
@@ -7357,9 +7357,9 @@ function gsRender() {
     return;
   }
   const years = Object.keys(dataset).sort().reverse();
-  let year = yearSel.value;
+  let year = yearSel ? yearSel.value : years[0];
   if (!dataset[year]) year = years[0];
-  yearSel.innerHTML = years.map(y => '<option value="' + y + '"' + (y===year?' selected':'') + '>' + y + (y==='2025'?'E':'') + '</option>').join('');
+  if (yearSel) yearSel.innerHTML = years.map(y => '<option value="' + y + '"' + (y===year?' selected':'') + '>' + y + (y==='2025'?'E':'') + '</option>').join('');
   const info = dataset[year];
   if (!info) { content.innerHTML = '<div class="gs-empty">\uc120\ud0dd\ud55c \uc5f0\ub3c4 \ub370\uc774\ud130 \uc5c6\uc74c</div>'; return; }
   const unit = info.unit || '';
