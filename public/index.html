@@ -7189,7 +7189,8 @@ const GS_COUNTRY_KO = {
   "Qatar": "카타르", "Rwanda": "르완다", "Senegal": "세네갈", "Serbia": "세르비아",
   "Sierra Leone": "시에라리온", "Slovakia": "슬로바키아", "Sri Lanka": "스리랑카", "Syria": "시리아",
   "Tajikistan": "타지키스탄", "Togo": "토고", "Trinidad and Tobago": "트리니다드토바고",
-  "Tunisia": "튀니지", "Turkmenistan": "투르크메니스탄", "Uganda": "우간다"
+  "Tunisia": "튀니지", "Turkmenistan": "투르크메니스탄", "Uganda": "우간다",
+  "Other countries": "기타 국가", "Mauritania": "모리타니", "Kenya": "케냐"
 };
 const GS_COLORS = ["#C0392B", "#2980B9", "#27AE60", "#D4860C", "#8E44AD", "#16A085", "#E74C3C", "#3498DB", "#2ECC71", "#F39C12", "#9B59B6", "#1ABC9C", "#E67E22", "#34495E", "#D35400", "#2C3E50", "#7F8C8D", "#1F618D", "#145A32", "#6C3483"];
 
@@ -7406,14 +7407,19 @@ function gsRender() {
   const unit = info.unit || '';
   const worldTotal = info.world_total;
   let countries = info.countries || [];
+  // "Other countries" 항상 맨 하위로
+  countries = [...countries.filter(c => !/^other/i.test(c.country)), ...countries.filter(c => /^other/i.test(c.country))];
   const TOP_N = 15;
   let display = countries.slice(0, TOP_N);
   const others = countries.slice(TOP_N);
   const othersTotal = others.reduce((s,c)=>s+c.value, 0);
-  const othersPct = worldTotal ? +(othersTotal/worldTotal*100).toFixed(1) : null;
   if (others.length > 0 && othersTotal > 0) {
-    display = [...display, {country:'\uae30\ud0c4 ' + others.length + '\uac1c\uad6d', value:othersTotal, pct:othersPct, isOther:true}];
+    display = [...display, {country:'\uae30\ud0c4 ' + others.length + '\uac1c\uad6d', value:othersTotal, pct:null, isOther:true}];
   }
+  // 비중 정규화: 표시 항목 합계 기준으로 재계산 (USGS 반올림 오차 보정)
+  const displaySum = display.reduce((s,c)=>s+c.value, 0);
+  const denom = displaySum > 0 ? displaySum : (worldTotal || 1);
+  display = display.map(c => ({...c, pct: +(c.value/denom*100).toFixed(1)}));
   const colorMap = {};
   display.forEach((c,i) => { colorMap[c.country] = c.isOther ? '#7F8C8D' : (GS_COLORS[i % GS_COLORS.length]); });
   const maxVal = display[0]?.value || 1;
