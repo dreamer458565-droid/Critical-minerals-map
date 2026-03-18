@@ -3696,9 +3696,12 @@ function buildHsQuickChips() {
   if (unit === '2') {
     el.innerHTML = [
       {code:'25',label:'25류 — 토석류'},{code:'26',label:'26류 — 광석·슬래그'},
-      {code:'28',label:'28류 — 무기화학'},{code:'71',label:'71류 — 귀금속'},
-      {code:'75',label:'75류 — 니켈'},{code:'80',label:'80류 — 주석'},
-      {code:'81',label:'81류 — 비금속'},{code:'85',label:'85류 — 축전지'},
+      {code:'28',label:'28류 — 무기화학'},{code:'38',label:'38류 — 화학공업'},
+      {code:'39',label:'39류 — 플라스틱'},{code:'71',label:'71류 — 귀금속'},
+      {code:'72',label:'72류 — 철강'},{code:'74',label:'74류 — 구리'},
+      {code:'75',label:'75류 — 니켈'},{code:'76',label:'76류 — 알루미늄'},
+      {code:'80',label:'80류 — 주석'},{code:'81',label:'81류 — 비금속'},
+      {code:'85',label:'85류 — 축전지'},
     ].map(c=>`<span class="qchip hs" onclick="quickHs('${c.code}')">${c.label}</span>`).join('');
     return;
   }
