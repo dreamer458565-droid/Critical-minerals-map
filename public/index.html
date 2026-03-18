@@ -994,7 +994,7 @@ table.result tbody td.center{text-align:center;}
     <div class="header-meta">
       <div><strong>기준연도</strong>&nbsp; <span id="refYear">2024</span></div>
       <div><strong>대상광물</strong>&nbsp; <span id="headerMineralCount">74종</span></div>
-      <div><strong>HS 코드</strong>&nbsp; <span id="headerHsCount">215개</span> 항목</div>
+      <div><strong>HS 코드</strong>&nbsp; <span id="headerHsCount">215개</span> 항목 <span style="font-size:10px;opacity:.6;">(426개 전체)</span></div>
       <div><strong>출처</strong>&nbsp; 관세청 무역통계</div>
       <div style="margin-top:10px;">
         <button onclick="downloadHsMappingCsv()" style="background:rgba(212,134,12,.18);border:1px solid rgba(212,134,12,.55);color:#F4C430;font-size:11px;font-weight:600;letter-spacing:.5px;padding:5px 14px;border-radius:3px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;" title="광종·HS코드·밸류체인 전체 매핑표 다운로드">📥 HS 매핑표 CSV</button>
@@ -7154,6 +7154,137 @@ const GS_CRITICAL = new Set(["Antimony", "Beryllium", "Bismuth", "Boron", "Chrom
 const GS_COUNTRY_KO = {"China": "중국", "United States": "미국", "Australia": "호주", "Russia": "러시아", "Canada": "캐나다", "Brazil": "브라질", "South Africa": "남아공", "India": "인도", "Indonesia": "인도네시아", "Japan": "일본", "Germany": "독일", "France": "프랑스", "Chile": "칠레", "Peru": "페루", "Mexico": "멕시코", "Congo (Kinshasa)": "콩고(DRC)", "Philippines": "필리핀", "Kazakhstan": "카자흐스탄", "Turkey": "튀르키예", "Sweden": "스웨덴", "Finland": "핀란드", "Norway": "노르웨이", "Spain": "스페인", "Italy": "이탈리아", "United Kingdom": "영국", "Portugal": "포르투갈", "Zimbabwe": "짐바브웨", "Mozambique": "모잠비크", "Madagascar": "마다가스카르", "Ghana": "가나", "Guinea": "기니", "Cameroon": "카메룬", "Morocco": "모로코", "Tanzania": "탄자니아", "Zambia": "잌비아", "Ethiopia": "에티오피아", "Eritrea": "에리트레아", "Namibia": "나미비아", "Botswana": "보츠와나", "Argentina": "아르헨티나", "Bolivia": "볼리비아", "Colombia": "콜롬비아", "Venezuela": "베네수엘라", "Myanmar": "미앨마", "Vietnam": "베트남", "Thailand": "태국", "Malaysia": "말레이시아", "North Korea": "북한", "South Korea": "한국", "Taiwan": "대만", "Mongolia": "몽골", "Uzbekistan": "우즈베키스탄", "Iran": "이란", "Saudi Arabia": "사우디", "United Arab Emirates": "UAE", "Egypt": "이집트", "Algeria": "알제리", "Nigeria": "나이지리아", "Sudan": "수단", "Laos": "라오스", "Papua New Guinea": "PNG", "New Caledonia": "뉴칼레도니아", "Poland": "폴란드", "Austria": "오스트리아", "Ukraine": "우크라이나", "Greece": "그리스", "Belgium": "벨기에", "Netherlands": "네덜란드", "Switzerland": "스위스", "Denmark": "덴마크"};
 const GS_COLORS = ["#C0392B", "#2980B9", "#27AE60", "#D4860C", "#8E44AD", "#16A085", "#E74C3C", "#3498DB", "#2ECC71", "#F39C12", "#9B59B6", "#1ABC9C", "#E67E22", "#34495E", "#D35400", "#2C3E50", "#7F8C8D", "#1F618D", "#145A32", "#6C3483"];
 
+// 광종 영문→한국어 매핑
+const GS_MINERAL_KO = {
+  'Abrasives (Manufactured)':'연마재(제조)',
+  'Alumina':'알루미나',
+  'Aluminum':'알루미늄',
+  'Antimony':'안티몬',
+  'Argon':'아르곤',
+  'Arsenic':'비소',
+  'Asbestos':'석면',
+  'Barite':'중정석(바라이트)',
+  'Bauxite':'보크사이트',
+  'Beryllium':'베릴륨',
+  'Bismuth':'비스무트',
+  'Boron':'붕소',
+  'Bromine':'브롬',
+  'Cadmium':'카드뮴',
+  'Cement':'시멘트',
+  'Cerium':'세륨',
+  'Cesium':'세슘',
+  'Chromium':'크롬',
+  'Clays':'점토',
+  'Cobalt':'코발트',
+  'Copper':'구리',
+  'Diamond (Bort, grit, and dust and powder; natural and synthetic)':'다이아몬드(분말·미립)',
+  'Diamond (Industrial)':'다이아몬드(산업용)',
+  'Diamond (Stones, natural and synthetic)':'다이아몬드(원석)',
+  'Diatomite':'규조토',
+  'Dysprosium':'디스프로슘',
+  'Erbium':'어븀',
+  'Europium':'유로퓸',
+  'Feldspar':'장석',
+  'Feldspar And Nepheline Syenite':'장석·암석',
+  'Fluorspar':'형석(플루오라이트)',
+  'Gadolinium':'가돌리늄',
+  'Gallium':'갈륨',
+  'Garnet (Industrial)':'가넷(산업용)',
+  'Gemstones':'보석류',
+  'Germanium':'게르마늄',
+  'Gold':'금',
+  'Granite Only':'화강암',
+  'Graphite (Natural)':'흑연(천연)',
+  'Ground high-purity quartz':'고순도 석영(분쇄)',
+  'Gypsum':'석고',
+  'Hafnium':'하프늄',
+  'Helium':'헬륨',
+  'Holmium':'홀뮴',
+  'Indium':'인듐',
+  'Industrial cultured quartz crystal':'합성 수정(산업용)',
+  'Iodine':'요오드',
+  'Iridium':'이리듐',
+  'Iron And Steel':'철강',
+  'Iron And Steel Scrap':'철강 스크랩',
+  'Iron And Steel Slag':'철강 슬래그',
+  'Iron Ore':'철광석',
+  'Iron Oxide Pigments':'산화철 안료',
+  'Krypton':'크립톤',
+  'Kyanite And Related Minerals':'카이아나이트',
+  'Lanthanum':'란타넘',
+  'Lead':'납(연)',
+  'Lime':'석회',
+  'Lithium':'리튬',
+  'Lutetium':'루테튬',
+  'Magnesium Compounds':'마그네슘 화합물',
+  'Magnesium Metal':'마그네슘 금속',
+  'Manganese':'망간',
+  'Mercury':'수은',
+  'Mica (Natural)':'운모(천연)',
+  'Molybdenum':'몰리브덴',
+  'Neodymium':'네오디뮴',
+  'Neon':'네온',
+  'Neon, krypton, and xenon ':'네온·크립톤·제논',
+  'Nepheline Syenite':'암석(넵헬린)',
+  'Nickel':'니켈',
+  'Niobium (Columbium)':'니오븀(콜럼븀)',
+  'Nitrogen (Fixed)—Ammonia':'질소(암모니아)',
+  'Osmium':'오스뮴',
+  'Palladium':'팔라듐',
+  'Peat':'이탄',
+  'Perlite':'펄라이트',
+  'Phosphate Rock':'인산염암',
+  'Platinum':'백금(플래티넘)',
+  'Platinum-Group Metals':'백금족 금속',
+  'Potash':'칼륨(포타쉬)',
+  'Praseodymium':'프라세오디뮴',
+  'Pumice And Pumicite':'부석',
+  'Quartz (High-Purity And Industrial Cultured Crystal)':'석영(고순도·합성)',
+  'Rare Earths':'희토류',
+  'Rare Earths (Heavy)':'희토류(중희토)',
+  'Rhenium':'레늄',
+  'Rhodium':'로듐',
+  'Rubidium':'루비듐',
+  'Ruthenium':'루테늄',
+  'Salt':'소금(암염)',
+  'Samarium':'사마륨',
+  'Sand And Gravel (Construction)':'모래·자갈(건설용)',
+  'Sand And Gravel (Industrial)':'모래·자갈(산업용)',
+  'Scandium':'스칸듐',
+  'Selenium':'셀레늄',
+  'Silicon':'규소(실리콘)',
+  'Silver':'은',
+  'Soda Ash':'소다회',
+  'Stone (Crushed)':'쇄석',
+  'Stone (Dimension)':'석재(치수재)',
+  'Strontium':'스트론튬',
+  'Sulfur':'황',
+  'Talc And Pyrophyllite':'활석(탈크)',
+  'Tantalum':'탄탈럼',
+  'Tellurium':'텔루륨',
+  'Terbium':'터븀',
+  'Thallium':'탈륨',
+  'Thorium':'토륨',
+  'TiO2 Pigment':'이산화티탄 안료',
+  'TiO2 pigment':'이산화티탄 안료',
+  'Tio2 Pigment':'이산화티탄 안료',
+  'Tin':'주석',
+  'Titanium Mineral Concentrates':'티타늄 정광',
+  'Titanium Sponge Metal':'티타늄 스폰지',
+  'Titanium sponge metal':'티타늄 스폰지',
+  'Tungsten':'텅스텐',
+  'Vanadium':'바나듐',
+  'Vermiculite':'질석(버미큘라이트)',
+  'Wollastonite':'규회석',
+  'Xenon':'제논',
+  'Ytterbium':'이터븀',
+  'Yttrium':'이트륨',
+  'Zeolites (Natural)':'제올라이트',
+  'Zinc':'아연',
+  'Zirconium':'지르코늄',
+  'Zirconium And Hafnium':'지르코늄·하프늄',
+};
+
 let _gsMineral = null;
 let _gsSubtab = 'reserves';
 
@@ -7171,17 +7302,21 @@ function gsInit() {
     const div = document.createElement('div');
     div.className = 'gs-mineral-item';
     div.dataset.mineral = m;
-    div.innerHTML = '<span>' + m + '</span>' + (isCrit ? '<span class="gs-critical-star" title="\ud575\uc2ec\uad11\ubb3c">\u2605</span>' : '');
+    const koName = GS_MINERAL_KO[m] || m;
+    div.innerHTML = '<span>' + koName + '</span>' + (isCrit ? '<span class="gs-critical-star" title="핵심광물">★</span>' : '');
+    div.dataset.ko = koName.toLowerCase();
     div.onclick = () => gsSelectMineral(m);
     list.appendChild(div);
   });
 }
 
 function gsFilterList(q) {
+  if (q === undefined) q = document.getElementById('gsMineralSearch')?.value || '';
   q = q.toLowerCase().trim();
   document.querySelectorAll('.gs-mineral-item').forEach(el => {
-    const name = el.dataset.mineral.toLowerCase();
-    el.style.display = (!q || name.includes(q)) ? '' : 'none';
+    const en = el.dataset.mineral.toLowerCase();
+    const ko = (el.dataset.ko || '').toLowerCase();
+    el.style.display = (!q || en.includes(q) || ko.includes(q)) ? '' : 'none';
   });
 }
 
@@ -7282,7 +7417,7 @@ function gsRender() {
     + '<span style="font-size:11px;color:var(--subtext);align-self:center;">\ucd9c\uc81c: USGS Mineral Commodity Summaries 2026</span>'
     + '</div>'
     + '<div class="gs-chart-wrap">'
-    + '<div class="gs-chart-title">' + _gsMineral + ' ' + labelType + ' \u2014 \uad6d\uac00\ubcc4 \ube44\uc911 (' + yearLabel + ', ' + unit + ')</div>'
+    + '<div class="gs-chart-title">' + (GS_MINERAL_KO[_gsMineral]||_gsMineral) + ' ' + labelType + ' \u2014 \uad6d\uac00\ubcc4 \ube44\uc911 (' + yearLabel + ', ' + unit + ')</div>'
     + barsHTML
     + '</div>'
     + '<div class="gs-table-wrap"><table class="gs-table"><thead><tr>'
