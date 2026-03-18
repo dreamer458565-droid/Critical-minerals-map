@@ -3556,7 +3556,7 @@ async function queryOverview() {
     const batch = pool.slice(i, i + BATCH);
     const promises = batch.map(async (m) => {
       try {
-        const primaryHs = m.hs[0]; // 대표 HS 코드
+        const primaryHs = resolveHs(m, year)[0]; // 연도별 HSK 코드 적용
         const items = await callTradeApi({ hsCd: primaryHs, strtYr: year, endYr: year, impExpDivCd: 'IMP' });
         doneCount++;
         if (statusEl) statusEl.textContent = `${year}년 로딩 중... (${doneCount}/${pool.length})`;
@@ -3687,7 +3687,7 @@ async function queryOverview() {
     let prevTotal = 0;
     try {
       const prevPromises = topMinerals.map(m =>
-        callTradeApi({ hsCd: m.hs[0], strtYr: prevYear, endYr: prevYear, impExpDivCd: 'IMP' })
+        callTradeApi({ hsCd: resolveHs(m, prevYear)[0], strtYr: prevYear, endYr: prevYear, impExpDivCd: 'IMP' })
           .then(items => {
             if (!items) return 0;
             return items.reduce((s, it) => s + parseFloat(it.impAmt || it.impDlr || '0'), 0);
@@ -3831,37 +3831,36 @@ async function queryMineral() {
   setMineralLoading(true);
 
   try {
-    // 중복 HS코드 제거 (hsUnit 단위로 truncate 후)
-    const seenHs = new Set();
-    const hsList = [];
-    for(const hs of selectedMineral.hs) {
-      const truncHs = hs.slice(0, parseInt(hsUnit));
-      if(seenHs.has(truncHs)) continue;
-      seenHs.add(truncHs);
-      hsList.push({truncHs, origHs:hs});
-    }
-
-    // ── 다년도 분할 호출: 관세청 API가 1년 단위만 지원하므로 연도별로 쪼개서 병렬 호출 ──
+    // ── 연도별 resolveHs 적용: 연도마다 올바른 HSK 코드 사용 ──
     const impExp = impYn==='1' ? 'IMP' : 'EXP';
     const queries = [];
-    for(const {truncHs, origHs} of hsList) {
-      if(periodType==='month') {
-        // 월별: 연도가 다르면 연도별로 분할
-        const sy = parseInt(String(start).slice(0,4)), ey = parseInt(String(end).slice(0,4));
-        if(sy === ey) {
-          queries.push({p:{hsCd:truncHs, strtYymm:String(start), endYymm:String(end), impExpDivCd:impExp}, origHs});
-        } else {
-          for(let y=sy; y<=ey; y++) {
-            const sm = (y===sy) ? String(start) : `${y}01`;
-            const em = (y===ey) ? String(end)   : `${y}12`;
-            queries.push({p:{hsCd:truncHs, strtYymm:sm, endYymm:em, impExpDivCd:impExp}, origHs});
-          }
+
+    if(periodType==='month') {
+      // 월별: 연도별로 분할 후 각 연도의 resolveHs 적용
+      const sy = parseInt(String(start).slice(0,4)), ey = parseInt(String(end).slice(0,4));
+      for(let y=sy; y<=ey; y++) {
+        const yearCodes = resolveHs(selectedMineral, y);
+        const seenHs = new Set();
+        for(const hs of yearCodes) {
+          const truncHs = hs.slice(0, parseInt(hsUnit));
+          if(seenHs.has(truncHs)) continue;
+          seenHs.add(truncHs);
+          const sm = (y===sy) ? String(start) : `${y}01`;
+          const em = (y===ey) ? String(end)   : `${y}12`;
+          queries.push({p:{hsCd:truncHs, strtYymm:sm, endYymm:em, impExpDivCd:impExp}, origHs:hs});
         }
-      } else {
-        // 연도별: 1년씩 분할
-        const sy = parseInt(start), ey = parseInt(end);
-        for(let y=sy; y<=ey; y++) {
-          queries.push({p:{hsCd:truncHs, strtYr:String(y), endYr:String(y), impExpDivCd:impExp}, origHs});
+      }
+    } else {
+      // 연도별: 1년씩 분할, 연도마다 해당연도 HSK 코드 사용
+      const sy = parseInt(start), ey = parseInt(end);
+      for(let y=sy; y<=ey; y++) {
+        const yearCodes = resolveHs(selectedMineral, y);
+        const seenHs = new Set();
+        for(const hs of yearCodes) {
+          const truncHs = hs.slice(0, parseInt(hsUnit));
+          if(seenHs.has(truncHs)) continue;
+          seenHs.add(truncHs);
+          queries.push({p:{hsCd:truncHs, strtYr:String(y), endYr:String(y), impExpDivCd:impExp}, origHs:hs});
         }
       }
     }
