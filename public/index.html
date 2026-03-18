@@ -1979,9 +1979,11 @@ function buildMineralMapping() {
   const tbody = document.getElementById('mineralMappingTbody');
   if (!tbody || tbody.children.length) return;
   const rCls = {'극심':'risk-cr','높음':'risk-hi','중간':'risk-md','낮음':'risk-lo'};
+  const _curYear = String(new Date().getFullYear() - 1);
 
   tbody.innerHTML = MINERALS.map(m => {
-    const hsBadges = (m.hs||[]).map(h=>`<span class="hs-badge">${h}</span>`).join(' ');
+    const resolved = resolveHs(m, _curYear);
+    const hsBadges = resolved.map(h=>`<span class="hs-badge">${h}</span>`).join(' ');
     const hsNames  = (m.hsName||[]).map(n=>`<span style="display:block">${n}</span>`).join('');
     return `<tr>
       <td><b style="font-size:12px">${m.ko}</b><br><span style="font-size:10px;color:var(--subtext)">${m.en} [${m.sym}]</span></td>
@@ -3282,7 +3284,9 @@ function showMineralBanner(m) {
   const banner = document.getElementById('mineralBanner');
   document.getElementById('mb-name').textContent = m.ko;
   document.getElementById('mb-en').textContent   = `${m.en} · ${m.sym}`;
-  document.getElementById('mb-hs-list').innerHTML = m.hs.map((h,i)=>
+  const _mbYear = (document.getElementById('m_end')?.value || String(new Date().getFullYear()-1)).slice(0,4);
+  const _mbCodes = resolveHs(m, _mbYear);
+  document.getElementById('mb-hs-list').innerHTML = _mbCodes.map((h,i)=>
     `<span class="mb-hs-chip" onclick="goToHs('${h}')" title="${m.hsName[i]||''}">
       ${h} <small style="opacity:.6">${m.hsName[i]||''}</small>
     </span>`).join('');
