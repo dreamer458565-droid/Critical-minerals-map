@@ -8058,25 +8058,82 @@ let _gtKoreaSourceChart = null, _gtKoreaCompChart = null;
 let _gtHsLevel = '';
 let _gtHsBreadcrumb = [];
 
-// 광종 → HS 6자리 매핑
-const GT_MINERAL_HS = {
-  '리튬':['253090','282520','282521','283691'],
-  '니켈':['260400','750110','750120'],
-  '코발트':['260500','282200'],
-  '흑연':['250410','250490'],
-  '희토류':['280530','284610'],
-  '텅스텐':['261100','810110'],
-  '망간':['260200','810211'],
-  '구리':['260300','740311'],
-  '철광석':['260111','260112'],
-  '아연':['260800','790111'],
-  '주석':['260900','800110'],
-  '알루미늄':['260600','760110'],
-  '티타늄':['261400','810810'],
-  '크롬':['261000','720241'],
-  '몰리브덴':['261310','810210'],
-  '바나듐':['261590','811292'],
+// 광종 → 밸류체인 단계별 HS 6자리 매핑
+const GT_MINERAL_VC = {
+  '리튬':{
+    '원광':['253090'],
+    '정제·화합물':['282520','282521'],
+    '가공품':['283691'],
+  },
+  '니켈':{
+    '원광·정광':['260400'],
+    '매트·중간재':['750110'],
+    '지금':['750120'],
+  },
+  '코발트':{
+    '원광':['260500'],
+    '산화물·화합물':['282200'],
+  },
+  '흑연':{
+    '천연흑연(분말)':['250410'],
+    '기타 흑연':['250490'],
+  },
+  '희토류':{
+    '산화물·화합물':['280530'],
+    '기타 희토류':['284610'],
+  },
+  '텅스텐':{
+    '원광·정광':['261100'],
+    '분말·지금':['810110'],
+  },
+  '망간':{
+    '원광·정광':['260200'],
+    '괴·분말':['810211'],
+  },
+  '구리':{
+    '정광':['260300'],
+    '전기동':['740311'],
+  },
+  '철광석':{
+    '괴(소결용)':['260111'],
+    '괴(펠릿)':['260112'],
+  },
+  '아연':{
+    '원광·정광':['260800'],
+    '지금':['790111'],
+  },
+  '주석':{
+    '원광·정광':['260900'],
+    '지금':['800110'],
+  },
+  '알루미늄':{
+    '보크사이트':['260600'],
+    '지금':['760110'],
+  },
+  '티타늄':{
+    '원광·정광':['261400'],
+    '괴·분말':['810810'],
+  },
+  '크롬':{
+    '원광·정광':['261000'],
+    '페로크롬':['720241'],
+  },
+  '몰리브덴':{
+    '원광·정광':['261310'],
+    '괴·분말':['810210'],
+  },
+  '바나듐':{
+    '원광·정광':['261590'],
+    '괴·분말':['811292'],
+  },
 };
+
+// 하위호환: 광종의 전체 HS 코드 배열
+function gtGetAllHs(mineral) {
+  const vc = GT_MINERAL_VC[mineral];
+  if (!vc) return [];
+  return Object.values(vc).flat();
+}
 
 // 국가 드롭다운 (한글, Comtrade 코드)
 const GT_COUNTRIES = [
@@ -8122,27 +8179,58 @@ function gtCountryOptions(includeAll) {
 }
 
 function gtYearOptions(selected) {
-  return Array.from({length:6},(_,i)=>2024-i)
+  return Array.from({length:11},(_,i)=>2024-i)
     .map(y => `<option value="${y}"${y===selected?' selected':''}>${y}</option>`)
     .join('');
 }
 
 function gtMineralChips(activeMineral) {
-  return Object.keys(GT_MINERAL_HS).map(m =>
+  return Object.keys(GT_MINERAL_VC).map(m =>
     `<span class="gt-mineral-chip${m===activeMineral?' active':''}" onclick="gtSelectMineral('${m}',this)">${m}</span>`
   ).join('');
 }
 
 function gtSelectMineral(mineral, el) {
+  // 광종 칩 활성화
   document.querySelectorAll('#gtContent .gt-mineral-chip').forEach(c => c.classList.remove('active'));
   if (el) el.classList.add('active');
-  if (GT_MINERAL_HS[mineral]) {
-    const code = GT_MINERAL_HS[mineral][0];
-    ['gtHsInput','gtBiHs','gtTrHs'].forEach(id => {
-      const inp = document.getElementById(id);
-      if (inp) inp.value = code;
-    });
+
+  const vc = GT_MINERAL_VC[mineral];
+  if (!vc) return;
+
+  // 밸류체인 단계 칩 표시
+  const stageEl = document.getElementById('gtStageChips');
+  if (stageEl) {
+    const stages = Object.keys(vc);
+    stageEl.innerHTML =
+      `<span class="gt-mineral-chip active" onclick="gtSelectStage('${mineral}','전체',this)" style="background:var(--navy);color:#fff;border-color:var(--navy);">전체</span>` +
+      stages.map(s =>
+        `<span class="gt-mineral-chip" onclick="gtSelectStage('${mineral}','${s}',this)">${s}</span>`
+      ).join('');
+    stageEl.style.display = '';
   }
+
+  // 기본: 전체 코드 입력
+  const allCodes = gtGetAllHs(mineral);
+  gtFillHsInputs(allCodes.join(','));
+}
+
+function gtSelectStage(mineral, stage, el) {
+  const stageEl = document.getElementById('gtStageChips');
+  if (stageEl) stageEl.querySelectorAll('.gt-mineral-chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  const vc = GT_MINERAL_VC[mineral];
+  if (!vc) return;
+  const codes = stage === '전체' ? gtGetAllHs(mineral) : (vc[stage] || []);
+  gtFillHsInputs(codes.join(','));
+}
+
+function gtFillHsInputs(codeStr) {
+  ['gtHsInput','gtBiHs','gtTrHs'].forEach(id => {
+    const inp = document.getElementById(id);
+    if (inp) inp.value = codeStr;
+  });
 }
 
 function gtSetTab(tab) {
@@ -8174,11 +8262,11 @@ function gtRenderCommodity() {
       <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;">
         <div>
           <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">HS 코드 (6자리)</label>
-          <input id="gtHsInput" type="text" class="gt-input" placeholder="예: 282520" maxlength="6" style="width:120px;">
+          <input id="gtHsInput" type="text" class="gt-input" placeholder="예: 282520 (복수: 쉼표구분)" style="width:200px;">
         </div>
         <div>
           <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">기준연도</label>
-          <select id="gtCmdYear" class="gt-select">${gtYearOptions(2023)}</select>
+          <select id="gtCmdYear" class="gt-select">${gtYearOptions(2024)}</select>
         </div>
         <div>
           <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">수출/수입</label>
@@ -8192,6 +8280,7 @@ function gtRenderCommodity() {
       <div style="margin-bottom:10px;">
         <div style="font-size:11px;color:var(--subtext);margin-bottom:6px;">광종 빠른선택</div>
         ${gtMineralChips('')}
+        <div id="gtStageChips" style="display:none;margin-top:6px;font-size:11px;color:var(--subtext);"><span style="font-weight:600;">밸류체인 단계:</span> </div>
       </div>
       <details style="margin-bottom:10px;">
         <summary style="font-size:12px;font-weight:600;color:var(--navy);cursor:pointer;">📋 HS 코드 가이드 (클릭하여 펼치기)</summary>
@@ -8280,7 +8369,7 @@ async function gtQueryCommodity() {
   const resultEl = document.getElementById('gtCmdResult');
   if (!hs || hs.length < 2) { resultEl.innerHTML = '<div class="gt-empty">HS 코드를 입력하세요 (최소 2자리)</div>'; return; }
 
-  const hs6 = hs.substring(0, 6);
+  const hs6 = hs.includes(',') ? hs.split(',').map(c=>c.trim().substring(0,6)).filter(Boolean).join(',') : hs.substring(0, 6);
   resultEl.innerHTML = '<div class="gt-loading">🔄 Comtrade 데이터 조회 중…</div>';
 
   try {
@@ -8422,6 +8511,93 @@ async function gtBuildAnalysis(hs6, year, flow) {
   } catch (e) { /* skip */ }
 }
 
+// 한국 주력 수출품목 HS 코드
+const GT_KOREA_EXPORTS = {
+  '반도체':{
+    '메모리':['854232'],
+    '비메모리':['854231'],
+    '웨이퍼':['381800'],
+  },
+  '자동차':{
+    '승용차':['870321','870322','870323','870324'],
+    '전기차':['870380'],
+    '부품':['870899'],
+  },
+  '이차전지':{
+    '리튬이온전지':['850760'],
+    '양극재':['282520'],
+    '음극재':['380190'],
+  },
+  '디스플레이':{
+    'OLED패널':['852412'],
+    'LCD패널':['852419'],
+  },
+  '철강':{
+    '열연강판':['720839'],
+    '냉연강판':['720915'],
+    '스테인리스':['721990'],
+  },
+  '석유화학':{
+    '에틸렌':['290121'],
+    '프로필렌':['290122'],
+    '합성수지':['390110'],
+  },
+  '조선':{
+    '화물선':['890190'],
+    '유조선':['890120'],
+    'LNG선':['890120'],
+  },
+  '기계':{
+    '건설기계':['842959'],
+    '공작기계':['845710'],
+    '펌프':['841370'],
+  },
+};
+
+function gtExportChips() {
+  return Object.keys(GT_KOREA_EXPORTS).map(p =>
+    `<span class="gt-mineral-chip" onclick="gtSelectExport('${p}',this)">${p}</span>`
+  ).join('');
+}
+
+function gtSelectExport(product, el) {
+  // 수출품 칩 활성화
+  document.querySelectorAll('#gtBiExportChips .gt-mineral-chip').forEach(c => c.classList.remove('active'));
+  // 광종 칩도 비활성화
+  document.querySelectorAll('#gtContent .gt-mineral-chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  const vc = GT_KOREA_EXPORTS[product];
+  if (!vc) return;
+
+  // 단계 칩 표시
+  const stageEl = document.getElementById('gtBiExportStage');
+  if (stageEl) {
+    const stages = Object.keys(vc);
+    stageEl.innerHTML = `<span style="font-weight:600;">세부품목:</span> ` +
+      `<span class="gt-mineral-chip active" onclick="gtSelectExportStage('${product}','전체',this)" style="background:var(--navy);color:#fff;border-color:var(--navy);">전체</span>` +
+      stages.map(s => `<span class="gt-mineral-chip" onclick="gtSelectExportStage('${product}','${s}',this)">${s}</span>`).join('');
+    stageEl.style.display = '';
+  }
+
+  // 수출국 한국으로 자동 설정
+  const reporterEl = document.getElementById('gtBiReporter');
+  if (reporterEl) reporterEl.value = '410';
+
+  const allCodes = Object.values(vc).flat();
+  gtFillHsInputs(allCodes.join(','));
+}
+
+function gtSelectExportStage(product, stage, el) {
+  const stageEl = document.getElementById('gtBiExportStage');
+  if (stageEl) stageEl.querySelectorAll('.gt-mineral-chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const vc = GT_KOREA_EXPORTS[product];
+  if (!vc) return;
+  const codes = stage === '전체' ? Object.values(vc).flat() : (vc[stage] || []);
+  gtFillHsInputs(codes.join(','));
+}
+
 // ─── 서브탭 1: 양자교역 ───
 function gtRenderBilateral() {
   const content = document.getElementById('gtContent');
@@ -8443,17 +8619,23 @@ function gtRenderBilateral() {
         </div>
         <div>
           <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">HS 코드 (6자리)</label>
-          <input id="gtBiHs" type="text" class="gt-input" placeholder="예: 260400" maxlength="6" style="width:120px;">
+          <input id="gtBiHs" type="text" class="gt-input" placeholder="예: 260400" style="width:180px;">
         </div>
         <div>
           <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">기준연도</label>
-          <select id="gtBiYear" class="gt-select">${gtYearOptions(2023)}</select>
+          <select id="gtBiYear" class="gt-select">${gtYearOptions(2024)}</select>
         </div>
         <button class="gt-btn primary" onclick="gtQueryBilateral()">🔍 조회</button>
       </div>
       <div style="margin-bottom:10px;">
         <div style="font-size:11px;color:var(--subtext);margin-bottom:6px;">광종 빠른선택</div>
         ${gtMineralChips('')}
+        <div id="gtStageChips" style="display:none;margin-top:6px;font-size:11px;color:var(--subtext);"><span style="font-weight:600;">밸류체인 단계:</span> </div>
+      </div>
+      <div style="margin-bottom:10px;padding-top:8px;border-top:1px dashed var(--border);">
+        <div style="font-size:11px;color:var(--subtext);margin-bottom:6px;">🇰🇷 한국 주력 수출품목</div>
+        <div id="gtBiExportChips">${gtExportChips()}</div>
+        <div id="gtBiExportStage" style="display:none;margin-top:6px;font-size:11px;color:var(--subtext);"></div>
       </div>
     </div>
     <div id="gtBiResult"></div>`;
@@ -8469,7 +8651,7 @@ async function gtQueryBilateral() {
   if (!reporter) { resultEl.innerHTML = '<div class="gt-empty">수출국을 선택하세요</div>'; return; }
   if (!hs || hs.length < 2) { resultEl.innerHTML = '<div class="gt-empty">HS 코드를 입력하세요</div>'; return; }
 
-  const hs6 = hs.substring(0, 6);
+  const hs6 = hs.includes(',') ? hs.split(',').map(c=>c.trim().substring(0,6)).filter(Boolean).join(',') : hs.substring(0, 6);
   resultEl.innerHTML = '<div class="gt-loading">🔄 양자교역 데이터 조회 중…</div>';
 
   const params = { cmdCode: hs6, period: year, reporterCode: reporter, flowCode: 'X' };
@@ -8587,15 +8769,15 @@ function gtRenderTrend() {
       <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;">
         <div>
           <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">HS 코드 (6자리)</label>
-          <input id="gtTrHs" type="text" class="gt-input" placeholder="예: 282520" maxlength="6" style="width:120px;">
+          <input id="gtTrHs" type="text" class="gt-input" placeholder="예: 282520 (복수: 쉼표구분)" style="width:200px;">
         </div>
         <div>
           <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">시작연도</label>
-          <select id="gtTrStart" class="gt-select">${gtYearOptions(2019)}</select>
+          <select id="gtTrStart" class="gt-select">${gtYearOptions(2015)}</select>
         </div>
         <div>
           <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">종료연도</label>
-          <select id="gtTrEnd" class="gt-select">${gtYearOptions(2023)}</select>
+          <select id="gtTrEnd" class="gt-select">${gtYearOptions(2024)}</select>
         </div>
         <div>
           <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">수출/수입</label>
@@ -8616,6 +8798,7 @@ function gtRenderTrend() {
       <div style="margin-bottom:10px;">
         <div style="font-size:11px;color:var(--subtext);margin-bottom:6px;">광종 빠른선택</div>
         ${gtMineralChips('')}
+        <div id="gtStageChips" style="display:none;margin-top:6px;font-size:11px;color:var(--subtext);"><span style="font-weight:600;">밸류체인 단계:</span> </div>
       </div>
     </div>
     <div id="gtTrResult"></div>`;
@@ -8631,7 +8814,7 @@ async function gtQueryTrend() {
 
   if (!hs || hs.length < 2) { resultEl.innerHTML = '<div class="gt-empty">HS 코드를 입력하세요</div>'; return; }
 
-  const hs6 = hs.substring(0, 6);
+  const hs6 = hs.includes(',') ? hs.split(',').map(c=>c.trim().substring(0,6)).filter(Boolean).join(',') : hs.substring(0, 6);
   const years = [];
   for (let y = startYear; y <= endYear; y++) years.push(y);
   if (years.length === 0) { resultEl.innerHTML = '<div class="gt-empty">연도 범위를 확인하세요</div>'; return; }
@@ -8731,36 +8914,52 @@ function gtRenderKorea() {
       <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;">
         <div>
           <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">기준연도</label>
-          <select id="gtKrYear" class="gt-select">${gtYearOptions(2023)}</select>
+          <select id="gtKrYear" class="gt-select">${gtYearOptions(2024)}</select>
         </div>
         <button class="gt-btn primary" onclick="gtQueryKorea()">🔍 조회</button>
       </div>
       <div style="margin-bottom:10px;">
         <div style="font-size:11px;color:var(--subtext);margin-bottom:6px;">광종 선택 (클릭하여 조회)</div>
-        <div id="gtKrChips">${Object.keys(GT_MINERAL_HS).map(m =>
+        <div id="gtKrChips">${Object.keys(GT_MINERAL_VC).map(m =>
           `<span class="gt-mineral-chip" onclick="gtQueryKorea('${m}',this)">${m}</span>`
         ).join('')}</div>
+        <div id="gtKrStageChips" style="display:none;margin-top:6px;font-size:11px;color:var(--subtext);"></div>
       </div>
     </div>
     <div id="gtKrResult"></div>`;
 }
 
-async function gtQueryKorea(mineral, chipEl) {
+let _gtKrMineral = null, _gtKrStage = '전체';
+
+async function gtQueryKorea(mineral, chipEl, stage) {
   if (mineral && chipEl) {
     document.querySelectorAll('#gtKrChips .gt-mineral-chip').forEach(c => c.classList.remove('active'));
     chipEl.classList.add('active');
+    _gtKrMineral = mineral;
+    _gtKrStage = '전체';
+    // 밸류체인 단계 칩 표시
+    const stageEl = document.getElementById('gtKrStageChips');
+    if (stageEl) {
+      const vc = GT_MINERAL_VC[mineral];
+      const stages = vc ? Object.keys(vc) : [];
+      stageEl.innerHTML = `<span style="font-weight:600;">밸류체인 단계:</span> ` +
+        `<span class="gt-mineral-chip active" onclick="gtQueryKoreaStage('전체',this)" style="background:var(--navy);color:#fff;border-color:var(--navy);">전체</span>` +
+        stages.map(s => `<span class="gt-mineral-chip" onclick="gtQueryKoreaStage('${s}',this)">${s}</span>`).join('');
+      stageEl.style.display = '';
+    }
   }
 
-  const activeChip = document.querySelector('#gtKrChips .gt-mineral-chip.active');
-  const selectedMineral = mineral || (activeChip ? activeChip.textContent : null);
+  const selectedMineral = mineral || _gtKrMineral;
+  const selectedStage = stage || _gtKrStage;
   const resultEl = document.getElementById('gtKrResult');
-  if (!selectedMineral || !GT_MINERAL_HS[selectedMineral]) {
+  if (!selectedMineral || !GT_MINERAL_VC[selectedMineral]) {
     resultEl.innerHTML = '<div class="gt-empty">광종을 선택하세요</div>';
     return;
   }
 
   const year = document.getElementById('gtKrYear')?.value || '2023';
-  const hsCodes = GT_MINERAL_HS[selectedMineral];
+  const vc = GT_MINERAL_VC[selectedMineral];
+  const hsCodes = selectedStage === '전체' ? gtGetAllHs(selectedMineral) : (vc[selectedStage] || []);
   const cmdCode = hsCodes.join(',');
 
   resultEl.innerHTML = '<div class="gt-loading">🔄 한국 교역 데이터 조회 중…</div>';
@@ -8850,6 +9049,14 @@ async function gtQueryKorea(mineral, chipEl) {
   } catch (e) {
     resultEl.innerHTML = `<div class="gt-empty" style="color:#e74c3c;">조회 실패: ${e.message}</div>`;
   }
+}
+
+function gtQueryKoreaStage(stage, el) {
+  const stageEl = document.getElementById('gtKrStageChips');
+  if (stageEl) stageEl.querySelectorAll('.gt-mineral-chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  _gtKrStage = stage;
+  gtQueryKorea(null, null, stage);
 }
 
 // ─── 글로벌 교역 탭 초기화 ───
