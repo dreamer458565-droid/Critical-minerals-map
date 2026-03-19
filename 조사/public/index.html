@@ -8073,6 +8073,7 @@ const GT_MINERAL_VC = {
   '코발트':{
     '원광':['260500'],
     '산화물·화합물':['282200'],
+    '금속(괴·분말)':['810520','810510','810530'],
   },
   '흑연':{
     '천연흑연(분말)':['250410'],
@@ -8084,7 +8085,7 @@ const GT_MINERAL_VC = {
   },
   '텅스텐':{
     '원광·정광':['261100'],
-    '분말·지금':['810110'],
+    '분말·괴':['810110'],
   },
   '망간':{
     '원광·정광':['260200'],
@@ -8713,13 +8714,20 @@ function gtRenderBilateral() {
       <div class="gt-section-title">🔄 양자교역 — 국가 간 교역 분석</div>
       <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;">
         <div>
-          <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">수출국 (보고국)</label>
+          <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">교역 방향</label>
+          <select id="gtBiFlow" class="gt-select" style="min-width:120px;" onchange="gtBiFlowChanged()">
+            <option value="X">수출 (→)</option>
+            <option value="M">수입 (←)</option>
+          </select>
+        </div>
+        <div>
+          <label id="gtBiReporterLabel" style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">수출국 (보고국)</label>
           <select id="gtBiReporter" class="gt-select" style="min-width:150px;">
             ${gtCountryOptions(false)}
           </select>
         </div>
         <div>
-          <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">수입국 (파트너)</label>
+          <label id="gtBiPartnerLabel" style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">수입국 (파트너)</label>
           <select id="gtBiPartner" class="gt-select" style="min-width:150px;">
             ${gtCountryOptions(true)}
           </select>
@@ -8748,20 +8756,35 @@ function gtRenderBilateral() {
     <div id="gtBiResult"></div>`;
 }
 
+function gtBiFlowChanged() {
+  const flow = document.getElementById('gtBiFlow')?.value;
+  const repLabel = document.getElementById('gtBiReporterLabel');
+  const parLabel = document.getElementById('gtBiPartnerLabel');
+  if (flow === 'M') {
+    if (repLabel) repLabel.textContent = '수입국 (보고국)';
+    if (parLabel) parLabel.textContent = '수출국 (파트너)';
+  } else {
+    if (repLabel) repLabel.textContent = '수출국 (보고국)';
+    if (parLabel) parLabel.textContent = '수입국 (파트너)';
+  }
+}
+
 async function gtQueryBilateral() {
   const reporter = document.getElementById('gtBiReporter')?.value;
   const partner = document.getElementById('gtBiPartner')?.value;
   const hs = (document.getElementById('gtBiHs')?.value || '').trim();
   const year = document.getElementById('gtBiYear')?.value || '2023';
+  const flow = document.getElementById('gtBiFlow')?.value || 'X';
+  const isImport = flow === 'M';
   const resultEl = document.getElementById('gtBiResult');
 
-  if (!reporter) { resultEl.innerHTML = '<div class="gt-empty">수출국을 선택하세요</div>'; return; }
+  if (!reporter) { resultEl.innerHTML = `<div class="gt-empty">${isImport ? '수입국' : '수출국'}을 선택하세요</div>`; return; }
   if (!hs) { resultEl.innerHTML = '<div class="gt-empty">HS 코드를 입력하거나 위의 광종·수출품목을 선택하세요<br><span style="font-size:11px;color:var(--muted);">UN Comtrade API는 품목코드(HS) 없이 전체 조회를 지원하지 않습니다</span></div>'; return; }
 
   const hs6 = hs.includes(',') ? hs.split(',').map(c=>c.trim().substring(0,6)).filter(Boolean).join(',') : hs.substring(0, 6);
   resultEl.innerHTML = '<div class="gt-loading">🔄 양자교역 데이터 조회 중…</div>';
 
-  const params = { period: year, reporterCode: reporter, flowCode: 'X', cmdCode: hs6 };
+  const params = { period: year, reporterCode: reporter, flowCode: flow, cmdCode: hs6 };
   if (partner && partner !== '0') params.partnerCode = partner;
 
   try {
@@ -8771,7 +8794,7 @@ async function gtQueryBilateral() {
     const reporterName = GT_COUNTRIES.find(c => c.code == reporter)?.name || reporter;
 
     if (!partner || partner === '0') {
-      // 파트너 전체 → 수출 대상국 분석
+      // 파트너 전체 → 대상국 분석
       const partnerMap = {};
       data.forEach(r => {
         if (!r.partnerISO || r.partnerISO === 'WLD') return;
@@ -8784,12 +8807,12 @@ async function gtQueryBilateral() {
 
       resultEl.innerHTML = `
         <div class="gt-result-card">
-          <div class="gt-section-title">${FLAG_MAP[GT_COUNTRIES.find(c=>c.code==reporter)?.iso]||''} ${reporterName}의 ${hs6 ? 'HS '+hs6 : '전체 품목'} 수출 대상국 (${year})</div>
+          <div class="gt-section-title">${FLAG_MAP[GT_COUNTRIES.find(c=>c.code==reporter)?.iso]||''} ${reporterName}의 ${hs6 ? 'HS '+hs6 : '전체 품목'} ${isImport ? '수입 원산국' : '수출 대상국'} (${year})</div>
           <div style="height:380px;"><canvas id="gtBiChart"></canvas></div>
         </div>
         <div class="gt-result-card">
           <table class="gt-table">
-            <thead><tr><th>순위</th><th>수입국</th><th>수출액 (USD)</th><th>비중</th><th>중량</th></tr></thead>
+            <thead><tr><th>순위</th><th>${isImport ? '수출국' : '수입국'}</th><th>${isImport ? '수입액' : '수출액'} (USD)</th><th>비중</th><th>중량</th></tr></thead>
             <tbody>${partners.map((c, i) => {
               const koName = COUNTRY_NAMES[c.iso] || c.name;
               return `<tr>
@@ -8836,7 +8859,7 @@ async function gtQueryBilateral() {
       // 역방향도 조회
       let revVal = 0, revWgt = 0;
       try {
-        const revData = await callComtradeApi({ cmdCode: hs6, period: year, reporterCode: partner, partnerCode: reporter, flowCode: 'X' });
+        const revData = await callComtradeApi({ cmdCode: hs6, period: year, reporterCode: partner, partnerCode: reporter, flowCode: flow });
         revData.forEach(r => {
           revVal += (r.primaryValue || r.tradeValue || 0);
           revWgt += (r.netWgt || r.netWeight || 0);
