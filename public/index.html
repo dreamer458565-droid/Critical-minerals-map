@@ -8619,7 +8619,7 @@ function gtRenderBilateral() {
         </div>
         <div>
           <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">HS 코드 (6자리)</label>
-          <input id="gtBiHs" type="text" class="gt-input" placeholder="예: 260400" style="width:180px;">
+          <input id="gtBiHs" type="text" class="gt-input" placeholder="미입력 시 전체" style="width:180px;">
         </div>
         <div>
           <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">기준연도</label>
@@ -8649,12 +8649,12 @@ async function gtQueryBilateral() {
   const resultEl = document.getElementById('gtBiResult');
 
   if (!reporter) { resultEl.innerHTML = '<div class="gt-empty">수출국을 선택하세요</div>'; return; }
-  if (!hs || hs.length < 2) { resultEl.innerHTML = '<div class="gt-empty">HS 코드를 입력하세요</div>'; return; }
 
-  const hs6 = hs.includes(',') ? hs.split(',').map(c=>c.trim().substring(0,6)).filter(Boolean).join(',') : hs.substring(0, 6);
+  const hs6 = hs ? (hs.includes(',') ? hs.split(',').map(c=>c.trim().substring(0,6)).filter(Boolean).join(',') : hs.substring(0, 6)) : '';
   resultEl.innerHTML = '<div class="gt-loading">🔄 양자교역 데이터 조회 중…</div>';
 
-  const params = { cmdCode: hs6, period: year, reporterCode: reporter, flowCode: 'X' };
+  const params = { period: year, reporterCode: reporter, flowCode: 'X' };
+  if (hs6) params.cmdCode = hs6;
   if (partner && partner !== '0') params.partnerCode = partner;
 
   try {
@@ -8677,7 +8677,7 @@ async function gtQueryBilateral() {
 
       resultEl.innerHTML = `
         <div class="gt-result-card">
-          <div class="gt-section-title">${FLAG_MAP[GT_COUNTRIES.find(c=>c.code==reporter)?.iso]||''} ${reporterName}의 HS ${hs6} 수출 대상국 (${year})</div>
+          <div class="gt-section-title">${FLAG_MAP[GT_COUNTRIES.find(c=>c.code==reporter)?.iso]||''} ${reporterName}의 ${hs6 ? 'HS '+hs6 : '전체 품목'} 수출 대상국 (${year})</div>
           <div style="height:380px;"><canvas id="gtBiChart"></canvas></div>
         </div>
         <div class="gt-result-card">
@@ -8730,7 +8730,7 @@ async function gtQueryBilateral() {
 
       resultEl.innerHTML = `
         <div class="gt-result-card">
-          <div class="gt-section-title">🔄 양자교역 상세 — HS ${hs6} (${year})</div>
+          <div class="gt-section-title">🔄 양자교역 상세 — ${hs6 ? 'HS '+hs6 : '전체 품목'} (${year})</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
             <div style="background:var(--cream);border-radius:6px;padding:16px;">
               <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px;">
