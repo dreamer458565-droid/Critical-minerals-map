@@ -8669,16 +8669,20 @@ async function gtRenderFlowMap(reporterIso, partners, totalValue, isImport) {
       .attr('text-anchor', 'middle').attr('fill', '#F4C430').attr('font-size', 10).attr('font-weight', 700)
       .text(COUNTRY_NAMES[reporterIso] || reporterIso);
 
-    // 교역 흐름 화살표
+    // 교역 흐름 화살표 — 비중 1% 미만 제외, 규모에 비례하여 화살표/원 차별화
     const maxVal = partners[0]?.value || 1;
     const colors = ['#1ABC9C','#3498db','#e67e22','#e74c3c','#9b59b6','#27ae60','#f39c12','#2980b9','#c0392b','#8e44ad','#16a085','#d35400','#2c3e50','#7f8c8d','#1abc9c'];
 
     partners.forEach((p, i) => {
       const destCoord = GT_COORDS[p.iso];
       if (!destCoord) return;
-      const destXY = proj(destCoord);
       const pct = totalValue > 0 ? (p.value / totalValue * 100) : 0;
-      const strokeW = Math.max(1, Math.min(5, (p.value / maxVal) * 5));
+      if (pct < 1) return; // 비중 1% 미만 제외
+
+      const destXY = proj(destCoord);
+      const ratio = p.value / maxVal;
+      const strokeW = Math.max(1.5, Math.min(8, ratio * 8));
+      const opacity = Math.max(0.4, Math.min(0.9, 0.4 + ratio * 0.5));
 
       // 곡선 호 (수입 모드면 partner→reporter 방향)
       const fromXY = isImport ? destXY : srcXY;
@@ -8690,16 +8694,18 @@ async function gtRenderFlowMap(reporterIso, partners, totalValue, isImport) {
       svg.append('path')
         .attr('d', `M${fromXY[0]},${fromXY[1]} Q${mx},${my} ${toXY[0]},${toXY[1]}`)
         .attr('fill', 'none').attr('stroke', colors[i % colors.length]).attr('stroke-width', strokeW)
-        .attr('opacity', 0.7).attr('marker-end', 'url(#gtArrow)');
+        .attr('opacity', opacity).attr('marker-end', 'url(#gtArrow)');
 
-      // 도착국 원 + 라벨
-      const r = Math.max(3, Math.min(6, strokeW));
+      // 파트너국 원 — 규모에 비례 (3~10px)
+      const r = Math.max(3, Math.min(10, 3 + ratio * 7));
       svg.append('circle').attr('cx', destXY[0]).attr('cy', destXY[1]).attr('r', r)
-        .attr('fill', colors[i % colors.length]).attr('stroke', '#fff').attr('stroke-width', 0.8);
+        .attr('fill', colors[i % colors.length]).attr('stroke', '#fff').attr('stroke-width', 1);
 
-      if (i < 8) { // 상위 8개국만 라벨 표시
+      // 상위 10개국만 라벨 표시
+      if (i < 10) {
+        const fontSize = Math.max(7, Math.min(10, 7 + ratio * 3));
         svg.append('text').attr('x', destXY[0]).attr('y', destXY[1] + r + 11)
-          .attr('text-anchor', 'middle').attr('fill', '#fff').attr('font-size', 8).attr('font-weight', 600).attr('opacity', 0.9)
+          .attr('text-anchor', 'middle').attr('fill', '#fff').attr('font-size', fontSize).attr('font-weight', 600).attr('opacity', 0.9)
           .text(`${COUNTRY_NAMES[p.iso] || p.iso} ${pct.toFixed(1)}%`);
       }
     });
