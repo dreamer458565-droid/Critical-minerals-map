@@ -966,6 +966,38 @@ table.result tbody td.center{text-align:center;}
 .gs-dl-btn.primary{background:var(--amber);color:#fff;}
 .gs-dl-btn.secondary{background:var(--white);color:var(--navy);border:1px solid var(--border);}
 .gs-dl-btn:hover{opacity:.85;}
+
+/* ── 글로벌 교역 탭 ── */
+.gt-sub-btn{padding:8px 18px;font-size:12px;font-weight:600;background:var(--white);color:var(--subtext);border:none;cursor:pointer;transition:background .15s,color .15s;}
+.gt-sub-btn.active{background:var(--navy);color:#fff;}
+.gt-input{padding:7px 10px;border:1px solid var(--border);border-radius:4px;font-size:12px;background:var(--white);color:var(--text);font-family:'Noto Sans KR',sans-serif;}
+.gt-select{padding:6px 10px;border:1px solid var(--border);border-radius:4px;font-size:12px;background:var(--white);color:var(--text);}
+.gt-btn{padding:8px 20px;font-size:12px;font-weight:700;border:none;border-radius:4px;cursor:pointer;transition:opacity .15s;}
+.gt-btn.primary{background:var(--navy);color:#fff;}
+.gt-btn.primary:hover{opacity:.85;}
+.gt-mineral-chip{display:inline-block;padding:5px 12px;font-size:11px;font-weight:600;border-radius:20px;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--text);transition:all .15s;margin:3px;}
+.gt-mineral-chip:hover{border-color:var(--amber);color:var(--amber);}
+.gt-mineral-chip.active{background:var(--amber);color:#fff;border-color:var(--amber);}
+.gt-result-card{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:14px;box-shadow:0 1px 6px rgba(44,36,22,.05);}
+.gt-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px;}
+.gt-table th{background:var(--navy);color:#fff;padding:7px 8px;text-align:left;font-size:10px;font-weight:700;}
+.gt-table td{padding:6px 8px;border-bottom:1px solid var(--border);}
+.gt-table tr.korea{background:rgba(244,196,48,.1);font-weight:700;}
+.gt-table .num{text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px;}
+.gt-loading{text-align:center;padding:30px;color:var(--subtext);font-size:12px;}
+.gt-empty{text-align:center;padding:30px;color:var(--subtext);font-size:12px;}
+.gt-hs-guide{background:var(--cream);border:1px solid var(--border);border-radius:6px;padding:12px;margin-top:10px;max-height:300px;overflow-y:auto;}
+.gt-hs-node{padding:6px 10px;cursor:pointer;font-size:12px;color:var(--text);border-bottom:1px solid rgba(0,0,0,.05);display:flex;align-items:center;gap:6px;transition:background .15s;}
+.gt-hs-node:hover{background:rgba(212,134,12,.08);}
+.gt-hs-code{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--navy);min-width:60px;}
+.gt-hs-name{flex:1;font-size:11px;color:var(--text);}
+.gt-hs-drill{color:var(--amber);font-size:10px;}
+.gt-breadcrumb{font-size:11px;color:var(--subtext);margin-bottom:8px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.gt-breadcrumb span{cursor:pointer;}.gt-breadcrumb span:hover{color:var(--navy);}
+.gt-breadcrumb .active{color:var(--navy);font-weight:700;cursor:default;}
+.gt-section-title{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.gt-analysis-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+@media(max-width:1024px){.gt-analysis-grid{grid-template-columns:1fr;}}
 .gs-chart-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:14px;}
 .gs-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
 .gs-bar-label{width:140px;font-size:11px;color:var(--text);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;}
@@ -1021,6 +1053,7 @@ table.result tbody td.center{text-align:center;}
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page3" onclick="switchTab(3)">🗺️&ensp;수입지도</button>
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page4" onclick="switchTab(4)">🔗&ensp;밸류체인</button>
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page5" onclick="switchTab(5)">🌍&ensp;글로벌 공급</button>
+    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page6" onclick="switchTab(6)">🌐&ensp;글로벌 교역</button>
   </div>
 </div>
 
@@ -1389,45 +1422,7 @@ table.result tbody td.center{text-align:center;}
       </div>
     </div>
 
-    <!-- UN Comtrade 글로벌 교역 섹션 -->
-    <div id="m-comtrade-section" style="display:none;margin-bottom:16px;">
-      <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:8px;">
-        🌍 글로벌 교역 현황 <span style="font-size:10px;font-weight:400;color:var(--subtext);">UN Comtrade</span>
-        <span id="m-comtrade-auth" style="font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(0,0,0,.06);color:var(--subtext);"></span>
-      </div>
-      <div class="chart-grid" style="grid-template-columns:1fr 1fr;">
-        <!-- 글로벌 수출국 TOP10 -->
-        <div class="chart-box">
-          <div class="chart-box-header">
-            <div class="chart-box-title" id="m-ct-exp-title">글로벌 수출국 TOP 10</div>
-          </div>
-          <div class="chart-box-body" style="height:280px;">
-            <div id="m-ct-exp-loading" style="text-align:center;padding:30px;color:var(--subtext);font-size:11px;">Comtrade 데이터 로딩 중…</div>
-            <canvas id="m-ct-exp-chart"></canvas>
-          </div>
-        </div>
-        <!-- 한국 vs 경쟁국 수입 비교 -->
-        <div class="chart-box">
-          <div class="chart-box-header">
-            <div class="chart-box-title">한국 vs 경쟁국 수입 비교</div>
-          </div>
-          <div class="chart-box-body" style="height:280px;">
-            <div id="m-ct-comp-loading" style="text-align:center;padding:30px;color:var(--subtext);font-size:11px;">Comtrade 데이터 로딩 중…</div>
-            <canvas id="m-ct-comp-chart"></canvas>
-          </div>
-        </div>
-      </div>
-      <!-- 글로벌 교역 추이 -->
-      <div class="chart-box" style="margin-top:10px;">
-        <div class="chart-box-header">
-          <div class="chart-box-title">글로벌 교역 추이 (연도별)</div>
-        </div>
-        <div class="chart-box-body" style="height:220px;">
-          <div id="m-ct-trend-loading" style="text-align:center;padding:30px;color:var(--subtext);font-size:11px;">Comtrade 데이터 로딩 중…</div>
-          <canvas id="m-ct-trend-chart"></canvas>
-        </div>
-      </div>
-    </div>
+    <!-- UN Comtrade → 글로벌 교역 탭(page6)으로 이동됨 -->
 
     <!-- 결과 테이블 -->
     <div class="result-table-wrap" id="m-table-wrap">
@@ -1608,17 +1603,7 @@ table.result tbody td.center{text-align:center;}
       <div class="chart-body" style="min-height:220px;"><canvas id="h-trend-chart" style="max-height:260px"></canvas></div>
     </div>
 
-    <!-- UN Comtrade 글로벌 교역 추이 -->
-    <div class="chart-box" id="h-ct-trend-box" style="margin-bottom:16px;display:none;">
-      <div class="chart-box-header">
-        <div class="chart-box-title">🌍 글로벌 교역 추이 (UN Comtrade)</div>
-        <span id="h-ct-auth" style="font-size:9px;padding:2px 6px;border-radius:3px;background:rgba(0,0,0,.06);color:var(--subtext);"></span>
-      </div>
-      <div class="chart-box-body" style="height:220px;">
-        <div id="h-ct-trend-loading" style="text-align:center;padding:30px;color:var(--subtext);font-size:11px;">Comtrade 데이터 로딩 중…</div>
-        <canvas id="h-ct-trend-chart"></canvas>
-      </div>
-    </div>
+    <!-- UN Comtrade 추이 → 글로벌 교역 탭(page6)으로 이동됨 -->
 
     <!-- 국가별 비중 요약 -->
     <div class="result-table-wrap" id="h-country-summary" style="margin-bottom:0;">
@@ -1922,7 +1907,7 @@ table.result tbody td.center{text-align:center;}
         <div style="display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;">
           <button id="gsTabResv" class="gs-sub-btn active" onclick="gsSetTab('reserves')">📦 매장량</button>
           <button id="gsTabProd" class="gs-sub-btn" onclick="gsSetTab('production')">⚙️ 생산량</button>
-          <button id="gsTabTrade" class="gs-sub-btn" onclick="gsSetTab('trade')">📊 교역량</button>
+          <!-- 교역량 → 글로벌 교역 탭(page6)으로 이동 -->
         </div>
         <div id="gsYearWrap" style="display:none;align-items:center;gap:6px;">
           <span style="font-size:11px;color:var(--subtext);">기준연도</span>
@@ -1948,6 +1933,38 @@ table.result tbody td.center{text-align:center;}
   </div>
   <!-- 툴팁 -->
   <div id="gsTooltip" style="position:fixed;display:none;background:rgba(15,25,50,.92);color:#fff;padding:8px 12px;border-radius:6px;font-size:12px;pointer-events:none;z-index:9999;line-height:1.6;"></div>
+</div>
+</div>
+
+<!-- ═══════════ page6: 글로벌 교역 ═══════════ -->
+<div class="page" id="page6" role="tabpanel" aria-labelledby="tab6">
+<div class="main">
+  <div style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;">
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--subtext);text-transform:uppercase;margin-bottom:6px;">UN Comtrade</div>
+      <div style="font-size:22px;font-weight:700;color:var(--navy);">글로벌 교역 분석</div>
+    </div>
+    <div style="font-size:11px;color:var(--subtext);line-height:1.7;text-align:right;">
+      <div><strong>출처</strong>&nbsp; UN Comtrade Database (Preview API)</div>
+      <div><strong>기준</strong>&nbsp; HS 6자리 코드 · 연간 데이터</div>
+      <div id="gtAuthStatus"></div>
+    </div>
+  </div>
+
+  <!-- 서브탭 -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+    <div style="display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+      <button id="gtTab0" class="gt-sub-btn active" onclick="gtSetTab(0)">📊 품목별 교역</button>
+      <button id="gtTab1" class="gt-sub-btn" onclick="gtSetTab(1)">🔄 양자교역</button>
+      <button id="gtTab2" class="gt-sub-btn" onclick="gtSetTab(2)">📈 교역 추이</button>
+      <button id="gtTab3" class="gt-sub-btn" onclick="gtSetTab(3)">🇰🇷 한국 교역</button>
+    </div>
+  </div>
+
+  <!-- 서브탭 콘텐츠 -->
+  <div id="gtContent">
+    <div class="gt-empty">서브탭을 선택하고 조회하세요</div>
+  </div>
 </div>
 </div>
 
@@ -4450,8 +4467,7 @@ function renderMineralResult(data) {
   renderMCountrySummary(data);
   renderMTable(data);
 
-  // UN Comtrade 글로벌 교역 데이터 (비동기, 메인 쿼리 완료 후)
-  queryComtradeForMineral(selectedMineral);
+  // UN Comtrade → 글로벌 교역 탭(page6)으로 이동됨
 }
 
 let mTableView = 'year'; // 'year' | 'month'
@@ -5095,12 +5111,9 @@ function autoSyncHsUnit(code) {
   }
 }
 
-/* ════════════════════════════════════════════════
-   9b. 광종별 조회 — UN Comtrade 글로벌 교역 차트
-════════════════════════════════════════════════ */
-let _mCtExpChart = null, _mCtCompChart = null, _mCtTrendChart = null;
+/* ── 9b. queryComtradeForMineral → 글로벌 교역 탭(page6)으로 이동됨 ── */
 
-async function queryComtradeForMineral(mineral) {
+async function queryComtradeForMineral_REMOVED(mineral) {
   const section = document.getElementById('m-comtrade-section');
   if (!section || !mineral) return;
 
@@ -5320,8 +5333,7 @@ function renderHsResult(data, hsCd) {
   renderHCountrySummary(data);
   renderHTable(data);
 
-  // UN Comtrade 글로벌 교역 추이
-  queryComtradeForHs(hsCd);
+  // UN Comtrade → 글로벌 교역 탭(page6)으로 이동됨
 }
 
 let _hCtTrendChart = null;
@@ -7725,25 +7737,22 @@ function gsSelectMineral(mineral) {
   if (_gsSubtab === 'production' && !hasProd && hasResv) _gsSubtab = 'reserves';
   document.getElementById('gsTabResv').classList.toggle('active', _gsSubtab==='reserves');
   document.getElementById('gsTabProd').classList.toggle('active', _gsSubtab==='production');
-  document.getElementById('gsTabTrade').classList.toggle('active', _gsSubtab==='trade');
-  if (_gsSubtab === 'trade') gsRenderTrade();
-  else gsRender();
+  gsRender();
 }
 
 function gsSwitchSubtab(tab) {
+  if (tab === 'trade') { switchTab(6); return; } // 글로벌 교역 탭으로 이동
   _gsSubtab = tab;
   document.getElementById('gsTabResv').classList.toggle('active', tab==='reserves');
   document.getElementById('gsTabProd').classList.toggle('active', tab==='production');
-  document.getElementById('gsTabTrade').classList.toggle('active', tab==='trade');
   document.getElementById('gsYearWrap').style.display = tab === 'production' ? 'flex' : 'none';
-  if (tab === 'trade') gsRenderTrade();
-  else gsRender();
+  gsRender();
 }
 function gsSetTab(tab) { gsSwitchSubtab(tab); }
 
-/* ── 글로벌 공급 탭: 교역량 (UN Comtrade) ── */
+/* ── gsRenderTrade → 글로벌 교역 탭(page6)으로 이동됨 ── */
 let _gsTradeChart = null;
-async function gsRenderTrade() {
+async function gsRenderTrade_REMOVED() {
   const content = document.getElementById('gsContent');
   if (!_gsMineral) {
     content.innerHTML = '<div style="padding:40px;text-align:center;color:var(--subtext);font-size:13px;">← 좌측에서 광종을 선택하세요</div>';
@@ -8040,11 +8049,822 @@ function gsDoDownload(allMinerals) {
   }
 }
 
+/* ════════════════════════════════════════════════
+   글로벌 교역 탭 (page6) — UN Comtrade 통합
+════════════════════════════════════════════════ */
+let _gtSubtab = 0;
+let _gtCommodityChart = null, _gtBilateralChart = null, _gtTrendChart = null;
+let _gtKoreaSourceChart = null, _gtKoreaCompChart = null;
+let _gtHsLevel = '';
+let _gtHsBreadcrumb = [];
+
+// 광종 → HS 6자리 매핑
+const GT_MINERAL_HS = {
+  '리튬':['253090','282520','282521','283691'],
+  '니켈':['260400','750110','750120'],
+  '코발트':['260500','282200'],
+  '흑연':['250410','250490'],
+  '희토류':['280530','284610'],
+  '텅스텐':['261100','810110'],
+  '망간':['260200','810211'],
+  '구리':['260300','740311'],
+  '철광석':['260111','260112'],
+  '아연':['260800','790111'],
+  '주석':['260900','800110'],
+  '알루미늄':['260600','760110'],
+  '티타늄':['261400','810810'],
+  '크롬':['261000','720241'],
+  '몰리브덴':['261310','810210'],
+  '바나듐':['261590','811292'],
+};
+
+// 국가 드롭다운 (한글, Comtrade 코드)
+const GT_COUNTRIES = [
+  {code:0,name:'전체',iso:'WLD'},
+  {code:410,name:'한국',iso:'KOR'},{code:156,name:'중국',iso:'CHN'},{code:392,name:'일본',iso:'JPN'},
+  {code:840,name:'미국',iso:'USA'},{code:276,name:'독일',iso:'DEU'},{code:826,name:'영국',iso:'GBR'},
+  {code:250,name:'프랑스',iso:'FRA'},{code:380,name:'이탈리아',iso:'ITA'},{code:724,name:'스페인',iso:'ESP'},
+  {code:528,name:'네덜란드',iso:'NLD'},{code:56,name:'벨기에',iso:'BEL'},{code:756,name:'스위스',iso:'CHE'},
+  {code:36,name:'호주',iso:'AUS'},{code:124,name:'캐나다',iso:'CAN'},{code:76,name:'브라질',iso:'BRA'},
+  {code:356,name:'인도',iso:'IND'},{code:643,name:'러시아',iso:'RUS'},{code:710,name:'남아공',iso:'ZAF'},
+  {code:360,name:'인도네시아',iso:'IDN'},{code:458,name:'말레이시아',iso:'MYS'},
+  {code:764,name:'태국',iso:'THA'},{code:704,name:'베트남',iso:'VNM'},{code:608,name:'필리핀',iso:'PHL'},
+  {code:158,name:'대만',iso:'TWN'},{code:702,name:'싱가포르',iso:'SGP'},{code:344,name:'홍콩',iso:'HKG'},
+  {code:682,name:'사우디아라비아',iso:'SAU'},{code:784,name:'아랍에미리트',iso:'ARE'},
+  {code:152,name:'칠레',iso:'CHL'},{code:604,name:'페루',iso:'PER'},{code:484,name:'멕시코',iso:'MEX'},
+  {code:578,name:'노르웨이',iso:'NOR'},{code:752,name:'스웨덴',iso:'SWE'},{code:246,name:'핀란드',iso:'FIN'},
+  {code:616,name:'폴란드',iso:'POL'},{code:792,name:'튀르키예',iso:'TUR'},{code:818,name:'이집트',iso:'EGY'},
+  {code:566,name:'나이지리아',iso:'NGA'},{code:180,name:'DR콩고',iso:'COD'},{code:894,name:'잠비아',iso:'ZMB'},
+  {code:496,name:'몽골',iso:'MNG'},{code:398,name:'카자흐스탄',iso:'KAZ'},{code:68,name:'볼리비아',iso:'BOL'},
+];
+
+function gtFormatValue(v) {
+  if (!v || v === 0) return '$0';
+  if (v >= 1e9) return `$${(v/1e9).toFixed(2)}B`;
+  if (v >= 1e6) return `$${(v/1e6).toFixed(1)}M`;
+  if (v >= 1e3) return `$${(v/1e3).toFixed(0)}K`;
+  return `$${v.toFixed(0)}`;
+}
+
+function gtFormatWeight(w) {
+  if (!w || w === 0) return '0';
+  if (w >= 1e9) return `${(w/1e9).toFixed(1)}B kg`;
+  if (w >= 1e6) return `${(w/1e6).toFixed(1)}M kg`;
+  if (w >= 1e3) return `${(w/1e3).toFixed(0)}K kg`;
+  return `${w.toFixed(0)} kg`;
+}
+
+function gtCountryOptions(includeAll) {
+  return GT_COUNTRIES
+    .filter(c => includeAll || c.code !== 0)
+    .map(c => `<option value="${c.code}">${FLAG_MAP[c.iso]||''} ${c.name}</option>`)
+    .join('');
+}
+
+function gtYearOptions(selected) {
+  return Array.from({length:6},(_,i)=>2024-i)
+    .map(y => `<option value="${y}"${y===selected?' selected':''}>${y}</option>`)
+    .join('');
+}
+
+function gtMineralChips(activeMineral) {
+  return Object.keys(GT_MINERAL_HS).map(m =>
+    `<span class="gt-mineral-chip${m===activeMineral?' active':''}" onclick="gtSelectMineral('${m}',this)">${m}</span>`
+  ).join('');
+}
+
+function gtSelectMineral(mineral, el) {
+  document.querySelectorAll('#gtContent .gt-mineral-chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const hsInput = document.getElementById('gtHsInput');
+  if (hsInput && GT_MINERAL_HS[mineral]) {
+    hsInput.value = GT_MINERAL_HS[mineral][0];
+  }
+}
+
+function gtSetTab(tab) {
+  _gtSubtab = tab;
+  for (let i = 0; i < 4; i++) {
+    const btn = document.getElementById('gtTab' + i);
+    if (btn) btn.classList.toggle('active', i === tab);
+  }
+  gtRender();
+}
+
+function gtRender() {
+  const content = document.getElementById('gtContent');
+  if (!content) return;
+  switch (_gtSubtab) {
+    case 0: gtRenderCommodity(); break;
+    case 1: gtRenderBilateral(); break;
+    case 2: gtRenderTrend(); break;
+    case 3: gtRenderKorea(); break;
+  }
+}
+
+// ─── 서브탭 0: 품목별 교역 ───
+function gtRenderCommodity() {
+  const content = document.getElementById('gtContent');
+  content.innerHTML = `
+    <div class="gt-result-card">
+      <div class="gt-section-title">📊 품목별 교역 — HS 코드 기반 글로벌 랭킹</div>
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">HS 코드 (6자리)</label>
+          <input id="gtHsInput" type="text" class="gt-input" placeholder="예: 282520" maxlength="6" style="width:120px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">기준연도</label>
+          <select id="gtCmdYear" class="gt-select">${gtYearOptions(2023)}</select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">수출/수입</label>
+          <select id="gtCmdFlow" class="gt-select">
+            <option value="X">수출</option>
+            <option value="M">수입</option>
+          </select>
+        </div>
+        <button class="gt-btn primary" onclick="gtQueryCommodity()">🔍 조회</button>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="font-size:11px;color:var(--subtext);margin-bottom:6px;">광종 빠른선택</div>
+        ${gtMineralChips('')}
+      </div>
+      <details style="margin-bottom:10px;">
+        <summary style="font-size:12px;font-weight:600;color:var(--navy);cursor:pointer;">📋 HS 코드 가이드 (클릭하여 펼치기)</summary>
+        <div class="gt-hs-guide">
+          <div id="gtHsBreadcrumb" class="gt-breadcrumb"><span class="active">전체 류</span></div>
+          <div id="gtHsNodes"></div>
+        </div>
+      </details>
+    </div>
+    <div id="gtCmdResult"></div>`;
+  gtBuildHsGuide('');
+}
+
+function gtBuildHsGuide(code) {
+  const nodesEl = document.getElementById('gtHsNodes');
+  const breadEl = document.getElementById('gtHsBreadcrumb');
+  if (!nodesEl || !breadEl) return;
+
+  const c = (code || '').replace(/\./g, '');
+  _gtHsLevel = c;
+
+  if (!c || c.length < 2) {
+    breadEl.innerHTML = '<span class="active">전체 류</span>';
+    nodesEl.innerHTML = Object.entries(HS_TREE).map(([ch, node]) =>
+      `<div class="gt-hs-node" onclick="gtDrillHs('${ch}')">
+        <span class="gt-hs-code">${ch}</span>
+        <span class="gt-hs-name">${node.name}</span>
+        <span class="gt-hs-drill">▶</span>
+      </div>`
+    ).join('');
+    return;
+  }
+
+  const top2 = c.slice(0, 2);
+  const root = HS_TREE[top2];
+  if (!root) { nodesEl.innerHTML = '<div style="padding:12px;color:var(--subtext);">해당 류에 등록된 트리 없음</div>'; return; }
+
+  _gtHsBreadcrumb = [{ code: '', name: '전체' }, { code: top2, name: root.name }];
+  let currentNode = root;
+  let currentChildren = root.children || {};
+  for (const lvl of [4, 6]) {
+    if (c.length < lvl) break;
+    const prefix = c.slice(0, lvl);
+    if (currentChildren[prefix]) {
+      _gtHsBreadcrumb.push({ code: prefix, name: currentChildren[prefix].name });
+      currentNode = currentChildren[prefix];
+      currentChildren = currentNode.children || {};
+    } else break;
+  }
+
+  breadEl.innerHTML = _gtHsBreadcrumb.map((p, i) => {
+    const isLast = i === _gtHsBreadcrumb.length - 1;
+    const label = p.code ? `${p.code} ${p.name.slice(0, 15)}` : '전체';
+    return `<span class="${isLast ? 'active' : ''}" onclick="gtDrillHs('${p.code}')">${label}</span>${!isLast ? ' › ' : ''}`;
+  }).join('');
+
+  if (!currentChildren || Object.keys(currentChildren).length === 0) {
+    nodesEl.innerHTML = `<div style="padding:12px;color:var(--subtext);font-size:12px;">
+      <strong>${c}</strong> — ${currentNode.name}<br>하위 코드가 없습니다. 이 코드로 조회하세요.
+    </div>`;
+    return;
+  }
+
+  nodesEl.innerHTML = Object.entries(currentChildren).map(([code2, node]) => {
+    const hasChildren = node.children && Object.keys(node.children).length > 0;
+    const digitLen = code2.length;
+    if (digitLen > 6) return ''; // Comtrade는 6자리까지만
+    return `<div class="gt-hs-node" onclick="gtDrillHs('${code2}')">
+      <span class="gt-hs-code">${code2}</span>
+      <span class="gt-hs-name">${node.name} <span style="font-size:9px;color:var(--muted);">[${digitLen}자리]</span></span>
+      ${hasChildren && digitLen < 6 ? '<span class="gt-hs-drill">▶</span>' : '<span class="gt-hs-drill" style="color:var(--muted);">─</span>'}
+    </div>`;
+  }).filter(Boolean).join('');
+}
+
+function gtDrillHs(code) {
+  const hsInput = document.getElementById('gtHsInput');
+  if (hsInput) hsInput.value = code || '';
+  gtBuildHsGuide(code);
+}
+
+async function gtQueryCommodity() {
+  const hs = (document.getElementById('gtHsInput')?.value || '').trim();
+  const year = document.getElementById('gtCmdYear')?.value || '2023';
+  const flow = document.getElementById('gtCmdFlow')?.value || 'X';
+  const resultEl = document.getElementById('gtCmdResult');
+  if (!hs || hs.length < 2) { resultEl.innerHTML = '<div class="gt-empty">HS 코드를 입력하세요 (최소 2자리)</div>'; return; }
+
+  const hs6 = hs.substring(0, 6);
+  resultEl.innerHTML = '<div class="gt-loading">🔄 Comtrade 데이터 조회 중…</div>';
+
+  try {
+    const data = await callComtradeApi({ cmdCode: hs6, period: year, flowCode: flow });
+    if (!data || data.length === 0) { resultEl.innerHTML = '<div class="gt-empty">해당 조건의 데이터가 없습니다.</div>'; return; }
+
+    const countryMap = {};
+    data.forEach(r => {
+      if (!r.reporterISO || r.reporterISO === 'WLD') return;
+      if (!countryMap[r.reporterISO]) countryMap[r.reporterISO] = { iso: r.reporterISO, name: r.reporterDesc, value: 0, weight: 0 };
+      countryMap[r.reporterISO].value += (r.primaryValue || r.tradeValue || 0);
+      countryMap[r.reporterISO].weight += (r.netWgt || r.netWeight || 0);
+    });
+    const countries = Object.values(countryMap).sort((a, b) => b.value - a.value).slice(0, 15);
+    if (countries.length === 0) { resultEl.innerHTML = '<div class="gt-empty">국가별 데이터가 없습니다.</div>'; return; }
+
+    const totalValue = countries.reduce((s, c) => s + c.value, 0);
+    const flowLabel = flow === 'X' ? '수출' : '수입';
+
+    resultEl.innerHTML = `
+      <div class="gt-result-card">
+        <div class="gt-section-title">${flowLabel}국 TOP 15 — HS ${hs6} (${year}년)</div>
+        <div style="height:380px;"><canvas id="gtCmdChart"></canvas></div>
+      </div>
+      <div class="gt-result-card">
+        <table class="gt-table">
+          <thead><tr><th>순위</th><th>국가</th><th>${flowLabel}액 (USD)</th><th>비중</th><th>중량</th></tr></thead>
+          <tbody>${countries.map((c, i) => {
+            const koName = COUNTRY_NAMES[c.iso] || c.name;
+            const isKor = c.iso === 'KOR';
+            return `<tr class="${isKor ? 'korea' : ''}">
+              <td>${i + 1}</td>
+              <td>${FLAG_MAP[c.iso] || ''} ${koName}</td>
+              <td class="num">${gtFormatValue(c.value)}</td>
+              <td class="num">${totalValue > 0 ? (c.value / totalValue * 100).toFixed(1) : 0}%</td>
+              <td class="num">${gtFormatWeight(c.weight)}</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+      </div>
+      <div id="gtCmdAnalysis"></div>`;
+
+    // 바 차트
+    if (_gtCommodityChart) _gtCommodityChart.destroy();
+    _gtCommodityChart = new Chart(document.getElementById('gtCmdChart'), {
+      type: 'bar',
+      data: {
+        labels: countries.map(c => `${FLAG_MAP[c.iso] || ''} ${COUNTRY_NAMES[c.iso] || c.name}`),
+        datasets: [{
+          data: countries.map(c => c.value / 1e6),
+          backgroundColor: flow === 'X' ? 'rgba(26,188,156,.65)' : 'rgba(212,134,12,.65)',
+          borderRadius: 3,
+        }],
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${gtFormatValue(ctx.parsed.x * 1e6)} (${(ctx.parsed.x / (totalValue / 1e6) * 100).toFixed(1)}%)` } } },
+        scales: { x: { ticks: { font: { size: 10 }, callback: v => `$${v}M` }, grid: { color: 'rgba(0,0,0,.04)' } }, y: { ticks: { font: { size: 11 } }, grid: { display: false } } },
+      },
+    });
+
+    // 분석 카드 자동 생성
+    gtBuildAnalysis(hs6, year, flow);
+  } catch (e) {
+    resultEl.innerHTML = `<div class="gt-empty" style="color:#e74c3c;">조회 실패: ${e.message}</div>`;
+  }
+}
+
+async function gtBuildAnalysis(hs6, year, flow) {
+  const el = document.getElementById('gtCmdAnalysis');
+  if (!el) return;
+  el.innerHTML = '<div class="gt-loading">📊 분석 데이터 로딩 중…</div>';
+
+  const analyses = [];
+
+  // 1) 한국 vs 경쟁국 수입 비교
+  try {
+    const compCodes = [410, 156, 392, 840];
+    const compData = await callComtradeApi({ cmdCode: hs6, period: year, reporterCode: compCodes.join(','), flowCode: 'M' });
+    const compMap = {};
+    compData.forEach(r => {
+      if (!compMap[r.reporterISO]) compMap[r.reporterISO] = { iso: r.reporterISO, value: 0 };
+      compMap[r.reporterISO].value += (r.primaryValue || r.tradeValue || 0);
+    });
+    const compCountries = compCodes.map(c => {
+      const iso = COMTRADE_CODES[c];
+      return compMap[iso] || { iso, value: 0 };
+    });
+    analyses.push(`<div class="gt-result-card">
+      <div class="gt-section-title">🇰🇷 한국 vs 경쟁국 수입 비교 (${year})</div>
+      <div style="height:220px;"><canvas id="gtAnalysisComp"></canvas></div>
+    </div>`);
+
+    el.innerHTML = analyses.join('');
+    new Chart(document.getElementById('gtAnalysisComp'), {
+      type: 'bar',
+      data: {
+        labels: compCountries.map(c => `${FLAG_MAP[c.iso] || ''} ${COUNTRY_NAMES[c.iso] || c.iso}`),
+        datasets: [{ data: compCountries.map(c => c.value / 1e6), backgroundColor: ['#F4C430', '#e74c3c', '#3498db', '#2ecc71'], borderRadius: 4 }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` 수입 ${gtFormatValue(ctx.parsed.y * 1e6)}` } } },
+        scales: { x: { ticks: { font: { size: 11 } }, grid: { display: false } }, y: { ticks: { font: { size: 9 }, callback: v => `$${v}M` }, grid: { color: 'rgba(0,0,0,.04)' } } },
+      },
+    });
+  } catch (e) { /* skip */ }
+
+  // 2) 교역 추이 (최근 5년)
+  try {
+    const endYear = parseInt(year);
+    const years = Array.from({ length: 5 }, (_, i) => endYear - 4 + i);
+    const trendData = await callComtradeApi({ cmdCode: hs6, period: years.join(','), flowCode: flow === 'X' ? 'X' : 'M' });
+    const yearTotals = {};
+    trendData.forEach(r => {
+      if (!yearTotals[r.period]) yearTotals[r.period] = 0;
+      yearTotals[r.period] += (r.primaryValue || r.tradeValue || 0);
+    });
+    const validYears = years.filter(y => yearTotals[y]);
+    if (validYears.length > 1) {
+      analyses.push(`<div class="gt-result-card">
+        <div class="gt-section-title">📈 글로벌 교역 추이 (${validYears[0]}~${validYears[validYears.length - 1]})</div>
+        <div style="height:220px;"><canvas id="gtAnalysisTrend"></canvas></div>
+      </div>`);
+      el.innerHTML = analyses.join('');
+      new Chart(document.getElementById('gtAnalysisTrend'), {
+        type: 'line',
+        data: {
+          labels: validYears.map(y => `${y}년`),
+          datasets: [{ label: '교역액 ($M)', data: validYears.map(y => (yearTotals[y] || 0) / 1e6), borderColor: '#1ABC9C', backgroundColor: 'rgba(26,188,156,.1)', fill: true, tension: .3, pointRadius: 4 }],
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'top', labels: { font: { size: 10 } } }, tooltip: { callbacks: { label: ctx => ` ${gtFormatValue(ctx.parsed.y * 1e6)}` } } },
+          scales: { x: { ticks: { font: { size: 10 } }, grid: { display: false } }, y: { ticks: { font: { size: 9 }, callback: v => `$${v}M` }, grid: { color: 'rgba(0,0,0,.04)' } } },
+        },
+      });
+    }
+  } catch (e) { /* skip */ }
+}
+
+// ─── 서브탭 1: 양자교역 ───
+function gtRenderBilateral() {
+  const content = document.getElementById('gtContent');
+  content.innerHTML = `
+    <div class="gt-result-card">
+      <div class="gt-section-title">🔄 양자교역 — 국가 간 교역 분석</div>
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">수출국 (보고국)</label>
+          <select id="gtBiReporter" class="gt-select" style="min-width:150px;">
+            ${gtCountryOptions(false)}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">수입국 (파트너)</label>
+          <select id="gtBiPartner" class="gt-select" style="min-width:150px;">
+            ${gtCountryOptions(true)}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">HS 코드 (6자리)</label>
+          <input id="gtBiHs" type="text" class="gt-input" placeholder="예: 260400" maxlength="6" style="width:120px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">기준연도</label>
+          <select id="gtBiYear" class="gt-select">${gtYearOptions(2023)}</select>
+        </div>
+        <button class="gt-btn primary" onclick="gtQueryBilateral()">🔍 조회</button>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="font-size:11px;color:var(--subtext);margin-bottom:6px;">광종 빠른선택</div>
+        ${gtMineralChips('')}
+      </div>
+    </div>
+    <div id="gtBiResult"></div>`;
+}
+
+async function gtQueryBilateral() {
+  const reporter = document.getElementById('gtBiReporter')?.value;
+  const partner = document.getElementById('gtBiPartner')?.value;
+  const hs = (document.getElementById('gtBiHs')?.value || '').trim();
+  const year = document.getElementById('gtBiYear')?.value || '2023';
+  const resultEl = document.getElementById('gtBiResult');
+
+  if (!reporter) { resultEl.innerHTML = '<div class="gt-empty">수출국을 선택하세요</div>'; return; }
+  if (!hs || hs.length < 2) { resultEl.innerHTML = '<div class="gt-empty">HS 코드를 입력하세요</div>'; return; }
+
+  const hs6 = hs.substring(0, 6);
+  resultEl.innerHTML = '<div class="gt-loading">🔄 양자교역 데이터 조회 중…</div>';
+
+  const params = { cmdCode: hs6, period: year, reporterCode: reporter, flowCode: 'X' };
+  if (partner && partner !== '0') params.partnerCode = partner;
+
+  try {
+    const data = await callComtradeApi(params);
+    if (!data || data.length === 0) { resultEl.innerHTML = '<div class="gt-empty">해당 조건의 교역 데이터가 없습니다.</div>'; return; }
+
+    const reporterName = GT_COUNTRIES.find(c => c.code == reporter)?.name || reporter;
+
+    if (!partner || partner === '0') {
+      // 파트너 전체 → 수출 대상국 분석
+      const partnerMap = {};
+      data.forEach(r => {
+        if (!r.partnerISO || r.partnerISO === 'WLD') return;
+        if (!partnerMap[r.partnerISO]) partnerMap[r.partnerISO] = { iso: r.partnerISO, name: r.partnerDesc, value: 0, weight: 0 };
+        partnerMap[r.partnerISO].value += (r.primaryValue || r.tradeValue || 0);
+        partnerMap[r.partnerISO].weight += (r.netWgt || r.netWeight || 0);
+      });
+      const partners = Object.values(partnerMap).sort((a, b) => b.value - a.value).slice(0, 15);
+      const totalValue = partners.reduce((s, c) => s + c.value, 0);
+
+      resultEl.innerHTML = `
+        <div class="gt-result-card">
+          <div class="gt-section-title">${FLAG_MAP[GT_COUNTRIES.find(c=>c.code==reporter)?.iso]||''} ${reporterName}의 HS ${hs6} 수출 대상국 (${year})</div>
+          <div style="height:380px;"><canvas id="gtBiChart"></canvas></div>
+        </div>
+        <div class="gt-result-card">
+          <table class="gt-table">
+            <thead><tr><th>순위</th><th>수입국</th><th>수출액 (USD)</th><th>비중</th><th>중량</th></tr></thead>
+            <tbody>${partners.map((c, i) => {
+              const koName = COUNTRY_NAMES[c.iso] || c.name;
+              return `<tr>
+                <td>${i + 1}</td><td>${FLAG_MAP[c.iso] || ''} ${koName}</td>
+                <td class="num">${gtFormatValue(c.value)}</td>
+                <td class="num">${totalValue > 0 ? (c.value / totalValue * 100).toFixed(1) : 0}%</td>
+                <td class="num">${gtFormatWeight(c.weight)}</td>
+              </tr>`;
+            }).join('')}</tbody>
+          </table>
+        </div>`;
+
+      if (_gtBilateralChart) _gtBilateralChart.destroy();
+      _gtBilateralChart = new Chart(document.getElementById('gtBiChart'), {
+        type: 'bar',
+        data: {
+          labels: partners.map(c => `${FLAG_MAP[c.iso] || ''} ${COUNTRY_NAMES[c.iso] || c.name}`),
+          datasets: [{ data: partners.map(c => c.value / 1e6), backgroundColor: 'rgba(41,128,185,.65)', borderRadius: 3 }],
+        },
+        options: {
+          indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${gtFormatValue(ctx.parsed.x * 1e6)}` } } },
+          scales: { x: { ticks: { font: { size: 10 }, callback: v => `$${v}M` }, grid: { color: 'rgba(0,0,0,.04)' } }, y: { ticks: { font: { size: 11 } }, grid: { display: false } } },
+        },
+      });
+    } else {
+      // 특정 양국 간 교역
+      let totalVal = 0, totalWgt = 0;
+      data.forEach(r => {
+        totalVal += (r.primaryValue || r.tradeValue || 0);
+        totalWgt += (r.netWgt || r.netWeight || 0);
+      });
+      const partnerName = GT_COUNTRIES.find(c => c.code == partner)?.name || partner;
+      const unitPrice = totalWgt > 0 ? (totalVal / totalWgt).toFixed(2) : '-';
+
+      // 역방향도 조회
+      let revVal = 0, revWgt = 0;
+      try {
+        const revData = await callComtradeApi({ cmdCode: hs6, period: year, reporterCode: partner, partnerCode: reporter, flowCode: 'X' });
+        revData.forEach(r => {
+          revVal += (r.primaryValue || r.tradeValue || 0);
+          revWgt += (r.netWgt || r.netWeight || 0);
+        });
+      } catch (e) { /* skip */ }
+
+      resultEl.innerHTML = `
+        <div class="gt-result-card">
+          <div class="gt-section-title">🔄 양자교역 상세 — HS ${hs6} (${year})</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div style="background:var(--cream);border-radius:6px;padding:16px;">
+              <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px;">
+                ${FLAG_MAP[GT_COUNTRIES.find(c=>c.code==reporter)?.iso]||''} ${reporterName} → ${FLAG_MAP[GT_COUNTRIES.find(c=>c.code==partner)?.iso]||''} ${partnerName}
+              </div>
+              <div style="font-size:11px;color:var(--subtext);line-height:2;">
+                <div>교역액: <strong style="color:var(--navy);font-size:14px;">${gtFormatValue(totalVal)}</strong></div>
+                <div>중량: <strong>${gtFormatWeight(totalWgt)}</strong></div>
+                <div>단가: <strong>$${unitPrice}/kg</strong></div>
+              </div>
+            </div>
+            <div style="background:var(--cream);border-radius:6px;padding:16px;">
+              <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px;">
+                ${FLAG_MAP[GT_COUNTRIES.find(c=>c.code==partner)?.iso]||''} ${partnerName} → ${FLAG_MAP[GT_COUNTRIES.find(c=>c.code==reporter)?.iso]||''} ${reporterName}
+              </div>
+              <div style="font-size:11px;color:var(--subtext);line-height:2;">
+                <div>교역액: <strong style="color:var(--navy);font-size:14px;">${gtFormatValue(revVal)}</strong></div>
+                <div>중량: <strong>${gtFormatWeight(revWgt)}</strong></div>
+                <div>단가: <strong>$${revWgt > 0 ? (revVal / revWgt).toFixed(2) : '-'}/kg</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+  } catch (e) {
+    resultEl.innerHTML = `<div class="gt-empty" style="color:#e74c3c;">조회 실패: ${e.message}</div>`;
+  }
+}
+
+// ─── 서브탭 2: 교역 추이 ───
+function gtRenderTrend() {
+  const content = document.getElementById('gtContent');
+  content.innerHTML = `
+    <div class="gt-result-card">
+      <div class="gt-section-title">📈 교역 추이 — 연도별 교역량 변화</div>
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">HS 코드 (6자리)</label>
+          <input id="gtTrHs" type="text" class="gt-input" placeholder="예: 282520" maxlength="6" style="width:120px;">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">시작연도</label>
+          <select id="gtTrStart" class="gt-select">${gtYearOptions(2019)}</select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">종료연도</label>
+          <select id="gtTrEnd" class="gt-select">${gtYearOptions(2023)}</select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">수출/수입</label>
+          <select id="gtTrFlow" class="gt-select">
+            <option value="X">수출</option>
+            <option value="M">수입</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">조회국</label>
+          <select id="gtTrCountry" class="gt-select" style="min-width:130px;">
+            <option value="0">세계 합산</option>
+            ${gtCountryOptions(false)}
+          </select>
+        </div>
+        <button class="gt-btn primary" onclick="gtQueryTrend()">🔍 조회</button>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="font-size:11px;color:var(--subtext);margin-bottom:6px;">광종 빠른선택</div>
+        ${gtMineralChips('')}
+      </div>
+    </div>
+    <div id="gtTrResult"></div>`;
+}
+
+async function gtQueryTrend() {
+  const hs = (document.getElementById('gtTrHs')?.value || '').trim();
+  const startYear = parseInt(document.getElementById('gtTrStart')?.value || 2019);
+  const endYear = parseInt(document.getElementById('gtTrEnd')?.value || 2023);
+  const flow = document.getElementById('gtTrFlow')?.value || 'X';
+  const country = document.getElementById('gtTrCountry')?.value || '0';
+  const resultEl = document.getElementById('gtTrResult');
+
+  if (!hs || hs.length < 2) { resultEl.innerHTML = '<div class="gt-empty">HS 코드를 입력하세요</div>'; return; }
+
+  const hs6 = hs.substring(0, 6);
+  const years = [];
+  for (let y = startYear; y <= endYear; y++) years.push(y);
+  if (years.length === 0) { resultEl.innerHTML = '<div class="gt-empty">연도 범위를 확인하세요</div>'; return; }
+
+  resultEl.innerHTML = '<div class="gt-loading">🔄 추이 데이터 조회 중…</div>';
+
+  const params = { cmdCode: hs6, period: years.join(','), flowCode: flow };
+  if (country && country !== '0') params.reporterCode = country;
+
+  try {
+    const data = await callComtradeApi(params);
+    const yearTotals = {};
+
+    if (country && country !== '0') {
+      data.forEach(r => {
+        if (!yearTotals[r.period]) yearTotals[r.period] = { value: 0, weight: 0 };
+        yearTotals[r.period].value += (r.primaryValue || r.tradeValue || 0);
+        yearTotals[r.period].weight += (r.netWgt || r.netWeight || 0);
+      });
+    } else {
+      // 세계 합산: WLD 행 먼저, 없으면 개별 합산
+      data.forEach(r => {
+        if (r.reporterISO === 'WLD') {
+          if (!yearTotals[r.period]) yearTotals[r.period] = { value: 0, weight: 0 };
+          yearTotals[r.period].value += (r.primaryValue || r.tradeValue || 0);
+          yearTotals[r.period].weight += (r.netWgt || r.netWeight || 0);
+        }
+      });
+      if (Object.keys(yearTotals).length === 0) {
+        data.forEach(r => {
+          if (!yearTotals[r.period]) yearTotals[r.period] = { value: 0, weight: 0 };
+          yearTotals[r.period].value += (r.primaryValue || r.tradeValue || 0);
+          yearTotals[r.period].weight += (r.netWgt || r.netWeight || 0);
+        });
+      }
+    }
+
+    const validYears = years.filter(y => yearTotals[y]);
+    if (validYears.length === 0) { resultEl.innerHTML = '<div class="gt-empty">해당 기간의 데이터가 없습니다.</div>'; return; }
+
+    const flowLabel = flow === 'X' ? '수출' : '수입';
+    const countryLabel = country === '0' ? '세계' : (GT_COUNTRIES.find(c => c.code == country)?.name || '');
+
+    resultEl.innerHTML = `
+      <div class="gt-result-card">
+        <div class="gt-section-title">📈 ${countryLabel} ${flowLabel} 추이 — HS ${hs6}</div>
+        <div style="height:300px;"><canvas id="gtTrChart"></canvas></div>
+      </div>
+      <div class="gt-result-card">
+        <table class="gt-table">
+          <thead><tr><th>연도</th><th>${flowLabel}액 (USD)</th><th>중량</th><th>전년비</th></tr></thead>
+          <tbody>${validYears.map((y, i) => {
+            const v = yearTotals[y];
+            const prevV = i > 0 && yearTotals[validYears[i - 1]] ? yearTotals[validYears[i - 1]].value : null;
+            const change = prevV ? ((v.value - prevV) / prevV * 100).toFixed(1) : '-';
+            const changeColor = change === '-' ? '' : parseFloat(change) >= 0 ? 'color:#27AE60' : 'color:#e74c3c';
+            return `<tr>
+              <td>${y}년</td>
+              <td class="num">${gtFormatValue(v.value)}</td>
+              <td class="num">${gtFormatWeight(v.weight)}</td>
+              <td class="num" style="${changeColor}">${change === '-' ? '-' : (parseFloat(change) >= 0 ? '+' : '') + change + '%'}</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+      </div>`;
+
+    if (_gtTrendChart) _gtTrendChart.destroy();
+    _gtTrendChart = new Chart(document.getElementById('gtTrChart'), {
+      type: 'line',
+      data: {
+        labels: validYears.map(y => `${y}년`),
+        datasets: [{
+          label: `${flowLabel}액 ($M)`,
+          data: validYears.map(y => (yearTotals[y]?.value || 0) / 1e6),
+          borderColor: flow === 'X' ? '#1ABC9C' : '#D4860C',
+          backgroundColor: flow === 'X' ? 'rgba(26,188,156,.1)' : 'rgba(212,134,12,.1)',
+          fill: true, tension: .3, pointRadius: 5,
+        }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'top', labels: { font: { size: 10 } } }, tooltip: { callbacks: { label: ctx => ` ${gtFormatValue(ctx.parsed.y * 1e6)}` } } },
+        scales: { x: { ticks: { font: { size: 10 } }, grid: { display: false } }, y: { ticks: { font: { size: 9 }, callback: v => `$${v}M` }, grid: { color: 'rgba(0,0,0,.04)' } } },
+      },
+    });
+  } catch (e) {
+    resultEl.innerHTML = `<div class="gt-empty" style="color:#e74c3c;">조회 실패: ${e.message}</div>`;
+  }
+}
+
+// ─── 서브탭 3: 한국 교역 ───
+function gtRenderKorea() {
+  const content = document.getElementById('gtContent');
+  content.innerHTML = `
+    <div class="gt-result-card">
+      <div class="gt-section-title">🇰🇷 한국 교역 — 수입원 분석 + 경쟁국 비교</div>
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;color:var(--subtext);display:block;margin-bottom:4px;">기준연도</label>
+          <select id="gtKrYear" class="gt-select">${gtYearOptions(2023)}</select>
+        </div>
+        <button class="gt-btn primary" onclick="gtQueryKorea()">🔍 조회</button>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="font-size:11px;color:var(--subtext);margin-bottom:6px;">광종 선택 (클릭하여 조회)</div>
+        <div id="gtKrChips">${Object.keys(GT_MINERAL_HS).map(m =>
+          `<span class="gt-mineral-chip" onclick="gtQueryKorea('${m}',this)">${m}</span>`
+        ).join('')}</div>
+      </div>
+    </div>
+    <div id="gtKrResult"></div>`;
+}
+
+async function gtQueryKorea(mineral, chipEl) {
+  if (mineral && chipEl) {
+    document.querySelectorAll('#gtKrChips .gt-mineral-chip').forEach(c => c.classList.remove('active'));
+    chipEl.classList.add('active');
+  }
+
+  const activeChip = document.querySelector('#gtKrChips .gt-mineral-chip.active');
+  const selectedMineral = mineral || (activeChip ? activeChip.textContent : null);
+  const resultEl = document.getElementById('gtKrResult');
+  if (!selectedMineral || !GT_MINERAL_HS[selectedMineral]) {
+    resultEl.innerHTML = '<div class="gt-empty">광종을 선택하세요</div>';
+    return;
+  }
+
+  const year = document.getElementById('gtKrYear')?.value || '2023';
+  const hsCodes = GT_MINERAL_HS[selectedMineral];
+  const cmdCode = hsCodes.join(',');
+
+  resultEl.innerHTML = '<div class="gt-loading">🔄 한국 교역 데이터 조회 중…</div>';
+
+  try {
+    // 1) 한국 수입원 분석
+    const importData = await callComtradeApi({ cmdCode, period: year, reporterCode: '410', flowCode: 'M' });
+    const partnerMap = {};
+    importData.forEach(r => {
+      if (!r.partnerISO || r.partnerISO === 'WLD') return;
+      if (!partnerMap[r.partnerISO]) partnerMap[r.partnerISO] = { iso: r.partnerISO, name: r.partnerDesc, value: 0, weight: 0 };
+      partnerMap[r.partnerISO].value += (r.primaryValue || r.tradeValue || 0);
+      partnerMap[r.partnerISO].weight += (r.netWgt || r.netWeight || 0);
+    });
+    const partners = Object.values(partnerMap).sort((a, b) => b.value - a.value).slice(0, 15);
+    const totalImport = partners.reduce((s, c) => s + c.value, 0);
+
+    // 2) 경쟁국 비교 (한국·중국·일본·미국)
+    const compCodes = [410, 156, 392, 840];
+    const compData = await callComtradeApi({ cmdCode, period: year, reporterCode: compCodes.join(','), flowCode: 'M' });
+    const compMap = {};
+    compData.forEach(r => {
+      if (!compMap[r.reporterISO]) compMap[r.reporterISO] = { iso: r.reporterISO, value: 0 };
+      compMap[r.reporterISO].value += (r.primaryValue || r.tradeValue || 0);
+    });
+    const compCountries = compCodes.map(c => {
+      const iso = COMTRADE_CODES[c];
+      return compMap[iso] || { iso, value: 0 };
+    });
+
+    resultEl.innerHTML = `
+      <div class="gt-analysis-grid">
+        <div class="gt-result-card">
+          <div class="gt-section-title">🇰🇷 한국 ${selectedMineral} 수입원 TOP 15 (${year})</div>
+          <div style="height:350px;"><canvas id="gtKrSourceChart"></canvas></div>
+        </div>
+        <div class="gt-result-card">
+          <div class="gt-section-title">🏁 경쟁국 ${selectedMineral} 수입 비교 (${year})</div>
+          <div style="height:350px;"><canvas id="gtKrCompChart"></canvas></div>
+        </div>
+      </div>
+      <div class="gt-result-card" style="margin-top:14px;">
+        <div class="gt-section-title">한국 ${selectedMineral} 수입원 상세</div>
+        <table class="gt-table">
+          <thead><tr><th>순위</th><th>수출국</th><th>수입액 (USD)</th><th>비중</th><th>중량</th></tr></thead>
+          <tbody>${partners.map((c, i) => {
+            const koName = COUNTRY_NAMES[c.iso] || c.name;
+            return `<tr>
+              <td>${i + 1}</td><td>${FLAG_MAP[c.iso] || ''} ${koName}</td>
+              <td class="num">${gtFormatValue(c.value)}</td>
+              <td class="num">${totalImport > 0 ? (c.value / totalImport * 100).toFixed(1) : 0}%</td>
+              <td class="num">${gtFormatWeight(c.weight)}</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+      </div>`;
+
+    // 수입원 바 차트
+    if (_gtKoreaSourceChart) _gtKoreaSourceChart.destroy();
+    _gtKoreaSourceChart = new Chart(document.getElementById('gtKrSourceChart'), {
+      type: 'bar',
+      data: {
+        labels: partners.map(c => `${FLAG_MAP[c.iso] || ''} ${COUNTRY_NAMES[c.iso] || c.name}`),
+        datasets: [{ data: partners.map(c => c.value / 1e6), backgroundColor: 'rgba(212,134,12,.65)', borderRadius: 3 }],
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${gtFormatValue(ctx.parsed.x * 1e6)} (${(ctx.parsed.x / (totalImport / 1e6) * 100).toFixed(1)}%)` } } },
+        scales: { x: { ticks: { font: { size: 10 }, callback: v => `$${v}M` }, grid: { color: 'rgba(0,0,0,.04)' } }, y: { ticks: { font: { size: 10 } }, grid: { display: false } } },
+      },
+    });
+
+    // 경쟁국 비교 차트
+    if (_gtKoreaCompChart) _gtKoreaCompChart.destroy();
+    _gtKoreaCompChart = new Chart(document.getElementById('gtKrCompChart'), {
+      type: 'bar',
+      data: {
+        labels: compCountries.map(c => `${FLAG_MAP[c.iso] || ''} ${COUNTRY_NAMES[c.iso] || c.iso}`),
+        datasets: [{ data: compCountries.map(c => c.value / 1e6), backgroundColor: ['#F4C430', '#e74c3c', '#3498db', '#2ecc71'], borderRadius: 4 }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` 수입 ${gtFormatValue(ctx.parsed.y * 1e6)}` } } },
+        scales: { x: { ticks: { font: { size: 11 } }, grid: { display: false } }, y: { ticks: { font: { size: 9 }, callback: v => `$${v}M` }, grid: { color: 'rgba(0,0,0,.04)' } } },
+      },
+    });
+  } catch (e) {
+    resultEl.innerHTML = `<div class="gt-empty" style="color:#e74c3c;">조회 실패: ${e.message}</div>`;
+  }
+}
+
+// ─── 글로벌 교역 탭 초기화 ───
+let _gtInitDone = false;
+function gtInit() {
+  if (_gtInitDone) return;
+  _gtInitDone = true;
+  const authEl = document.getElementById('gtAuthStatus');
+  if (authEl) authEl.innerHTML = `<span style="font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(0,0,0,.06);">${_comtradeAuthMode === 'key' ? '🔑 인증됨' : '🔓 무료모드'}</span>`;
+  gtRender();
+}
+
 (function patchSwitchTabGS() {
   const orig = window.switchTab;
   window.switchTab = function(idx) {
     orig(idx);
     if (idx === 5) gsInit();
+    if (idx === 6) gtInit();
   };
 })();
 
