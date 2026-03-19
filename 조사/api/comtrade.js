@@ -164,8 +164,8 @@ export default async function handler(req, res) {
   const params = new URLSearchParams();
   params.set('cmdCode', cmdCode);
   if (period)       params.set('period', period);
-  if (reporterCode) params.set('reporterCode', reporterCode);
-  if (partnerCode)  params.set('partnerCode', partnerCode);
+  if (reporterCode && reporterCode !== '0') params.set('reporterCode', reporterCode);
+  if (partnerCode && partnerCode !== '0')  params.set('partnerCode', partnerCode);
   if (flowCode)     params.set('flowCode', flowCode);
   params.set('includeDesc', 'true');
 
