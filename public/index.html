@@ -8689,8 +8689,8 @@ async function gtRenderFlowMap(reporterIso, partners, totalValue, isImport) {
 
       const destXY = proj(destCoord);
       const ratio = p.value / maxVal;
-      const strokeW = Math.max(1.5, Math.min(8, ratio * 8));
-      const opacity = Math.max(0.4, Math.min(0.9, 0.4 + ratio * 0.5));
+      const strokeW = 2; // 화살표 굵기 동일
+      const opacity = Math.max(0.5, Math.min(0.9, 0.5 + ratio * 0.4));
 
       // 곡선 호 (수입 모드면 partner→reporter 방향)
       const fromXY = isImport ? destXY : srcXY;
@@ -8704,8 +8704,8 @@ async function gtRenderFlowMap(reporterIso, partners, totalValue, isImport) {
         .attr('fill', 'none').attr('stroke', colors[i % colors.length]).attr('stroke-width', strokeW)
         .attr('opacity', opacity).attr('marker-end', 'url(#gtArrow)');
 
-      // 파트너국 원 — 규모에 비례 (3~10px)
-      const r = Math.max(3, Math.min(10, 3 + ratio * 7));
+      // 파트너국 원 — 규모에 크게 비례 (3~16px)
+      const r = Math.max(3, Math.min(16, 3 + ratio * 13));
       svg.append('circle').attr('cx', destXY[0]).attr('cy', destXY[1]).attr('r', r)
         .attr('fill', colors[i % colors.length]).attr('stroke', '#fff').attr('stroke-width', 1);
 
