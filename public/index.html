@@ -8136,9 +8136,12 @@ function gtMineralChips(activeMineral) {
 function gtSelectMineral(mineral, el) {
   document.querySelectorAll('#gtContent .gt-mineral-chip').forEach(c => c.classList.remove('active'));
   if (el) el.classList.add('active');
-  const hsInput = document.getElementById('gtHsInput');
-  if (hsInput && GT_MINERAL_HS[mineral]) {
-    hsInput.value = GT_MINERAL_HS[mineral][0];
+  if (GT_MINERAL_HS[mineral]) {
+    const code = GT_MINERAL_HS[mineral][0];
+    ['gtHsInput','gtBiHs','gtTrHs'].forEach(id => {
+      const inp = document.getElementById(id);
+      if (inp) inp.value = code;
+    });
   }
 }
 
