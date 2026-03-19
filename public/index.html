@@ -8624,7 +8624,7 @@ const GT_COORDS = {
 };
 
 // 양자교역 흐름 지도 렌더링
-async function gtRenderFlowMap(reporterIso, partners, totalValue) {
+async function gtRenderFlowMap(reporterIso, partners, totalValue, isImport) {
   const mapEl = document.getElementById('gtBiFlowMap');
   if (!mapEl || !window.d3 || !window.topojson) return;
 
@@ -8680,13 +8680,15 @@ async function gtRenderFlowMap(reporterIso, partners, totalValue) {
       const pct = totalValue > 0 ? (p.value / totalValue * 100) : 0;
       const strokeW = Math.max(1, Math.min(5, (p.value / maxVal) * 5));
 
-      // 곡선 호
-      const mx = (srcXY[0] + destXY[0]) / 2;
-      const lift = Math.hypot(srcXY[0] - destXY[0], srcXY[1] - destXY[1]) * 0.2;
-      const my = (srcXY[1] + destXY[1]) / 2 - lift;
+      // 곡선 호 (수입 모드면 partner→reporter 방향)
+      const fromXY = isImport ? destXY : srcXY;
+      const toXY = isImport ? srcXY : destXY;
+      const mx = (fromXY[0] + toXY[0]) / 2;
+      const lift = Math.hypot(fromXY[0] - toXY[0], fromXY[1] - toXY[1]) * 0.2;
+      const my = (fromXY[1] + toXY[1]) / 2 - lift;
 
       svg.append('path')
-        .attr('d', `M${srcXY[0]},${srcXY[1]} Q${mx},${my} ${destXY[0]},${destXY[1]}`)
+        .attr('d', `M${fromXY[0]},${fromXY[1]} Q${mx},${my} ${toXY[0]},${toXY[1]}`)
         .attr('fill', 'none').attr('stroke', colors[i % colors.length]).attr('stroke-width', strokeW)
         .attr('opacity', 0.7).attr('marker-end', 'url(#gtArrow)');
 
@@ -8845,7 +8847,7 @@ async function gtQueryBilateral() {
       });
       // 교역 흐름 지도 렌더
       const repIso = GT_COUNTRIES.find(c => c.code == reporter)?.iso;
-      if (repIso) gtRenderFlowMap(repIso, partners, totalValue);
+      if (repIso) gtRenderFlowMap(repIso, partners, totalValue, isImport);
     } else {
       // 특정 양국 간 교역
       let totalVal = 0, totalWgt = 0;
@@ -8903,7 +8905,7 @@ async function gtQueryBilateral() {
       if (repIso2 && parIso2) {
         const biPartners = [{ iso: parIso2, value: totalVal }];
         if (revVal > 0) biPartners.push({ iso: repIso2, value: revVal });
-        gtRenderFlowMap(repIso2, biPartners, totalVal + revVal);
+        gtRenderFlowMap(repIso2, biPartners, totalVal + revVal, isImport);
       }
     }
   } catch (e) {
