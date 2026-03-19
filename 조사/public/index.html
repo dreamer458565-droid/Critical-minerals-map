@@ -8610,6 +8610,101 @@ function gtSelectExportStage(product, stage, el) {
   gtFillHsInputs(codes.join(','));
 }
 
+// 국가 ISO3 → 좌표 (주요국 중심점)
+const GT_COORDS = {
+  KOR:[127,37],CHN:[104,35],JPN:[138,36],USA:[-97,38],DEU:[10,51],GBR:[-2,54],
+  FRA:[2,46],ITA:[12,43],ESP:[-4,40],NLD:[5,52],BEL:[4,51],CHE:[8,47],
+  AUS:[134,-25],CAN:[-106,56],BRA:[-53,-10],IND:[79,22],RUS:[100,60],ZAF:[25,-29],
+  IDN:[117,-2],MYS:[102,4],THA:[101,15],VNM:[106,16],PHL:[122,13],TWN:[121,24],
+  SGP:[104,1],HKG:[114,22],SAU:[45,24],ARE:[54,24],CHL:[-71,-35],PER:[-76,-10],
+  MEX:[-102,23],NOR:[10,62],SWE:[16,62],FIN:[26,64],POL:[20,52],TUR:[35,39],
+  EGY:[30,27],NGA:[8,10],COD:[24,-4],ZMB:[28,-14],MNG:[105,47],KAZ:[67,48],
+  BOL:[-65,-17],ARG:[-64,-34],COL:[-74,4],UKR:[32,49],
+};
+
+// 양자교역 흐름 지도 렌더링
+async function gtRenderFlowMap(reporterIso, partners, totalValue) {
+  const mapEl = document.getElementById('gtBiFlowMap');
+  if (!mapEl || !window.d3 || !window.topojson) return;
+
+  const srcCoord = GT_COORDS[reporterIso];
+  if (!srcCoord) { mapEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--subtext);font-size:11px;">지도 좌표 없음</div>'; return; }
+
+  try {
+    const world = await d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+    mapEl.innerHTML = '';
+    const W = mapEl.clientWidth || 700;
+    const H = Math.round(W * 0.48);
+    const proj = d3.geoNaturalEarth1().scale(W / 6.28).translate([W * 0.48, H * 0.56]);
+    const gpath = d3.geoPath().projection(proj);
+    const svg = d3.select(mapEl).append('svg')
+      .attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`)
+      .style('display', 'block').style('border-radius', '6px');
+
+    // 배경
+    const defs = svg.append('defs');
+    const grad = defs.append('linearGradient').attr('id', '_gtmg').attr('x1', '0%').attr('y1', '0%').attr('x2', '0%').attr('y2', '100%');
+    grad.append('stop').attr('offset', '0%').attr('stop-color', '#1B2A4A');
+    grad.append('stop').attr('offset', '100%').attr('stop-color', '#0F1C33');
+    // 화살표 마커
+    defs.append('marker').attr('id','gtArrow').attr('viewBox','0 0 10 6').attr('refX',10).attr('refY',3)
+      .attr('markerWidth',8).attr('markerHeight',5).attr('orient','auto')
+      .append('path').attr('d','M0,0 L10,3 L0,6 Z').attr('fill','#F4C430');
+
+    svg.append('rect').attr('width', W).attr('height', H).attr('fill', 'url(#_gtmg)');
+    svg.append('path').datum(d3.geoGraticule()()).attr('d', gpath)
+      .attr('fill', 'none').attr('stroke', 'rgba(255,255,255,0.06)').attr('stroke-width', 0.3);
+
+    // 국가 경계
+    const features = topojson.feature(world, world.objects.countries).features;
+    svg.append('g').selectAll('path').data(features).enter().append('path')
+      .attr('d', gpath).attr('fill', '#2E4A6E').attr('stroke', 'rgba(255,255,255,0.15)').attr('stroke-width', 0.3);
+
+    // 수출국 원
+    const srcXY = proj(srcCoord);
+    svg.append('circle').attr('cx', srcXY[0]).attr('cy', srcXY[1]).attr('r', 6)
+      .attr('fill', '#F4C430').attr('stroke', '#fff').attr('stroke-width', 1.5);
+    svg.append('text').attr('x', srcXY[0]).attr('y', srcXY[1] - 12)
+      .attr('text-anchor', 'middle').attr('fill', '#F4C430').attr('font-size', 10).attr('font-weight', 700)
+      .text(COUNTRY_NAMES[reporterIso] || reporterIso);
+
+    // 교역 흐름 화살표
+    const maxVal = partners[0]?.value || 1;
+    const colors = ['#1ABC9C','#3498db','#e67e22','#e74c3c','#9b59b6','#27ae60','#f39c12','#2980b9','#c0392b','#8e44ad','#16a085','#d35400','#2c3e50','#7f8c8d','#1abc9c'];
+
+    partners.forEach((p, i) => {
+      const destCoord = GT_COORDS[p.iso];
+      if (!destCoord) return;
+      const destXY = proj(destCoord);
+      const pct = totalValue > 0 ? (p.value / totalValue * 100) : 0;
+      const strokeW = Math.max(1, Math.min(5, (p.value / maxVal) * 5));
+
+      // 곡선 호
+      const mx = (srcXY[0] + destXY[0]) / 2;
+      const lift = Math.hypot(srcXY[0] - destXY[0], srcXY[1] - destXY[1]) * 0.2;
+      const my = (srcXY[1] + destXY[1]) / 2 - lift;
+
+      svg.append('path')
+        .attr('d', `M${srcXY[0]},${srcXY[1]} Q${mx},${my} ${destXY[0]},${destXY[1]}`)
+        .attr('fill', 'none').attr('stroke', colors[i % colors.length]).attr('stroke-width', strokeW)
+        .attr('opacity', 0.7).attr('marker-end', 'url(#gtArrow)');
+
+      // 도착국 원 + 라벨
+      const r = Math.max(3, Math.min(6, strokeW));
+      svg.append('circle').attr('cx', destXY[0]).attr('cy', destXY[1]).attr('r', r)
+        .attr('fill', colors[i % colors.length]).attr('stroke', '#fff').attr('stroke-width', 0.8);
+
+      if (i < 8) { // 상위 8개국만 라벨 표시
+        svg.append('text').attr('x', destXY[0]).attr('y', destXY[1] + r + 11)
+          .attr('text-anchor', 'middle').attr('fill', '#fff').attr('font-size', 8).attr('font-weight', 600).attr('opacity', 0.9)
+          .text(`${COUNTRY_NAMES[p.iso] || p.iso} ${pct.toFixed(1)}%`);
+      }
+    });
+  } catch (e) {
+    mapEl.innerHTML = `<div style="padding:20px;text-align:center;color:var(--subtext);font-size:11px;">지도 로딩 실패</div>`;
+  }
+}
+
 // ─── 서브탭 1: 양자교역 ───
 function gtRenderBilateral() {
   const content = document.getElementById('gtContent');
@@ -8705,6 +8800,10 @@ async function gtQueryBilateral() {
               </tr>`;
             }).join('')}</tbody>
           </table>
+        </div>
+        <div class="gt-result-card">
+          <div class="gt-section-title">🗺️ 교역 흐름 지도</div>
+          <div id="gtBiFlowMap" style="height:380px;"></div>
         </div>`;
 
       if (_gtBilateralChart) _gtBilateralChart.destroy();
@@ -8721,6 +8820,9 @@ async function gtQueryBilateral() {
           scales: { x: { ticks: { font: { size: 10 }, callback: v => `$${v}M` }, grid: { color: 'rgba(0,0,0,.04)' } }, y: { ticks: { font: { size: 11 } }, grid: { display: false } } },
         },
       });
+      // 교역 흐름 지도 렌더
+      const repIso = GT_COUNTRIES.find(c => c.code == reporter)?.iso;
+      if (repIso) gtRenderFlowMap(repIso, partners, totalValue);
     } else {
       // 특정 양국 간 교역
       let totalVal = 0, totalWgt = 0;
@@ -8766,7 +8868,20 @@ async function gtQueryBilateral() {
               </div>
             </div>
           </div>
+        </div>
+        <div class="gt-result-card">
+          <div class="gt-section-title">🗺️ 교역 흐름 지도</div>
+          <div id="gtBiFlowMap" style="height:380px;"></div>
         </div>`;
+
+      // 양국 간 흐름 지도: 양방향 화살표
+      const repIso2 = GT_COUNTRIES.find(c => c.code == reporter)?.iso;
+      const parIso2 = GT_COUNTRIES.find(c => c.code == partner)?.iso;
+      if (repIso2 && parIso2) {
+        const biPartners = [{ iso: parIso2, value: totalVal }];
+        if (revVal > 0) biPartners.push({ iso: repIso2, value: revVal });
+        gtRenderFlowMap(repIso2, biPartners, totalVal + revVal);
+      }
     }
   } catch (e) {
     resultEl.innerHTML = `<div class="gt-empty" style="color:#e74c3c;">조회 실패: ${e.message}</div>`;
