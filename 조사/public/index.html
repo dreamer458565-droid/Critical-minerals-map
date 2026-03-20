@@ -8131,13 +8131,13 @@ function gsRender() {
     if (dataSource) {
       const allYrs = Object.keys(dataSource).sort();
       if (allYrs.length > 0) {
-        const TOP_STACK = 8;
-        // 최신연도 기준 상위 국가 결정
+        // 최신연도 기준 상위 5개국 (비중 높은 순, 나머지는 기타)
         const latestInfo = dataSource[allYrs[allYrs.length - 1]];
         const topCountries = (latestInfo.countries || [])
           .filter(c => !/^other/i.test(c.country))
-          .slice(0, TOP_STACK)
-          .map(c => c.country);
+          .slice(0, 5)
+          .map(c => c.country)
+; // 비중 높은 순 (첫 dataset=바닥이므로 이 순서 그대로)
 
         // 연도별 세계총계 YoY
         let yoyHtml = '';
@@ -8152,14 +8152,34 @@ function gsRender() {
           }
         }
         const latestWt = latestInfo.world_total;
+        // 1위 국가 정보
+        const topCountriesOrig = (latestInfo.countries || []).filter(c => !/^other/i.test(c.country));
+        const top1 = topCountriesOrig[0];
+        const top1Ko = top1 ? (GS_COUNTRY_KO[top1.country] || top1.country) : '-';
+        const top1Pct = (top1 && latestWt && latestWt > 0) ? (top1.value / latestWt * 100).toFixed(1) : 0;
+        // 상위 5개국 집중도
+        const top5Sum = topCountriesOrig.slice(0, 5).reduce((s, c) => s + c.value, 0);
+        const top5Pct = (latestWt && latestWt > 0) ? (top5Sum / latestWt * 100).toFixed(1) : 0;
+        const yrLabel = allYrs[allYrs.length-1] + (allYrs[allYrs.length-1]==='2025'?'E':'');
         content.innerHTML += '<div style="margin-top:24px;border-top:1px solid var(--border);padding-top:16px;">'
           + '<div class="gs-chart-title">' + (GS_MINERAL_KO[_gsMineral]||_gsMineral) + ' ' + labelType + ' — 국가별 누적 비교</div>'
-          + '<div style="display:flex;gap:16px;flex-wrap:wrap;margin:8px 0;">'
-          + '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:140px;">'
-          + '<div style="font-size:11px;color:var(--subtext);">세계 총 ' + labelType + ' (' + allYrs[allYrs.length-1] + (allYrs[allYrs.length-1]==='2025'?'E':'') + ')</div>'
+          + '<div style="display:flex;gap:12px;flex-wrap:wrap;margin:8px 0;">'
+          + '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:120px;">'
+          + '<div style="font-size:11px;color:var(--subtext);">세계 총 ' + labelType + ' (' + yrLabel + ')</div>'
           + '<div style="font-size:22px;font-weight:700;">' + (latestWt ? fmtVal(latestWt) : 'N/A') + yoyHtml + '</div>'
           + '<div style="font-size:10px;color:var(--subtext);">' + unit + '</div>'
-          + '</div></div>'
+          + '</div>'
+          + '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:120px;">'
+          + '<div style="font-size:11px;color:var(--subtext);">1위 생산국</div>'
+          + '<div style="font-size:18px;font-weight:700;">' + top1Ko + '</div>'
+          + '<div style="font-size:12px;color:var(--subtext);">' + (top1 ? fmtVal(top1.value) + ' ' + unit + ' (' + top1Pct + '%)' : '-') + '</div>'
+          + '</div>'
+          + '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:120px;">'
+          + '<div style="font-size:11px;color:var(--subtext);">상위 5개국 집중도</div>'
+          + '<div style="font-size:18px;font-weight:700;">' + top5Pct + '%</div>'
+          + '<div style="height:6px;background:#eee;border-radius:3px;margin-top:4px;"><div style="height:100%;width:' + top5Pct + '%;background:' + (top5Pct >= 80 ? '#e74c3c' : top5Pct >= 60 ? '#f39c12' : '#27ae60') + ';border-radius:3px;"></div></div>'
+          + '</div>'
+          + '</div>'
           + '<canvas id="gsStackedChart" height="260"></canvas>'
           + '<div style="font-size:10px;color:var(--subtext);margin-top:4px;">* 2025년은 추정치(E) · 출처: USGS MCS2026</div>'
           + '</div>';
@@ -8168,7 +8188,7 @@ function gsRender() {
         const canvas = document.getElementById('gsStackedChart');
         if (canvas) {
           if (window._gsStackedChart) window._gsStackedChart.destroy();
-          const stackColors = ['#3498db','#e74c3c','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#34495e'];
+          const stackColors = ['#3498db','#e74c3c','#2ecc71','#f39c12','#9b59b6'];
           const datasets = [];
           topCountries.forEach((country, i) => {
             const data = allYrs.map(yr => {
@@ -8214,6 +8234,7 @@ function gsRender() {
               plugins: {
                 legend: {
                   position: 'bottom',
+                  reverse: true,
                   labels: { font: { size: 10 }, boxWidth: 12, padding: 8 }
                 },
                 tooltip: {
