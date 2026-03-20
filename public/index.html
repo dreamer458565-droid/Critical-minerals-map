@@ -7856,8 +7856,7 @@ function gsSelectMineral(mineral) {
   });
   const hasResv = !!((USGS_SUPPLY_DATA.reserves)||{})[mineral];
   const hasProd = !!((USGS_SUPPLY_DATA.production)||{})[mineral];
-  if (_gsSubtab === 'reserves' && !hasResv && hasProd) _gsSubtab = 'production';
-  if (_gsSubtab === 'production' && !hasProd && hasResv) _gsSubtab = 'reserves';
+  // 탭 자동 전환 제거 — 데이터 없어도 현재 탭 유지
   ['gsTabResv','gsTabProd','gsTabReliance','gsTabPrice','gsTabConsump'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
