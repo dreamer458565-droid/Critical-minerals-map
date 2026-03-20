@@ -8114,6 +8114,108 @@ function gsRender() {
     + '<td class="num"><strong>' + wtDisplay + '</strong></td>'
     + '<td class="num"><strong>100%</strong></td></tr></tfoot>'
     + '</table></div>';
+
+  // ─── 생산량 탭: 미국 생산 시계열 차트 추가 ───
+  if (_gsSubtab === 'production') {
+    const salient = (typeof USGS_US_SALIENT !== 'undefined') ? USGS_US_SALIENT[_gsMineral] : null;
+    const usProd = salient && salient.production;
+    if (usProd && usProd.data) {
+      const yrs = Object.keys(usProd.data).sort();
+      const vals = yrs.map(y => usProd.data[y]);
+      if (vals.some(v => v !== null)) {
+        const usUnit = usProd.unit || unit;
+        const usLabel = usProd.label || '생산량';
+        // 미국 생산량 카드 + 차트
+        const latestYr = yrs[yrs.length - 1];
+        const latestVal = usProd.data[latestYr];
+        const prevYr = yrs.length >= 2 ? yrs[yrs.length - 2] : null;
+        const prevVal = prevYr ? usProd.data[prevYr] : null;
+        let yoyHtml = '';
+        if (latestVal !== null && prevVal !== null && prevVal > 0) {
+          const yoy = ((latestVal - prevVal) / prevVal * 100).toFixed(1);
+          const yoyColor = yoy > 0 ? '#27ae60' : yoy < 0 ? '#e74c3c' : 'var(--text)';
+          yoyHtml = '<span style="font-size:13px;color:' + yoyColor + ';margin-left:8px;">'
+            + (yoy > 0 ? '▲' : yoy < 0 ? '▼' : '—') + ' ' + Math.abs(yoy) + '% YoY</span>';
+        }
+        // 세계 총생산 대비 미국 비중
+        let shareHtml = '';
+        if (latestVal !== null && worldTotal && worldTotal > 0) {
+          // 단위 보정: salient 단위가 "thousand metric tons"이면 ×1000
+          let usValAdj = latestVal;
+          if (usUnit.toLowerCase().includes('thousand') && !unit.toLowerCase().includes('thousand')) {
+            usValAdj = latestVal * 1000;
+          } else if (!usUnit.toLowerCase().includes('thousand') && unit.toLowerCase().includes('thousand')) {
+            usValAdj = latestVal / 1000;
+          }
+          const share = (usValAdj / worldTotal * 100).toFixed(1);
+          shareHtml = '<div style="font-size:12px;color:var(--subtext);margin-top:4px;">세계 총생산 대비 미국 비중: <strong>' + share + '%</strong></div>';
+        }
+        content.innerHTML += '<div style="margin-top:24px;border-top:1px solid var(--border);padding-top:16px;">'
+          + '<div class="gs-chart-title">🇺🇸 ' + (GS_MINERAL_KO[_gsMineral]||_gsMineral) + ' 미국 생산 추이 (' + yrs[0] + '–' + yrs[yrs.length-1] + ')</div>'
+          + '<div style="display:flex;gap:16px;flex-wrap:wrap;margin:8px 0;">'
+          + '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:140px;">'
+          + '<div style="font-size:11px;color:var(--subtext);">' + latestYr + (latestYr==='2025'?' (추정)':'') + ' ' + usLabel + '</div>'
+          + '<div style="font-size:22px;font-weight:700;">' + (latestVal !== null ? latestVal.toLocaleString() : 'N/A') + yoyHtml + '</div>'
+          + '<div style="font-size:10px;color:var(--subtext);">' + usUnit + '</div>'
+          + shareHtml
+          + '</div></div>'
+          + '<canvas id="gsUSProdChart" height="200"></canvas>'
+          + '<div style="font-size:10px;color:var(--subtext);margin-top:4px;">* 2025년은 추정치(E) · 출처: USGS MCS2026 Salient Statistics</div>'
+          + '</div>';
+
+        // Chart.js 렌더
+        const canvas = document.getElementById('gsUSProdChart');
+        if (canvas) {
+          if (window._gsUSProdChart) window._gsUSProdChart.destroy();
+          const bgColors = yrs.map(y => y === '2025' ? 'rgba(52,152,219,0.3)' : 'rgba(52,152,219,0.7)');
+          const borderColors = yrs.map(y => y === '2025' ? 'rgba(52,152,219,0.5)' : 'rgba(52,152,219,1)');
+          const borderDash = yrs.map(y => y === '2025' ? [5,3] : []);
+          window._gsUSProdChart = new Chart(canvas, {
+            type: 'bar',
+            data: {
+              labels: yrs.map(y => y + (y==='2025'?'(E)':'')),
+              datasets: [{
+                label: usLabel + ' (' + usUnit + ')',
+                data: vals,
+                backgroundColor: bgColors,
+                borderColor: borderColors,
+                borderWidth: 1,
+                borderDash: undefined
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: {
+                    label: function(ctx) {
+                      const v = ctx.parsed.y;
+                      const yr = yrs[ctx.dataIndex];
+                      return (v !== null ? v.toLocaleString() : 'N/A') + ' ' + usUnit + (yr==='2025' ? ' (추정)' : '');
+                    }
+                  }
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: false,
+                  ticks: {
+                    callback: function(v) {
+                      if (v >= 1e6) return (v/1e6).toFixed(1) + 'M';
+                      if (v >= 1e3) return (v/1e3).toFixed(1) + 'K';
+                      return v;
+                    }
+                  },
+                  title: { display: true, text: usUnit, font: { size: 10 } }
+                }
+              }
+            }
+          });
+        }
+      }
+    }
+  }
 }
 
 // ─── 광종명 한글 변환 헬퍼 (대소문자·접미사 무관 매칭) ───
