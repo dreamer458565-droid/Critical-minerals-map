@@ -65,8 +65,8 @@ def build_supply_data(rows):
         # Skip non-World sections
         if 'World' not in section:
             continue
-        # Skip years before 2024
-        if year not in ('2024', '2025'):
+        # 2020-2025년 포함
+        if year not in ('2020', '2021', '2022', '2023', '2024', '2025'):
             continue
 
         is_production = stat == 'Production'
