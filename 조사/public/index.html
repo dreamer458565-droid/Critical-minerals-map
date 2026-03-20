@@ -1052,8 +1052,8 @@ table.result tbody td.center{text-align:center;}
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page2" onclick="switchTab(2)">🔢&ensp;HS코드별 조회</button>
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page3" onclick="switchTab(3)">🗺️&ensp;수입지도</button>
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page4" onclick="switchTab(4)">🔗&ensp;밸류체인</button>
-    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page5" onclick="switchTab(5)">🌍&ensp;USGS 통계</button>
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page6" onclick="switchTab(6)">🌐&ensp;글로벌 교역</button>
+    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page5" onclick="switchTab(5)">🌍&ensp;USGS 통계</button>
   </div>
 </div>
 
@@ -8123,7 +8123,7 @@ function gsRender() {
     + '<td class="num"><strong>100%</strong></td></tr></tfoot>'
     + '</table></div>';
 
-  // ─── 생산량/매장량 탭: 국가별 누적 막대 차트 ───
+  // ─── 생산량/매장량 탭: 추세 라인 차트 + 국가별 가로 막대 차트 ───
   {
     const dataSource = _gsSubtab === 'reserves'
       ? (USGS_SUPPLY_DATA.reserves || {})[_gsMineral]
@@ -8131,19 +8131,27 @@ function gsRender() {
     if (dataSource) {
       const allYrs = Object.keys(dataSource).sort();
       if (allYrs.length > 0) {
-        // 최신연도 기준 상위 5개국 (비중 높은 순, 나머지는 기타)
-        const latestInfo = dataSource[allYrs[allYrs.length - 1]];
-        const topCountries = (latestInfo.countries || [])
-          .filter(c => !/^other/i.test(c.country))
-          .slice(0, 5)
-          .map(c => c.country)
-; // 비중 높은 순 (첫 dataset=바닥이므로 이 순서 그대로)
+        const latestYr = allYrs[allYrs.length - 1];
+        const latestInfo = dataSource[latestYr];
+        const allCountries = (latestInfo.countries || []).filter(c => !/^other/i.test(c.country));
+        // 개별 국가 합계를 모수로 사용
+        const countrySum = allCountries.reduce((s, c) => s + c.value, 0);
+        const top5 = allCountries.slice(0, 5);
+        const top5Sum = top5.reduce((s, c) => s + c.value, 0);
+        const otherSum = Math.max(0, countrySum - top5Sum);
 
-        // 연도별 세계총계 YoY
+        // world_total fallback helper
+        function getTotal(yrData) {
+          if (yrData?.world_total != null) return yrData.world_total;
+          const cs = (yrData?.countries || []).filter(c => !/^other/i.test(c.country));
+          const sum = cs.reduce((s, c) => s + c.value, 0);
+          return sum > 0 ? sum : null;
+        }
+        // YoY
         let yoyHtml = '';
         if (allYrs.length >= 2) {
-          const wt1 = dataSource[allYrs[allYrs.length - 2]]?.world_total;
-          const wt2 = dataSource[allYrs[allYrs.length - 1]]?.world_total;
+          const wt1 = getTotal(dataSource[allYrs[allYrs.length - 2]]);
+          const wt2 = getTotal(latestInfo);
           if (wt1 && wt2 && wt1 > 0) {
             const yoy = ((wt2 - wt1) / wt1 * 100).toFixed(1);
             const yoyColor = yoy > 0 ? '#27ae60' : yoy < 0 ? '#e74c3c' : 'var(--text)';
@@ -8151,18 +8159,16 @@ function gsRender() {
               + (yoy > 0 ? '▲' : yoy < 0 ? '▼' : '—') + ' ' + Math.abs(yoy) + '% YoY</span>';
           }
         }
-        const latestWt = latestInfo.world_total;
-        // 1위 국가 정보
-        const topCountriesOrig = (latestInfo.countries || []).filter(c => !/^other/i.test(c.country));
-        const top1 = topCountriesOrig[0];
+        const latestWt = getTotal(latestInfo);
+        const top1 = allCountries[0];
         const top1Ko = top1 ? (GS_COUNTRY_KO[top1.country] || top1.country) : '-';
-        const top1Pct = (top1 && latestWt && latestWt > 0) ? (top1.value / latestWt * 100).toFixed(1) : 0;
-        // 상위 5개국 집중도
-        const top5Sum = topCountriesOrig.slice(0, 5).reduce((s, c) => s + c.value, 0);
-        const top5Pct = (latestWt && latestWt > 0) ? (top5Sum / latestWt * 100).toFixed(1) : 0;
-        const yrLabel = allYrs[allYrs.length-1] + (allYrs[allYrs.length-1]==='2025'?'E':'');
+        const top1Pct = (top1 && countrySum > 0) ? (top1.value / countrySum * 100).toFixed(1) : 0;
+        const top5Pct = countrySum > 0 ? (top5Sum / countrySum * 100).toFixed(1) : 0;
+        const yrLabel = latestYr + (latestYr === '2025' ? 'E' : '');
+
         content.innerHTML += '<div style="margin-top:24px;border-top:1px solid var(--border);padding-top:16px;">'
-          + '<div class="gs-chart-title">' + (GS_MINERAL_KO[_gsMineral]||_gsMineral) + ' ' + labelType + ' — 국가별 누적 비교</div>'
+          + '<div class="gs-chart-title">' + (GS_MINERAL_KO[_gsMineral]||_gsMineral) + ' ' + labelType + ' — 추세 및 국가별 비중</div>'
+          // 요약 카드
           + '<div style="display:flex;gap:12px;flex-wrap:wrap;margin:8px 0;">'
           + '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:120px;">'
           + '<div style="font-size:11px;color:var(--subtext);">세계 총 ' + labelType + ' (' + yrLabel + ')</div>'
@@ -8170,117 +8176,174 @@ function gsRender() {
           + '<div style="font-size:10px;color:var(--subtext);">' + unit + '</div>'
           + '</div>'
           + '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:120px;">'
-          + '<div style="font-size:11px;color:var(--subtext);">1위 생산국</div>'
+          + '<div style="font-size:11px;color:var(--subtext);">1위 ' + (_gsSubtab==='reserves'?'보유국':'생산국') + '</div>'
           + '<div style="font-size:18px;font-weight:700;">' + top1Ko + '</div>'
           + '<div style="font-size:12px;color:var(--subtext);">' + (top1 ? fmtVal(top1.value) + ' ' + unit + ' (' + top1Pct + '%)' : '-') + '</div>'
           + '</div>'
           + '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;min-width:120px;">'
           + '<div style="font-size:11px;color:var(--subtext);">상위 5개국 집중도</div>'
           + '<div style="font-size:18px;font-weight:700;">' + top5Pct + '%</div>'
-          + '<div style="height:6px;background:#eee;border-radius:3px;margin-top:4px;"><div style="height:100%;width:' + top5Pct + '%;background:' + (top5Pct >= 80 ? '#e74c3c' : top5Pct >= 60 ? '#f39c12' : '#27ae60') + ';border-radius:3px;"></div></div>'
+          + '<div style="height:6px;background:#eee;border-radius:3px;margin-top:4px;"><div style="height:100%;width:' + Math.min(100, top5Pct) + '%;background:' + (top5Pct >= 80 ? '#e74c3c' : top5Pct >= 60 ? '#f39c12' : '#27ae60') + ';border-radius:3px;"></div></div>'
           + '</div>'
           + '</div>'
-          + '<canvas id="gsStackedChart" height="180"></canvas>'
-          + '<div style="font-size:10px;color:var(--subtext);margin-top:4px;">* 2025년은 추정치(E) · 출처: USGS MCS2026</div>'
+          // 듀얼 차트 영역 (1개년만 있으면 라인차트 생략)
+          + '<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;">'
+          + (allYrs.length >= 2 ? '<div style="flex:1;min-width:280px;"><div style="font-size:12px;font-weight:600;margin-bottom:4px;">' + labelType + ' 추세 (' + allYrs[0] + '-' + latestYr + ')</div><canvas id="gsTrendLine" height="200"></canvas></div>' : '')
+          + '<div style="flex:1;min-width:280px;"><div style="font-size:12px;font-weight:600;margin-bottom:4px;">국가별 비중 (' + yrLabel + ')</div><canvas id="gsCountryBar" height="200"></canvas></div>'
+          + '</div>'
+          + '<div style="font-size:10px;color:var(--subtext);margin-top:4px;">* 2025년은 추정치(E) · 비중은 개별국 합계 기준 · 출처: USGS MCS</div>'
           + '</div>';
 
-        // 누적 막대 차트 데이터셋 생성
-        const canvas = document.getElementById('gsStackedChart');
-        if (canvas) {
-          if (window._gsStackedChart) window._gsStackedChart.destroy();
-          const stackColors = ['#3498db','#e74c3c','#2ecc71','#f39c12','#9b59b6'];
-          const datasets = [];
-          topCountries.forEach((country, i) => {
-            const data = allYrs.map(yr => {
-              const yrData = dataSource[yr];
-              const found = (yrData.countries || []).find(c => c.country === country);
-              return found ? found.value : 0;
-            });
-            datasets.push({
-              label: GS_COUNTRY_KO[country] || country,
-              data: data,
-              backgroundColor: stackColors[i % stackColors.length],
-              borderColor: 'rgba(255,255,255,0.5)',
-              borderWidth: 1
-            });
+        // ── 라인 차트: 세계 총 생산/매장량 추세 ──
+        const trendCanvas = document.getElementById('gsTrendLine');
+        if (trendCanvas) {
+          if (window._gsTrendChart) window._gsTrendChart.destroy();
+          const trendData = allYrs.map(yr => {
+            const d = dataSource[yr];
+            if (d?.world_total != null) return d.world_total;
+            // world_total이 null이면 국가별 합계로 대체
+            const cs = (d?.countries || []).filter(c => !/^other/i.test(c.country));
+            const sum = cs.reduce((s, c) => s + c.value, 0);
+            return sum > 0 ? sum : null;
           });
-          // 기타 국가 합산
-          const otherData = allYrs.map(yr => {
-            const yrData = dataSource[yr];
-            const topSum = topCountries.reduce((s, c) => {
-              const found = (yrData.countries || []).find(x => x.country === c);
-              return s + (found ? found.value : 0);
-            }, 0);
-            return Math.max(0, (yrData.world_total || 0) - topSum);
+          // 2025년만 점선으로 표시하기 위해 두 데이터셋 분리
+          const solidData = allYrs.map((yr, i) => yr !== '2025' ? trendData[i] : null);
+          const dashData = allYrs.map((yr, i) => {
+            if (yr === '2025') return trendData[i];
+            // 2025 직전 연도에도 값을 넣어 선이 연결되도록
+            const idx2025 = allYrs.indexOf('2025');
+            if (idx2025 > 0 && i === idx2025 - 1) return trendData[i];
+            return null;
           });
-          if (otherData.some(v => v > 0)) {
+          const datasets = [{
+            label: '세계 총 ' + labelType,
+            data: solidData,
+            borderColor: '#3498db',
+            backgroundColor: 'rgba(52,152,219,0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4,
+            pointBackgroundColor: '#3498db',
+            borderWidth: 2
+          }];
+          if (allYrs.includes('2025')) {
             datasets.push({
-              label: '기타 국가',
-              data: otherData,
-              backgroundColor: '#bdc3c7',
-              borderColor: 'rgba(255,255,255,0.5)',
-              borderWidth: 1
+              label: '추정치(E)',
+              data: dashData,
+              borderColor: '#3498db',
+              borderDash: [5, 3],
+              fill: false,
+              tension: 0.3,
+              pointRadius: 4,
+              pointStyle: 'triangle',
+              pointBackgroundColor: '#e74c3c',
+              borderWidth: 2
             });
           }
-
-          // 바 안에 국가명+비중 표시 플러그인
-          const stackedLabelPlugin = {
-            id: 'stackedLabels',
-            afterDatasetsDraw(chart) {
-              const ctx = chart.ctx;
-              chart.data.datasets.forEach((ds, dsIdx) => {
-                const meta = chart.getDatasetMeta(dsIdx);
-                meta.data.forEach((bar, i) => {
-                  const v = ds.data[i];
-                  if (!v) return;
-                  const total = chart.data.datasets.reduce((s, d) => s + (d.data[i] || 0), 0);
-                  const pct = total > 0 ? (v / total * 100) : 0;
-                  if (pct < 5) return; // 5% 미만은 라벨 생략
-                  const h = bar.height || (bar.base - bar.y);
-                  if (h < 14) return; // 바가 너무 작으면 생략
-                  ctx.save();
-                  ctx.fillStyle = '#fff';
-                  ctx.font = 'bold 9px sans-serif';
-                  ctx.textAlign = 'center';
-                  ctx.textBaseline = 'middle';
-                  const yMid = (bar.y + bar.base) / 2;
-                  const label = ds.label + ' ' + pct.toFixed(0) + '%';
-                  ctx.fillText(label, bar.x, yMid);
-                  ctx.restore();
-                });
-              });
-            }
-          };
-          window._gsStackedChart = new Chart(canvas, {
-            type: 'bar',
+          window._gsTrendChart = new Chart(trendCanvas, {
+            type: 'line',
             data: {
-              labels: allYrs.map(y => y + (y==='2025'?'(E)':'')),
+              labels: allYrs.map(y => y + (y === '2025' ? '(E)' : '')),
               datasets: datasets
             },
-            plugins: [stackedLabelPlugin],
             options: {
               responsive: true,
               plugins: {
-                legend: {
-                  position: 'bottom',
-                  reverse: true,
-                  labels: { font: { size: 10 }, boxWidth: 12, padding: 8 }
-                },
+                legend: { display: false },
                 tooltip: {
                   callbacks: {
                     label: function(ctx) {
                       const v = ctx.parsed.y;
-                      const total = ctx.chart.data.datasets.reduce((s, ds) => s + (ds.data[ctx.dataIndex] || 0), 0);
-                      const pct = total > 0 ? (v / total * 100).toFixed(1) : 0;
-                      return ctx.dataset.label + ': ' + (v ? v.toLocaleString() : 0) + ' ' + unit + ' (' + pct + '%)';
+                      return (v != null ? v.toLocaleString() : 'N/A') + ' ' + unit;
                     }
                   }
                 }
               },
               scales: {
-                x: { stacked: true },
                 y: {
-                  stacked: true,
+                  beginAtZero: false,
+                  ticks: {
+                    callback: function(v) {
+                      if (v >= 1e9) return (v/1e9).toFixed(1) + 'B';
+                      if (v >= 1e6) return (v/1e6).toFixed(1) + 'M';
+                      if (v >= 1e3) return (v/1e3).toFixed(1) + 'K';
+                      return v;
+                    }
+                  },
+                  title: { display: true, text: unit, font: { size: 10 } }
+                }
+              }
+            }
+          });
+        }
+
+        // ── 가로 막대 차트: 최신연도 국가별 비중 ──
+        const barCanvas = document.getElementById('gsCountryBar');
+        if (barCanvas) {
+          if (window._gsCountryChart) window._gsCountryChart.destroy();
+          const barLabels = [];
+          const barValues = [];
+          const barPcts = [];
+          const barColors = ['#3498db','#e74c3c','#2ecc71','#f39c12','#9b59b6','#bdc3c7'];
+          top5.forEach(c => {
+            barLabels.push(GS_COUNTRY_KO[c.country] || c.country);
+            barValues.push(c.value);
+            barPcts.push(countrySum > 0 ? (c.value / countrySum * 100) : 0);
+          });
+          if (otherSum > 0) {
+            barLabels.push('기타');
+            barValues.push(otherSum);
+            barPcts.push(countrySum > 0 ? (otherSum / countrySum * 100) : 0);
+          }
+          // 바 끝에 비중% 표시 플러그인
+          const hBarLabelPlugin = {
+            id: 'hBarLabels',
+            afterDatasetsDraw(chart) {
+              const ctx = chart.ctx;
+              const meta = chart.getDatasetMeta(0);
+              meta.data.forEach((bar, i) => {
+                ctx.save();
+                ctx.fillStyle = document.documentElement.classList.contains('dark') ? '#e0e0e0' : '#333';
+                ctx.font = 'bold 11px sans-serif';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                const pct = barPcts[i].toFixed(1) + '%';
+                const val = fmtVal(barValues[i]);
+                ctx.fillText(val + ' (' + pct + ')', bar.x + 6, bar.y);
+                ctx.restore();
+              });
+            }
+          };
+          window._gsCountryChart = new Chart(barCanvas, {
+            type: 'bar',
+            data: {
+              labels: barLabels,
+              datasets: [{
+                data: barValues,
+                backgroundColor: barColors.slice(0, barLabels.length),
+                borderRadius: 3,
+                barPercentage: 0.7
+              }]
+            },
+            plugins: [hBarLabelPlugin],
+            options: {
+              indexAxis: 'y',
+              responsive: true,
+              layout: { padding: { right: 100 } },
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  callbacks: {
+                    label: function(ctx) {
+                      const v = ctx.parsed.x;
+                      const pct = barPcts[ctx.dataIndex].toFixed(1);
+                      return (v ? v.toLocaleString() : 0) + ' ' + unit + ' (' + pct + '%)';
+                    }
+                  }
+                }
+              },
+              scales: {
+                x: {
                   beginAtZero: true,
                   ticks: {
                     callback: function(v) {
@@ -8291,6 +8354,9 @@ function gsRender() {
                     }
                   },
                   title: { display: true, text: unit, font: { size: 10 } }
+                },
+                y: {
+                  ticks: { font: { size: 11 } }
                 }
               }
             }

@@ -1052,8 +1052,8 @@ table.result tbody td.center{text-align:center;}
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page2" onclick="switchTab(2)">🔢&ensp;HS코드별 조회</button>
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page3" onclick="switchTab(3)">🗺️&ensp;수입지도</button>
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page4" onclick="switchTab(4)">🔗&ensp;밸류체인</button>
-    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page5" onclick="switchTab(5)">🌍&ensp;USGS 통계</button>
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page6" onclick="switchTab(6)">🌐&ensp;글로벌 교역</button>
+    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page5" onclick="switchTab(5)">🌍&ensp;USGS 통계</button>
   </div>
 </div>
 
@@ -8140,11 +8140,18 @@ function gsRender() {
         const top5Sum = top5.reduce((s, c) => s + c.value, 0);
         const otherSum = Math.max(0, countrySum - top5Sum);
 
+        // world_total fallback helper
+        function getTotal(yrData) {
+          if (yrData?.world_total != null) return yrData.world_total;
+          const cs = (yrData?.countries || []).filter(c => !/^other/i.test(c.country));
+          const sum = cs.reduce((s, c) => s + c.value, 0);
+          return sum > 0 ? sum : null;
+        }
         // YoY
         let yoyHtml = '';
         if (allYrs.length >= 2) {
-          const wt1 = dataSource[allYrs[allYrs.length - 2]]?.world_total;
-          const wt2 = latestInfo.world_total;
+          const wt1 = getTotal(dataSource[allYrs[allYrs.length - 2]]);
+          const wt2 = getTotal(latestInfo);
           if (wt1 && wt2 && wt1 > 0) {
             const yoy = ((wt2 - wt1) / wt1 * 100).toFixed(1);
             const yoyColor = yoy > 0 ? '#27ae60' : yoy < 0 ? '#e74c3c' : 'var(--text)';
@@ -8152,7 +8159,7 @@ function gsRender() {
               + (yoy > 0 ? '▲' : yoy < 0 ? '▼' : '—') + ' ' + Math.abs(yoy) + '% YoY</span>';
           }
         }
-        const latestWt = latestInfo.world_total;
+        const latestWt = getTotal(latestInfo);
         const top1 = allCountries[0];
         const top1Ko = top1 ? (GS_COUNTRY_KO[top1.country] || top1.country) : '-';
         const top1Pct = (top1 && countrySum > 0) ? (top1.value / countrySum * 100).toFixed(1) : 0;
@@ -8179,9 +8186,9 @@ function gsRender() {
           + '<div style="height:6px;background:#eee;border-radius:3px;margin-top:4px;"><div style="height:100%;width:' + Math.min(100, top5Pct) + '%;background:' + (top5Pct >= 80 ? '#e74c3c' : top5Pct >= 60 ? '#f39c12' : '#27ae60') + ';border-radius:3px;"></div></div>'
           + '</div>'
           + '</div>'
-          // 듀얼 차트 영역
+          // 듀얼 차트 영역 (1개년만 있으면 라인차트 생략)
           + '<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;">'
-          + '<div style="flex:1;min-width:280px;"><div style="font-size:12px;font-weight:600;margin-bottom:4px;">' + labelType + ' 추세 (' + allYrs[0] + '-' + latestYr + ')</div><canvas id="gsTrendLine" height="200"></canvas></div>'
+          + (allYrs.length >= 2 ? '<div style="flex:1;min-width:280px;"><div style="font-size:12px;font-weight:600;margin-bottom:4px;">' + labelType + ' 추세 (' + allYrs[0] + '-' + latestYr + ')</div><canvas id="gsTrendLine" height="200"></canvas></div>' : '')
           + '<div style="flex:1;min-width:280px;"><div style="font-size:12px;font-weight:600;margin-bottom:4px;">국가별 비중 (' + yrLabel + ')</div><canvas id="gsCountryBar" height="200"></canvas></div>'
           + '</div>'
           + '<div style="font-size:10px;color:var(--subtext);margin-top:4px;">* 2025년은 추정치(E) · 비중은 개별국 합계 기준 · 출처: USGS MCS</div>'
@@ -8191,7 +8198,14 @@ function gsRender() {
         const trendCanvas = document.getElementById('gsTrendLine');
         if (trendCanvas) {
           if (window._gsTrendChart) window._gsTrendChart.destroy();
-          const trendData = allYrs.map(yr => dataSource[yr]?.world_total || null);
+          const trendData = allYrs.map(yr => {
+            const d = dataSource[yr];
+            if (d?.world_total != null) return d.world_total;
+            // world_total이 null이면 국가별 합계로 대체
+            const cs = (d?.countries || []).filter(c => !/^other/i.test(c.country));
+            const sum = cs.reduce((s, c) => s + c.value, 0);
+            return sum > 0 ? sum : null;
+          });
           // 2025년만 점선으로 표시하기 위해 두 데이터셋 분리
           const solidData = allYrs.map((yr, i) => yr !== '2025' ? trendData[i] : null);
           const dashData = allYrs.map((yr, i) => {
