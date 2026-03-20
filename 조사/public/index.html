@@ -1052,8 +1052,8 @@ table.result tbody td.center{text-align:center;}
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page2" onclick="switchTab(2)">🔢&ensp;HS코드별 조회</button>
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page3" onclick="switchTab(3)">🗺️&ensp;수입지도</button>
     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page4" onclick="switchTab(4)">🔗&ensp;밸류체인</button>
-    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page6" onclick="switchTab(6)">🌐&ensp;글로벌 교역</button>
-    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page5" onclick="switchTab(5)">🌍&ensp;USGS 통계</button>
+    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page5" onclick="switchTab(5)">🌐&ensp;글로벌 교역</button>
+    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="page6" onclick="switchTab(6)">🌍&ensp;USGS 통계</button>
   </div>
 </div>
 
@@ -1873,8 +1873,40 @@ table.result tbody td.center{text-align:center;}
 </div>
 </div>
 
-<!-- PAGE 6: USGS 통계 -->
+<!-- ═══════════ page5: 글로벌 교역 ═══════════ -->
 <div class="page" id="page5" role="tabpanel" aria-labelledby="tab5">
+<div class="main">
+  <div style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;">
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--subtext);text-transform:uppercase;margin-bottom:6px;">UN Comtrade</div>
+      <div style="font-size:22px;font-weight:700;color:var(--navy);">글로벌 교역 분석</div>
+    </div>
+    <div style="font-size:11px;color:var(--subtext);line-height:1.7;text-align:right;">
+      <div><strong>출처</strong>&nbsp; UN Comtrade Database (Preview API)</div>
+      <div><strong>기준</strong>&nbsp; HS 6자리 코드 · 연간 데이터</div>
+      <div id="gtAuthStatus"></div>
+    </div>
+  </div>
+
+  <!-- 서브탭 -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+    <div style="display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+      <button id="gtTab0" class="gt-sub-btn active" onclick="gtSetTab(0)">📊 품목별 교역</button>
+      <button id="gtTab1" class="gt-sub-btn" onclick="gtSetTab(1)">🔄 양자교역</button>
+      <button id="gtTab2" class="gt-sub-btn" onclick="gtSetTab(2)">📈 교역 추이</button>
+      <button id="gtTab3" class="gt-sub-btn" onclick="gtSetTab(3)">🇰🇷 한국 교역</button>
+    </div>
+  </div>
+
+  <!-- 서브탭 콘텐츠 -->
+  <div id="gtContent">
+    <div class="gt-empty">서브탭을 선택하고 조회하세요</div>
+  </div>
+</div>
+</div>
+
+<!-- PAGE 6: USGS 통계 -->
+<div class="page" id="page6" role="tabpanel" aria-labelledby="tab6">
 <div class="main">
   <div style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;">
     <div>
@@ -1935,38 +1967,6 @@ table.result tbody td.center{text-align:center;}
   </div>
   <!-- 툴팁 -->
   <div id="gsTooltip" style="position:fixed;display:none;background:rgba(15,25,50,.92);color:#fff;padding:8px 12px;border-radius:6px;font-size:12px;pointer-events:none;z-index:9999;line-height:1.6;"></div>
-</div>
-</div>
-
-<!-- ═══════════ page6: 글로벌 교역 ═══════════ -->
-<div class="page" id="page6" role="tabpanel" aria-labelledby="tab6">
-<div class="main">
-  <div style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;">
-    <div>
-      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--subtext);text-transform:uppercase;margin-bottom:6px;">UN Comtrade</div>
-      <div style="font-size:22px;font-weight:700;color:var(--navy);">글로벌 교역 분석</div>
-    </div>
-    <div style="font-size:11px;color:var(--subtext);line-height:1.7;text-align:right;">
-      <div><strong>출처</strong>&nbsp; UN Comtrade Database (Preview API)</div>
-      <div><strong>기준</strong>&nbsp; HS 6자리 코드 · 연간 데이터</div>
-      <div id="gtAuthStatus"></div>
-    </div>
-  </div>
-
-  <!-- 서브탭 -->
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
-    <div style="display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;">
-      <button id="gtTab0" class="gt-sub-btn active" onclick="gtSetTab(0)">📊 품목별 교역</button>
-      <button id="gtTab1" class="gt-sub-btn" onclick="gtSetTab(1)">🔄 양자교역</button>
-      <button id="gtTab2" class="gt-sub-btn" onclick="gtSetTab(2)">📈 교역 추이</button>
-      <button id="gtTab3" class="gt-sub-btn" onclick="gtSetTab(3)">🇰🇷 한국 교역</button>
-    </div>
-  </div>
-
-  <!-- 서브탭 콘텐츠 -->
-  <div id="gtContent">
-    <div class="gt-empty">서브탭을 선택하고 조회하세요</div>
-  </div>
 </div>
 </div>
 
@@ -7868,7 +7868,7 @@ function gsSelectMineral(mineral) {
 }
 
 function gsSwitchSubtab(tab) {
-  if (tab === 'trade') { switchTab(6); return; }
+  if (tab === 'trade') { switchTab(5); return; }
   _gsSubtab = tab;
   ['gsTabResv','gsTabProd','gsTabReliance','gsTabPrice','gsTabConsump'].forEach(id => {
     const el = document.getElementById(id);
@@ -9969,8 +9969,8 @@ function gtInit() {
   const orig = window.switchTab;
   window.switchTab = function(idx) {
     orig(idx);
-    if (idx === 5) gsInit();
-    if (idx === 6) gtInit();
+    if (idx === 5) gtInit();
+    if (idx === 6) gsInit();
   };
 })();
 
