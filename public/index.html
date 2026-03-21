@@ -8744,8 +8744,8 @@ function gsDoDownload(allMinerals) {
   const makeSheetData = (mineral, subtab) => {
     const dataset = ((USGS_SUPPLY_DATA[subtab])||{})[mineral];
     if (!dataset) return null;
-    const rows = [['Mineral','Type','Year','Unit','Country','Country (KO)','Value','Share (%)']];
-    const lbl = subtab === 'reserves' ? 'Reserves' : 'Production';
+    const rows = [['광종','구분','연도','단위','국가(영문)','국가(한글)','수량','비중(%)']];
+    const lbl = subtab === 'reserves' ? '매장량' : '생산량';
     Object.entries(dataset).sort().forEach(([yr, info]) => {
       (info.countries||[]).forEach(c => {
         rows.push([mineral, lbl, yr, info.unit, c.country, GS_COUNTRY_KO[c.country]||c.country, c.value, c.pct]);
@@ -8764,7 +8764,7 @@ function gsDoDownload(allMinerals) {
     });
     XLSX.writeFile(wb, 'USGS_' + (_gsMineral||'mineral').replace(/[\/\\?*:]/g,'_') + '_MCS2026.xlsx');
   } else {
-    const allData = [['Mineral','Type','Year','Unit','Country','Country (KO)','Value','Share (%)']];
+    const allData = [['광종','구분','연도','단위','국가(영문)','국가(한글)','수량','비중(%)']];
     Object.keys((USGS_SUPPLY_DATA.production)||{}).forEach(m => {
       const d = makeSheetData(m,'production'); if(d) allData.push(...d.slice(1));
     });
@@ -8822,7 +8822,7 @@ const GT_MINERAL_VC = {
     '원광·정광':['260200'],
     '산화물':['282010','282020','282090'],
     '페로망간':['720211','720219'],
-    '금속(괴·분말)':['810211'],
+    '금속(괴·분말)':['811100'],
   },
   '구리':{
     '정광':['260300'],
@@ -8834,7 +8834,7 @@ const GT_MINERAL_VC = {
   },
   '아연':{
     '원광·정광':['260800'],
-    '괴(잉곳)':['790111'],
+    '괴(잉곳)':['790110'],
   },
   '주석':{
     '원광·정광':['260900'],
@@ -8854,7 +8854,7 @@ const GT_MINERAL_VC = {
     '페로크롬':['720241','720249'],
   },
   '몰리브덴':{
-    '원광·정광':['261310'],
+    '원광·정광':['261300'],
     '괴·분말':['810210'],
   },
   '바나듐':{
