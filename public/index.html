@@ -8162,7 +8162,7 @@ function gsRender() {
         const top1 = allCountries[0];
         const top1Ko = top1 ? (GS_COUNTRY_KO[top1.country] || top1.country) : '-';
         const top1Pct = (top1 && countrySum > 0) ? (top1.value / countrySum * 100).toFixed(1) : 0;
-        const top5Pct = countrySum > 0 ? (top5Sum / countrySum * 100).toFixed(1) : 0;
+        const top5Pct = countrySum > 0 ? Math.min(100, (top5Sum / countrySum * 100)).toFixed(1) : 0;
         const yrLabel = latestYr + (latestYr === '2025' ? 'E' : '');
 
         content.innerHTML += '<div style="margin-top:24px;border-top:1px solid var(--border);padding-top:16px;">'
@@ -8221,6 +8221,7 @@ function gsRender() {
             backgroundColor: 'rgba(52,152,219,0.1)',
             fill: true,
             tension: 0.3,
+            spanGaps: true,
             pointRadius: 4,
             pointBackgroundColor: '#3498db',
             borderWidth: 2
@@ -8233,6 +8234,7 @@ function gsRender() {
               borderDash: [5, 3],
               fill: false,
               tension: 0.3,
+              spanGaps: true,
               pointRadius: 4,
               pointStyle: 'triangle',
               pointBackgroundColor: '#e74c3c',
